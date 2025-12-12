@@ -1,7 +1,7 @@
 ﻿export const environment = {
   production: true,
-  supabaseUrl: 'YOUR_SUPABASE_URL',
-  supabaseKey: 'YOUR_SUPABASE_ANON_KEY',
+  supabaseUrl: 'https://scncstkyhyfunkjqcuwl.supabase.co',
+  supabaseKey: 'sb_publishable_30tZuFKisXs91Cr0GEWzYw_1ZafnEkz',
   appVersion: '1.0.0',
   appName: 'ControlAsist'
 };
