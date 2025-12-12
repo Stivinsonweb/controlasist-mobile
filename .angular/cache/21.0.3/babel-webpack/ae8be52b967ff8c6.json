@@ -1,0 +1,1 @@
+{"ast":null,"code":"export const routes = [{\n  path: '',\n  redirectTo: 'home',\n  pathMatch: 'full'\n}, {\n  path: 'home',\n  loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage)\n}];","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}

@@ -1,0 +1,1 @@
+{"ast":null,"code":"export const environment = {\n  production: false,\n  supabaseUrl: 'YOUR_SUPABASE_URL',\n  supabaseKey: 'YOUR_SUPABASE_ANON_KEY',\n  appVersion: '1.0.0',\n  appName: 'ControlAsist'\n};","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}

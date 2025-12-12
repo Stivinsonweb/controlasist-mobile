@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ControlAsist</string>
+    <string name="title_activity_main">ControlAsist</string>
+    <string name="package_name">com.utch.controlasist</string>
+    <string name="custom_url_scheme">com.utch.controlasist</string>
+</resources>
