@@ -11,8 +11,6 @@ import {
   IonInput,
   IonButton,
   IonIcon,
-  IonSelect,
-  IonSelectOption,
   IonSpinner,
   AlertController,
   LoadingController,
@@ -23,7 +21,10 @@ import {
   personAdd,
   personOutline,
   person,
-  cardOutline,
+  callOutline,
+  call,
+  businessOutline,
+  business,
   schoolOutline,
   school,
   briefcaseOutline,
@@ -61,14 +62,13 @@ import { AvatarService } from '../../../services/avatar/avatar.service';
     IonInput,
     IonButton,
     IonIcon,
-    IonSelect,
-    IonSelectOption,
     IonSpinner
   ]
 })
 export class RegisterPage implements OnInit {
   registerForm!: FormGroup;
   isLoading = false;
+  loadingAvatars = false;
   showPassword = false;
   avatars: string[] = [];
   selectedAvatarIndex: number = 0;
@@ -86,7 +86,10 @@ export class RegisterPage implements OnInit {
       personAdd,
       personOutline,
       person,
-      cardOutline,
+      callOutline,
+      call,
+      businessOutline,
+      business,
       schoolOutline,
       school,
       briefcaseOutline,
@@ -115,8 +118,8 @@ export class RegisterPage implements OnInit {
     this.registerForm = this.formBuilder.group({
       nombres: ['', [Validators.required, Validators.minLength(2)]],
       apellidos: ['', [Validators.required, Validators.minLength(2)]],
-      tipo_documento: ['CC', Validators.required],
-      cedula: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
+      telefono: ['', [Validators.pattern(/^[0-9]{7,10}$/)]],
+      entidad: [''],
       programa: [''],
       area: [''],
       email: ['', [Validators.required, Validators.email]],
@@ -125,33 +128,50 @@ export class RegisterPage implements OnInit {
   }
 
   async loadAvatars() {
-    const loading = await this.loadingController.create({
-      message: 'Cargando avatares...',
-      spinner: 'crescent',
-      duration: 3000
-    });
-    await loading.present();
+    this.loadingAvatars = true;
 
     try {
+      console.log('🔄 Intentando cargar avatares desde Supabase Storage...');
+      
       // Intentar cargar avatares desde Supabase Storage
       this.avatars = await this.avatarService.getDefaultAvatars();
       
-      // Si no hay avatares en Storage, usar los de UI Avatars
+      console.log('✅ Avatares cargados:', this.avatars.length);
+      
+      // Si no hay avatares o falló, usar los de UI Avatars
       if (this.avatars.length === 0) {
+        console.log('⚠️ No hay avatares en Storage, usando UI Avatars');
         this.avatars = this.avatarService.getDefaultAvatarUrls();
       }
       
-      await loading.dismiss();
+      this.loadingAvatars = false;
     } catch (error) {
-      await loading.dismiss();
-      console.error('Error cargando avatares:', error);
-      // Usar avatares por defecto
+      console.error('❌ Error cargando avatares:', error);
+      
+      // Usar avatares por defecto de UI Avatars
       this.avatars = this.avatarService.getDefaultAvatarUrls();
+      this.loadingAvatars = false;
+      
+      await this.showToast('Usando avatares por defecto', 'warning');
     }
+  }
+
+  // Manejar error de carga de imagen
+  onImageError(event: any, index: number) {
+    console.log(`❌ Error cargando avatar ${index + 1}, usando fallback`);
+    
+    // Reemplazar con avatar de UI Avatars
+    const colors = ['3b82f6', '10b981', 'f59e0b', 'ef4444', '8b5cf6', 'ec4899', '06b6d4', '84cc16'];
+    const color = colors[index % colors.length];
+    this.avatars[index] = `https://ui-avatars.com/api/?name=Avatar+${index + 1}&background=${color}&color=fff&size=200&bold=true&rounded=true`;
+    
+    // Forzar actualización de la vista
+    event.target.src = this.avatars[index];
   }
 
   selectAvatar(index: number) {
     this.selectedAvatarIndex = index;
+    console.log('✅ Avatar seleccionado:', index + 1);
   }
 
   togglePassword() {
@@ -197,10 +217,20 @@ export class RegisterPage implements OnInit {
         const formData = this.registerForm.value;
         const selectedAvatar = this.avatars[this.selectedAvatarIndex];
 
+        console.log('📝 Datos del formulario:', formData);
+        console.log('🎨 Avatar seleccionado:', selectedAvatar);
+
         // Preparar datos para registro
         const registerData = {
-          ...formData,
-          foto_url: selectedAvatar // Avatar seleccionado
+          email: formData.email,
+          password: formData.password,
+          nombres: formData.nombres,
+          apellidos: formData.apellidos,
+          telefono: formData.telefono || null,
+          entidad: formData.entidad || null,
+          programa: formData.programa || null,
+          area: formData.area || null,
+          foto_url: selectedAvatar
         };
 
         const result = await this.authService.register(registerData);
@@ -210,17 +240,14 @@ export class RegisterPage implements OnInit {
         if (result.success) {
           await this.showSuccessAlert(
             '✓ Cuenta creada exitosamente',
-            `Bienvenido ${result.docente?.nombres}. Tu cuenta ha sido creada. Ahora puedes iniciar sesión.`
+            `Bienvenido ${result.docente?.nombres}. Tu cuenta ha sido creada. Revisa tu correo para confirmar tu cuenta.`
           );
           this.router.navigate(['/auth/login']);
         } else {
-          // Mensajes de error específicos
           let errorMessage = result.error || 'Error al crear la cuenta';
 
           if (result.error.includes('already registered') || result.error.includes('already exists')) {
             errorMessage = 'El correo electrónico ya está registrado';
-          } else if (result.error.includes('cédula ya está registrada')) {
-            errorMessage = 'La cédula ya está registrada en el sistema';
           } else if (result.error.includes('Invalid email')) {
             errorMessage = 'El formato del correo electrónico es inválido';
           }
@@ -230,6 +257,7 @@ export class RegisterPage implements OnInit {
 
       } catch (error: any) {
         await loading.dismiss();
+        console.error('❌ Error en registro:', error);
         await this.showAlert('Error', error.message || 'Error inesperado al crear la cuenta');
       }
     } else {
@@ -238,10 +266,8 @@ export class RegisterPage implements OnInit {
         await this.showToast('Los nombres son requeridos', 'warning');
       } else if (this.apellidos?.hasError('required')) {
         await this.showToast('Los apellidos son requeridos', 'warning');
-      } else if (this.cedula?.hasError('required')) {
-        await this.showToast('La cédula es requerida', 'warning');
-      } else if (this.cedula?.hasError('pattern')) {
-        await this.showToast('La cédula solo debe contener números', 'warning');
+      } else if (this.telefono?.hasError('pattern')) {
+        await this.showToast('El teléfono debe tener entre 7 y 10 dígitos', 'warning');
       } else if (this.email?.hasError('required')) {
         await this.showToast('El correo electrónico es requerido', 'warning');
       } else if (this.email?.hasError('email')) {
@@ -303,12 +329,12 @@ export class RegisterPage implements OnInit {
     return this.registerForm.get('apellidos');
   }
 
-  get tipo_documento() {
-    return this.registerForm.get('tipo_documento');
+  get telefono() {
+    return this.registerForm.get('telefono');
   }
 
-  get cedula() {
-    return this.registerForm.get('cedula');
+  get entidad() {
+    return this.registerForm.get('entidad');
   }
 
   get programa() {

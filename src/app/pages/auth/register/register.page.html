@@ -29,13 +29,21 @@
                 <ion-icon name="image-outline"></ion-icon>
                 Selecciona tu avatar
               </h3>
-              <div class="avatars-grid">
+              
+              <!-- Loading de avatares -->
+              <div *ngIf="loadingAvatars" class="avatars-loading">
+                <ion-spinner name="crescent" color="primary"></ion-spinner>
+                <p>Cargando avatares...</p>
+              </div>
+
+              <!-- Grid de avatares -->
+              <div class="avatars-grid" *ngIf="!loadingAvatars">
                 <div 
                   *ngFor="let avatar of avatars; let i = index"
                   class="avatar-item"
                   [class.selected]="selectedAvatarIndex === i"
                   (click)="selectAvatar(i)">
-                  <img [src]="avatar" [alt]="'Avatar ' + (i + 1)">
+                  <img [src]="avatar" [alt]="'Avatar ' + (i + 1)" (error)="onImageError($event, i)">
                   <ion-icon name="checkmark-circle" class="check-icon" *ngIf="selectedAvatarIndex === i"></ion-icon>
                 </div>
               </div>
@@ -83,41 +91,45 @@
               </div>
             </div>
 
-            <!-- Tipo de Documento y Cédula -->
+            <!-- Teléfono y Entidad en fila -->
             <div class="input-row">
+              <!-- Teléfono -->
               <div class="input-group half">
                 <ion-label class="input-label">
-                  <ion-icon name="card-outline" class="label-icon"></ion-icon>
-                  Tipo <span class="required">*</span>
+                  <ion-icon name="call-outline" class="label-icon"></ion-icon>
+                  Teléfono
                 </ion-label>
-                <ion-item lines="none" class="custom-item">
-                  <ion-select 
-                    formControlName="tipo_documento"
-                    placeholder="Tipo"
-                    class="custom-select">
-                    <ion-select-option value="CC">CC</ion-select-option>
-                    <ion-select-option value="TI">TI</ion-select-option>
-                  </ion-select>
-                </ion-item>
-              </div>
-
-              <div class="input-group half">
-                <ion-label class="input-label">
-                  <ion-icon name="card-outline" class="label-icon"></ion-icon>
-                  Cédula <span class="required">*</span>
-                </ion-label>
-                <ion-item lines="none" class="custom-item" [class.item-error]="cedula?.invalid && cedula?.touched">
+                <ion-item lines="none" class="custom-item" [class.item-error]="telefono?.invalid && telefono?.touched">
                   <ion-input 
-                    type="text" 
-                    formControlName="cedula"
-                    placeholder="Número"
-                    class="custom-input">
+                    type="tel" 
+                    formControlName="telefono"
+                    placeholder="3001234567"
+                    class="custom-input"
+                    maxlength="10">
+                    <ion-icon name="call" slot="start" class="input-icon"></ion-icon>
                   </ion-input>
                 </ion-item>
-                <div class="error-message" *ngIf="cedula?.invalid && cedula?.touched">
+                <div class="error-message" *ngIf="telefono?.invalid && telefono?.touched">
                   <ion-icon name="alert-circle" class="error-icon"></ion-icon>
                   <span>Solo números</span>
                 </div>
+              </div>
+
+              <!-- Entidad -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="business-outline" class="label-icon"></ion-icon>
+                  Entidad
+                </ion-label>
+                <ion-item lines="none" class="custom-item">
+                  <ion-input 
+                    type="text" 
+                    formControlName="entidad"
+                    placeholder="Universidad..."
+                    class="custom-input">
+                    <ion-icon name="business" slot="start" class="input-icon"></ion-icon>
+                  </ion-input>
+                </ion-item>
               </div>
             </div>
 

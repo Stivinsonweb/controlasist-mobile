@@ -580,3 +580,25 @@ ion-card-content {
     }
   }
 }
+
+// ========================================
+// LOADING AVATARES
+// ========================================
+.avatars-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: #6d28d9;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+  }
+}

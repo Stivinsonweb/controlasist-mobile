@@ -15,6 +15,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/auth/register/register.page').then((m) => m.RegisterPage),
   },
   {
+    path: 'auth/reset-password',
+    loadComponent: () => import('./pages/auth/reset-password/reset-password.page').then((m) => m.ResetPasswordPage),
+  },
+  {
     path: 'home',
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
   },

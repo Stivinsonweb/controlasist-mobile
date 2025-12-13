@@ -5,19 +5,7 @@ import { SupabaseService } from '../supabase/supabase.service';
   providedIn: 'root'
 })
 export class AvatarService {
-  private readonly BUCKET_NAME = 'avatares';
-  private readonly DEFAULT_AVATARS = [
-    'avatars/avatar-1.png',
-    'avatars/avatar-2.png',
-    'avatars/avatar-3.png',
-    'avatars/avatar-4.png',
-    'avatars/avatar-5.png',
-    'avatars/avatar-6.png',
-    'avatars/avatar-7.png',
-    'avatars/avatar-8.png',
-    'avatars/avatar-9.png',
-    'avatars/avatar-10.png',
-  ];
+  private readonly BUCKET_NAME = 'avatares'; // ← ASEGÚRATE QUE SEA 'avatares'
 
   constructor(private supabase: SupabaseService) {}
 
@@ -39,6 +27,7 @@ export class AvatarService {
       }
 
       if (!data || data.length === 0) {
+        console.log('No hay avatares en Storage, usando por defecto');
         return this.getDefaultAvatarUrls();
       }
 
@@ -52,6 +41,7 @@ export class AvatarService {
           return publicUrl;
         });
 
+      console.log('Avatares cargados:', avatarUrls);
       return avatarUrls.length > 0 ? avatarUrls : this.getDefaultAvatarUrls();
     } catch (error) {
       console.error('Error obteniendo avatares:', error);
@@ -75,7 +65,7 @@ export class AvatarService {
     ];
 
     return colors.map((color, index) => 
-      `https://ui-avatars.com/api/?name=Avatar+${index + 1}&background=${color}&color=fff&size=200&bold=true`
+      `https://ui-avatars.com/api/?name=Avatar+${index + 1}&background=${color}&color=fff&size=200&bold=true&rounded=true`
     );
   }
 
@@ -87,17 +77,15 @@ export class AvatarService {
       const fileExt = file.name.split('.').pop();
       const fileName = `${tipo}s/${userId}/avatar.${fileExt}`;
 
-      // Subir archivo
       const { error: uploadError } = await this.supabase.storage
         .from(this.BUCKET_NAME)
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: true // Reemplazar si ya existe
+          upsert: true
         });
 
       if (uploadError) throw uploadError;
 
-      // Obtener URL pública
       const { data: { publicUrl } } = this.supabase.storage
         .from(this.BUCKET_NAME)
         .getPublicUrl(fileName);
@@ -131,7 +119,7 @@ export class AvatarService {
    */
   generateInitialsAvatar(nombres: string, apellidos: string, color?: string): string {
     const initials = this.getInitials(nombres, apellidos);
-    const bgColor = color || '3b82f6';
+    const bgColor = color?.replace('#', '') || '3b82f6';
     return `https://ui-avatars.com/api/?name=${initials}&background=${bgColor}&color=fff&size=200&bold=true&rounded=true`;
   }
 

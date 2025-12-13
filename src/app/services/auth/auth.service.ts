@@ -13,8 +13,8 @@ export interface RegisterData {
   password: string;
   nombres: string;
   apellidos: string;
-  cedula: string;
-  tipo_documento?: string;
+  telefono?: string;
+  entidad?: string;
   programa?: string;
   area?: string;
 }
@@ -77,62 +77,50 @@ export class AuthService {
   }
 
   async register(registerData: RegisterData & { foto_url?: string }) {
-    try {
-      // Verificar si la cédula ya existe
-      const { data: existingDocente } = await this.supabase
-        .from("docentes")
-        .select("cedula")
-        .eq("cedula", registerData.cedula)
-        .single();
+  try {
+    // Crear usuario en Auth
+    const { data: authData, error: authError } = await this.supabase.auth.signUp({
+      email: registerData.email,
+      password: registerData.password,
+    });
 
-      if (existingDocente) {
-        throw new Error("La cédula ya está registrada");
-      }
+    if (authError) throw authError;
+    if (!authData.user) throw new Error('No se pudo crear el usuario');
 
-      // Crear usuario en Auth
-      const { data: authData, error: authError } =
-        await this.supabase.auth.signUp({
+    // Crear registro en la tabla docentes
+    const { data: docenteData, error: docenteError } = await this.supabase
+      .from('docentes')
+      .insert([
+        {
+          user_id: authData.user.id,
           email: registerData.email,
-          password: registerData.password,
-        });
+          nombres: registerData.nombres,
+          apellidos: registerData.apellidos,
+          telefono: registerData.telefono || null,      // ← NUEVO
+          entidad: registerData.entidad || null,        // ← NUEVO (si existe en la tabla)
+          programa: registerData.programa || null,
+          area: registerData.area || null,
+          foto_url: registerData.foto_url || null,
+        }
+      ])
+      .select()
+      .single();
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("No se pudo crear el usuario");
+    if (docenteError) throw docenteError;
 
-      // Crear registro en la tabla docentes CON AVATAR
-      const { data: docenteData, error: docenteError } = await this.supabase
-        .from("docentes")
-        .insert([
-          {
-            user_id: authData.user.id,
-            email: registerData.email,
-            nombres: registerData.nombres,
-            apellidos: registerData.apellidos,
-            cedula: registerData.cedula,
-            tipo_documento: registerData.tipo_documento || "CC",
-            programa: registerData.programa,
-            area: registerData.area,
-            foto_url: registerData.foto_url || null, // ← AVATAR
-          },
-        ])
-        .select()
-        .single();
-
-      if (docenteError) throw docenteError;
-
-      return {
-        success: true,
-        user: authData.user,
-        docente: docenteData,
-      };
-    } catch (error: any) {
-      console.error("Error en registro:", error);
-      return {
-        success: false,
-        error: error.message || "Error al crear la cuenta",
-      };
-    }
+    return {
+      success: true,
+      user: authData.user,
+      docente: docenteData
+    };
+  } catch (error: any) {
+    console.error('Error en registro:', error);
+    return {
+      success: false,
+      error: error.message || 'Error al crear la cuenta'
+    };
   }
+}
   /**
    * RECUPERAR CONTRASEÑA - Validar email y enviar correo
    */
