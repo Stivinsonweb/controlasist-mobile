@@ -1,7 +1,8 @@
-import { Injectable } from "@angular/core";
-import { Router } from "@angular/router";
-import { SupabaseService } from "../supabase/supabase.service";
-import { BehaviorSubject } from "rxjs";
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Router } from '@angular/router';
+import { SupabaseService } from '../supabase/supabase.service';
+import type { User } from '@supabase/supabase-js';
 
 export interface LoginData {
   email: string;
@@ -19,139 +20,201 @@ export interface RegisterData {
   area?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  user_id: string;
+  email: string;
+  nombres: string;
+  apellidos: string;
+  rol: 'docente' | 'administrador';
+  telefono?: string;
+  entidad?: string;
+  programa?: string;
+  area?: string;
+  foto_url?: string;
+}
+
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<any>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
 
-  constructor(private supabase: SupabaseService, private router: Router) {
+  constructor(
+    private supabase: SupabaseService,
+    private router: Router
+  ) {
     this.checkSession();
   }
 
   async checkSession() {
-    try {
-      const {
-        data: { session },
-      } = await this.supabase.auth.getSession();
-      if (session) {
-        this.currentUserSubject.next(session.user);
-        return session.user;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error verificando sesión:", error);
-      return null;
-    }
+    const { data: { user } } = await this.supabase.auth.getUser();
+    this.currentUserSubject.next(user);
   }
 
   async login(loginData: LoginData) {
     try {
+      console.log('🔐 Intentando login con:', loginData.email);
+      
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error en signInWithPassword:', error);
+        throw error;
+      }
 
-      if (data.user) {
+      console.log('✅ Autenticación exitosa, user_id:', data.user.id);
+
+      // PRIMERO: Buscar en administradores
+      console.log('🔍 Buscando en tabla administradores...');
+      const { data: admin, error: adminError } = await this.supabase
+        .from('administradores')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .maybeSingle();
+
+      console.log('📊 Admin encontrado:', admin);
+      console.log('⚠️ Error admin (si hay):', adminError);
+
+      if (admin) {
+        console.log('✅ Usuario es ADMINISTRADOR');
         this.currentUserSubject.next(data.user);
-        const docenteData = await this.getDocenteByUserId(data.user.id);
-
         return {
           success: true,
           user: data.user,
-          docente: docenteData,
+          profile: { ...admin, rol: 'administrador' } as UserProfile
         };
       }
 
-      throw new Error("No se pudo iniciar sesión");
+      // SEGUNDO: Buscar en docentes
+      console.log('🔍 Buscando en tabla docentes...');
+      const { data: docente, error: docenteError } = await this.supabase
+        .from('docentes')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .maybeSingle();
+
+      console.log('📊 Docente encontrado:', docente);
+      console.log('⚠️ Error docente (si hay):', docenteError);
+
+      if (docente) {
+        console.log('✅ Usuario es DOCENTE');
+        this.currentUserSubject.next(data.user);
+        return {
+          success: true,
+          user: data.user,
+          profile: { ...docente, rol: 'docente' } as UserProfile
+        };
+      }
+
+      console.error('❌ Usuario NO encontrado en administradores ni docentes');
+      throw new Error('Usuario no encontrado en el sistema');
+
     } catch (error: any) {
-      console.error("Error en login:", error);
+      console.error('❌ Error en login:', error);
+      
+      if (error.message.includes('Invalid login credentials')) {
+        return {
+          success: false,
+          error: 'Correo o contraseña incorrectos. Verifica tus datos.'
+        };
+      }
+      
+      if (error.message.includes('Email not confirmed')) {
+        return {
+          success: false,
+          error: 'Debes confirmar tu correo electrónico antes de iniciar sesión.'
+        };
+      }
+      
       return {
         success: false,
-        error: error.message || "Error al iniciar sesión",
+        error: error.message || 'Error al iniciar sesión'
       };
     }
   }
 
   async register(registerData: RegisterData & { foto_url?: string }) {
-  try {
-    // Crear usuario en Auth
-    const { data: authData, error: authError } = await this.supabase.auth.signUp({
-      email: registerData.email,
-      password: registerData.password,
-    });
-
-    if (authError) throw authError;
-    if (!authData.user) throw new Error('No se pudo crear el usuario');
-
-    // Crear registro en la tabla docentes
-    const { data: docenteData, error: docenteError } = await this.supabase
-      .from('docentes')
-      .insert([
-        {
-          user_id: authData.user.id,
-          email: registerData.email,
-          nombres: registerData.nombres,
-          apellidos: registerData.apellidos,
-          telefono: registerData.telefono || null,      // ← NUEVO
-          entidad: registerData.entidad || null,        // ← NUEVO (si existe en la tabla)
-          programa: registerData.programa || null,
-          area: registerData.area || null,
-          foto_url: registerData.foto_url || null,
-        }
-      ])
-      .select()
-      .single();
-
-    if (docenteError) throw docenteError;
-
-    return {
-      success: true,
-      user: authData.user,
-      docente: docenteData
-    };
-  } catch (error: any) {
-    console.error('Error en registro:', error);
-    return {
-      success: false,
-      error: error.message || 'Error al crear la cuenta'
-    };
-  }
-}
-  /**
-   * RECUPERAR CONTRASEÑA - Validar email y enviar correo
-   */
-  async forgotPassword(email: string) {
     try {
-      // PASO 1: Verificar si el email existe en la tabla docentes
-      const { data: docente, error: docenteError } = await this.supabase
-        .from("docentes")
-        .select("email, nombres, apellidos")
-        .eq("email", email)
+      const { data: authData, error: authError } = await this.supabase.auth.signUp({
+        email: registerData.email,
+        password: registerData.password,
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('No se pudo crear el usuario');
+
+      const { data: docenteData, error: docenteError } = await this.supabase
+        .from('docentes')
+        .insert([
+          {
+            user_id: authData.user.id,
+            email: registerData.email,
+            nombres: registerData.nombres,
+            apellidos: registerData.apellidos,
+            telefono: registerData.telefono || null,
+            entidad: registerData.entidad || null,
+            programa: registerData.programa || null,
+            area: registerData.area || null,
+            foto_url: registerData.foto_url || null,
+          }
+        ])
+        .select()
         .single();
 
-      if (docenteError || !docente) {
+      if (docenteError) throw docenteError;
+
+      return {
+        success: true,
+        user: authData.user,
+        docente: docenteData
+      };
+    } catch (error: any) {
+      console.error('Error en registro:', error);
+      return {
+        success: false,
+        error: error.message || 'Error al crear la cuenta'
+      };
+    }
+  }
+
+  async forgotPassword(email: string) {
+    try {
+      const { data: docente } = await this.supabase
+        .from('docentes')
+        .select('email, nombres, apellidos')
+        .eq('email', email)
+        .maybeSingle();
+
+      const { data: admin } = await this.supabase
+        .from('administradores')
+        .select('email, nombres, apellidos')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (!docente && !admin) {
         return {
           success: false,
-          error: "El correo electrónico no está registrado en el sistema",
+          error: 'El correo electrónico no está registrado en el sistema'
         };
       }
 
-      // PASO 2: Enviar email de recuperación
-      const { error: resetError } =
-        await this.supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/reset-password`,
-        });
+      const redirectUrl = `${window.location.origin}/auth/reset-password`;
+      console.log('🔗 Redirect URL:', redirectUrl);
+
+      const { error: resetError } = await this.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
 
       if (resetError) {
-        // Si el error es porque el email no existe en Auth
-        if (resetError.message.includes("User not found")) {
+        if (resetError.message.includes('User not found')) {
           return {
             success: false,
-            error: "No se encontró una cuenta asociada a este correo",
+            error: 'No se encontró una cuenta asociada a este correo'
           };
         }
         throw resetError;
@@ -160,31 +223,28 @@ export class AuthService {
       return {
         success: true,
         message: `Se ha enviado un correo de recuperación a ${email}. Revisa tu bandeja de entrada.`,
-        docente: docente,
+        profile: docente || admin
       };
     } catch (error: any) {
-      console.error("Error en recuperación de contraseña:", error);
-
-      // Mensajes de error más específicos
-      if (error.message.includes("Email not confirmed")) {
+      console.error('Error en recuperación de contraseña:', error);
+      
+      if (error.message.includes('Email not confirmed')) {
         return {
           success: false,
-          error:
-            "Debes confirmar tu correo electrónico antes de restablecer la contraseña",
+          error: 'Debes confirmar tu correo electrónico antes de restablecer la contraseña'
         };
       }
-
-      if (error.message.includes("rate limit")) {
+      
+      if (error.message.includes('rate limit')) {
         return {
           success: false,
-          error:
-            "Demasiados intentos. Por favor espera unos minutos e intenta de nuevo",
+          error: 'Demasiados intentos. Por favor espera unos minutos e intenta de nuevo'
         };
       }
-
+      
       return {
         success: false,
-        error: error.message || "Error al enviar el correo de recuperación",
+        error: error.message || 'Error al enviar el correo de recuperación'
       };
     }
   }
@@ -192,81 +252,73 @@ export class AuthService {
   async updatePassword(newPassword: string) {
     try {
       const { error } = await this.supabase.auth.updateUser({
-        password: newPassword,
+        password: newPassword
       });
 
       if (error) throw error;
 
       return {
         success: true,
-        message: "Contraseña actualizada exitosamente",
+        message: 'Contraseña actualizada exitosamente'
       };
     } catch (error: any) {
-      console.error("Error actualizando contraseña:", error);
+      console.error('Error actualizando contraseña:', error);
       return {
         success: false,
-        error: error.message || "Error al actualizar la contraseña",
+        error: error.message || 'Error al actualizar la contraseña'
       };
     }
   }
 
   async logout() {
-    try {
-      const { error } = await this.supabase.auth.signOut();
-      if (error) throw error;
-
-      this.currentUserSubject.next(null);
-      this.router.navigate(["/auth/login"]);
-
-      return { success: true };
-    } catch (error: any) {
-      console.error("Error en logout:", error);
-      return {
-        success: false,
-        error: error.message || "Error al cerrar sesión",
-      };
-    }
+    await this.supabase.auth.signOut();
+    this.currentUserSubject.next(null);
+    this.router.navigate(['/auth/login']);
   }
 
   async getDocenteByUserId(userId: string) {
-    try {
-      const { data, error } = await this.supabase
-        .from("docentes")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
+    const { data, error } = await this.supabase
+      .from('docentes')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error("Error obteniendo docente:", error);
+    if (error) {
+      console.error('Error obteniendo docente:', error);
       return null;
     }
+
+    return data;
   }
 
-  /**
-   * Verificar si un email existe en la base de datos
-   */
-  async checkEmailExists(email: string): Promise<boolean> {
-    try {
-      const { data, error } = await this.supabase
-        .from("docentes")
-        .select("email")
-        .eq("email", email)
-        .single();
+  async getAdminByUserId(userId: string) {
+    const { data, error } = await this.supabase
+      .from('administradores')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
 
-      return !error && !!data;
-    } catch (error) {
-      console.error("Error verificando email:", error);
-      return false;
+    if (error) {
+      console.error('Error obteniendo administrador:', error);
+      return null;
     }
+
+    return data;
   }
 
-  isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
-  }
+  async checkEmailExists(email: string): Promise<boolean> {
+    const { data: docente } = await this.supabase
+      .from('docentes')
+      .select('email')
+      .eq('email', email)
+      .single();
 
-  getCurrentUser() {
-    return this.currentUserSubject.value;
+    const { data: admin } = await this.supabase
+      .from('administradores')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    return !!(docente || admin);
   }
 }

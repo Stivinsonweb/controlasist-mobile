@@ -1,18 +1,136 @@
 ﻿<ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>
-      ControlAsist
-    </ion-title>
+    <ion-title>ControlAsist</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="flex flex-col items-center justify-center h-full">
-    <h1 class="text-3xl font-bold text-primary-600 mb-4">
-      ¡Bienvenido a ControlAsist!
-    </h1>
-    <p class="text-gray-600 text-center">
-      Sistema de control de asistencia para docentes
-    </p>
+<ion-content [fullscreen]="true">
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="refresh-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="crescent"
+      refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="home-container">
+    
+    <!-- Perfil del Docente -->
+    <div class="profile-section">
+      <ion-card class="profile-card">
+        <ion-card-content>
+          <div class="profile-header">
+            <ion-avatar class="profile-avatar">
+              <img [src]="getAvatarUrl()" [alt]="docente?.nombres" />
+            </ion-avatar>
+            <div class="profile-info">
+              <h2 class="profile-name">{{ docente?.nombres }} {{ docente?.apellidos }}</h2>
+              <p class="profile-email">{{ docente?.email }}</p>
+            </div>
+          </div>
+
+          <div class="profile-details">
+            <div class="detail-item" *ngIf="docente?.telefono">
+              <ion-icon name="call-outline" class="detail-icon"></ion-icon>
+              <span>{{ docente?.telefono }}</span>
+            </div>
+            <div class="detail-item" *ngIf="docente?.entidad">
+              <ion-icon name="business-outline" class="detail-icon"></ion-icon>
+              <span>{{ docente?.entidad }}</span>
+            </div>
+            <div class="detail-item" *ngIf="docente?.programa">
+              <ion-icon name="school-outline" class="detail-icon"></ion-icon>
+              <span>{{ docente?.programa }}</span>
+            </div>
+            <div class="detail-item" *ngIf="docente?.area">
+              <ion-icon name="briefcase-outline" class="detail-icon"></ion-icon>
+              <span>{{ docente?.area }}</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Sección de Asignaturas -->
+    <div class="asignaturas-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <ion-icon name="book-outline"></ion-icon>
+          Mis Asignaturas
+        </h3>
+        <ion-button (click)="crearAsignatura()" size="small" class="add-button">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Nueva
+        </ion-button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loadingAsignaturas" class="loading-container">
+        <ion-card class="skeleton-card" *ngFor="let item of [1,2,3]">
+          <ion-card-content>
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Sin asignaturas -->
+      <div *ngIf="!loadingAsignaturas && asignaturas.length === 0" class="empty-state">
+        <ion-icon name="book-outline" class="empty-icon"></ion-icon>
+        <h4>No tienes asignaturas registradas</h4>
+        <p>Crea tu primera asignatura para comenzar</p>
+        <ion-button (click)="crearAsignatura()" expand="block" class="empty-button">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Crear Asignatura
+        </ion-button>
+      </div>
+
+      <!-- Lista de asignaturas -->
+      <ion-grid *ngIf="!loadingAsignaturas && asignaturas.length > 0">
+        <ion-row>
+          <ion-col size="12" size-md="6" size-lg="4" *ngFor="let asignatura of asignaturas">
+            <ion-card class="asignatura-card" (click)="verAsignatura(asignatura)">
+              <ion-card-header>
+                <ion-card-title>{{ asignatura.nombre }}</ion-card-title>
+                <div class="asignatura-codigo">{{ asignatura.codigo }}</div>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="asignatura-info">
+                  <ion-chip color="primary" class="info-chip">
+                    <ion-icon name="school-outline"></ion-icon>
+                    <ion-label>{{ asignatura.nivel }}</ion-label>
+                  </ion-chip>
+                  <ion-chip color="success" class="info-chip">
+                    <ion-icon name="book-outline"></ion-icon>
+                    <ion-label>{{ asignatura.creditos }} créditos</ion-label>
+                  </ion-chip>
+                </div>
+                <div class="asignatura-actions">
+                  <ion-button size="small" fill="outline" color="primary">
+                    <ion-icon name="people-outline" slot="start"></ion-icon>
+                    Estudiantes
+                  </ion-button>
+                  <ion-button size="small" fill="outline" color="success">
+                    <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
+                    Reportes
+                  </ion-button>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+
+    <!-- Botón de Cerrar Sesión -->
+    <div class="logout-section">
+      <ion-button (click)="logout()" expand="block" color="danger" class="logout-button">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Cerrar sesión
+      </ion-button>
+    </div>
   </div>
 </ion-content>

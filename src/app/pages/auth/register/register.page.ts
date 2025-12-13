@@ -240,7 +240,7 @@ export class RegisterPage implements OnInit {
         if (result.success) {
           await this.showSuccessAlert(
             '✓ Cuenta creada exitosamente',
-            `Bienvenido ${result.docente?.nombres}. Tu cuenta ha sido creada. Revisa tu correo para confirmar tu cuenta.`
+            `Bienvenido ${result.docente?.nombres}. Tu cuenta ha sido creada`
           );
           this.router.navigate(['/auth/login']);
         } else {
