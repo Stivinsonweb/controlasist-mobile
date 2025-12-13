@@ -1,0 +1,123 @@
+<ion-content [fullscreen]="true">
+  <div class="login-container">
+    
+    <!-- Header con logo/icono -->
+    <div class="header-section">
+      <div class="logo-container">
+        <ion-icon name="people-circle-outline" class="logo-icon"></ion-icon>
+      </div>
+      <h1 class="app-title">ControlAsist</h1>
+      <p class="app-subtitle">Sistema de Control de Asistencia Académica</p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-container">
+      <ion-card class="login-card">
+        <ion-card-content>
+          
+          <!-- Título del formulario -->
+          <div class="form-header">
+            <h2 class="form-title">Iniciar Sesión</h2>
+            <p class="form-subtitle">Accede a tu panel de control</p>
+          </div>
+
+          <form [formGroup]="loginForm" (ngSubmit)="login()">
+            
+            <!-- Correo electrónico -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="mail-outline" class="label-icon"></ion-icon>
+                Correo electrónico
+              </ion-label>
+              <ion-item lines="none" class="custom-item" [class.item-error]="email?.invalid && email?.touched">
+                <ion-input 
+                  type="email" 
+                  formControlName="email"
+                  placeholder="ejemplo@correo.com"
+                  class="custom-input">
+                  <ion-icon name="mail" slot="start" class="input-icon"></ion-icon>
+                </ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="email?.invalid && email?.touched">
+                <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                <span>{{ email?.hasError('required') ? 'El correo es requerido' : 'Formato de correo inválido' }}</span>
+              </div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="input-group">
+              <div class="label-row">
+                <ion-label class="input-label">
+                  <ion-icon name="lock-closed-outline" class="label-icon"></ion-icon>
+                  Contraseña
+                </ion-label>
+              </div>
+              <ion-item lines="none" class="custom-item" [class.item-error]="password?.invalid && password?.touched">
+                <ion-input 
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Ingresa tu contraseña"
+                  class="custom-input">
+                  <ion-icon name="lock-closed" slot="start" class="input-icon"></ion-icon>
+                  <ion-icon 
+                    [name]="showPassword ? 'eye-off' : 'eye'" 
+                    slot="end" 
+                    class="toggle-password"
+                    (click)="togglePassword()">
+                  </ion-icon>
+                </ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="password?.invalid && password?.touched">
+                <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                <span>{{ password?.hasError('required') ? 'La contraseña es requerida' : 'Mínimo 6 caracteres' }}</span>
+              </div>
+            </div>
+
+            <!-- Link de recuperar contraseña -->
+            <div class="forgot-password-container">
+              <a class="forgot-password-link" (click)="forgotPassword()">
+                <ion-icon name="key-outline" class="forgot-icon"></ion-icon>
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+
+            <!-- Botón de Login -->
+            <ion-button 
+              expand="block" 
+              type="submit"
+              [disabled]="loginForm.invalid || isLoading"
+              class="login-button">
+              <ion-icon name="checkmark-done-outline" slot="start" *ngIf="!isLoading"></ion-icon>
+              <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+              <span>{{ isLoading ? 'Iniciando sesión...' : 'Iniciar sesión' }}</span>
+            </ion-button>
+
+            <!-- Divisor -->
+            <div class="divider">
+              <span class="divider-text">¿No tienes cuenta?</span>
+            </div>
+
+            <!-- Botón de Registro -->
+            <ion-button 
+              expand="block" 
+              fill="outline"
+              (click)="goToRegister()"
+              class="register-button">
+              <ion-icon name="person-add-outline" slot="start"></ion-icon>
+              Crear cuenta nueva
+            </ion-button>
+
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-section">
+      <p class="footer-text">
+        <ion-icon name="shield-checkmark" class="footer-icon"></ion-icon>
+        Conexión segura y cifrada
+      </p>
+    </div>
+  </div>
+</ion-content>

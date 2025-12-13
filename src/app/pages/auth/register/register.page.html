@@ -1,0 +1,253 @@
+<ion-content [fullscreen]="true">
+  <div class="register-container">
+    
+    <!-- Header con logo/icono -->
+    <div class="header-section">
+      <div class="logo-container">
+        <ion-icon name="person-add" class="logo-icon"></ion-icon>
+      </div>
+      <h1 class="app-title">Crear Cuenta</h1>
+      <p class="app-subtitle">Completa tu información para registrarte</p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-container">
+      <ion-card class="register-card">
+        <ion-card-content>
+          
+          <!-- Título del formulario -->
+          <div class="form-header">
+            <h2 class="form-title">Nuevo Docente</h2>
+            <p class="form-subtitle">Completa todos los campos requeridos</p>
+          </div>
+
+          <form [formGroup]="registerForm" (ngSubmit)="register()">
+            
+            <!-- Selector de Avatar -->
+            <div class="avatar-section">
+              <h3 class="avatar-title">
+                <ion-icon name="image-outline"></ion-icon>
+                Selecciona tu avatar
+              </h3>
+              <div class="avatars-grid">
+                <div 
+                  *ngFor="let avatar of avatars; let i = index"
+                  class="avatar-item"
+                  [class.selected]="selectedAvatarIndex === i"
+                  (click)="selectAvatar(i)">
+                  <img [src]="avatar" [alt]="'Avatar ' + (i + 1)">
+                  <ion-icon name="checkmark-circle" class="check-icon" *ngIf="selectedAvatarIndex === i"></ion-icon>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nombres -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="person-outline" class="label-icon"></ion-icon>
+                Nombres <span class="required">*</span>
+              </ion-label>
+              <ion-item lines="none" class="custom-item" [class.item-error]="nombres?.invalid && nombres?.touched">
+                <ion-input 
+                  type="text" 
+                  formControlName="nombres"
+                  placeholder="Ingresa tus nombres"
+                  class="custom-input">
+                  <ion-icon name="person" slot="start" class="input-icon"></ion-icon>
+                </ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="nombres?.invalid && nombres?.touched">
+                <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                <span>Los nombres son requeridos</span>
+              </div>
+            </div>
+
+            <!-- Apellidos -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="person-outline" class="label-icon"></ion-icon>
+                Apellidos <span class="required">*</span>
+              </ion-label>
+              <ion-item lines="none" class="custom-item" [class.item-error]="apellidos?.invalid && apellidos?.touched">
+                <ion-input 
+                  type="text" 
+                  formControlName="apellidos"
+                  placeholder="Ingresa tus apellidos"
+                  class="custom-input">
+                  <ion-icon name="person" slot="start" class="input-icon"></ion-icon>
+                </ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="apellidos?.invalid && apellidos?.touched">
+                <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                <span>Los apellidos son requeridos</span>
+              </div>
+            </div>
+
+            <!-- Tipo de Documento y Cédula -->
+            <div class="input-row">
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="card-outline" class="label-icon"></ion-icon>
+                  Tipo <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item">
+                  <ion-select 
+                    formControlName="tipo_documento"
+                    placeholder="Tipo"
+                    class="custom-select">
+                    <ion-select-option value="CC">CC</ion-select-option>
+                    <ion-select-option value="TI">TI</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="card-outline" class="label-icon"></ion-icon>
+                  Cédula <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item" [class.item-error]="cedula?.invalid && cedula?.touched">
+                  <ion-input 
+                    type="text" 
+                    formControlName="cedula"
+                    placeholder="Número"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="cedula?.invalid && cedula?.touched">
+                  <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                  <span>Solo números</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Programa -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="school-outline" class="label-icon"></ion-icon>
+                Programa
+              </ion-label>
+              <ion-item lines="none" class="custom-item">
+                <ion-input 
+                  type="text" 
+                  formControlName="programa"
+                  placeholder="Ej: Ingeniería de Sistemas"
+                  class="custom-input">
+                  <ion-icon name="school" slot="start" class="input-icon"></ion-icon>
+                </ion-input>
+              </ion-item>
+            </div>
+
+            <!-- Área -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="briefcase-outline" class="label-icon"></ion-icon>
+                Área
+              </ion-label>
+              <ion-item lines="none" class="custom-item">
+                <ion-input 
+                  type="text" 
+                  formControlName="area"
+                  placeholder="Ej: Ciencias Básicas"
+                  class="custom-input">
+                  <ion-icon name="briefcase" slot="start" class="input-icon"></ion-icon>
+                </ion-input>
+              </ion-item>
+            </div>
+
+            <!-- Email -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="mail-outline" class="label-icon"></ion-icon>
+                Correo electrónico <span class="required">*</span>
+              </ion-label>
+              <ion-item lines="none" class="custom-item" [class.item-error]="email?.invalid && email?.touched">
+                <ion-input 
+                  type="email" 
+                  formControlName="email"
+                  placeholder="correo@ejemplo.com"
+                  class="custom-input">
+                  <ion-icon name="mail" slot="start" class="input-icon"></ion-icon>
+                </ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="email?.invalid && email?.touched">
+                <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                <span>{{ email?.hasError('required') ? 'El correo es requerido' : 'Correo inválido' }}</span>
+              </div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="lock-closed-outline" class="label-icon"></ion-icon>
+                Contraseña <span class="required">*</span>
+              </ion-label>
+              <ion-item lines="none" class="custom-item" [class.item-error]="password?.invalid && password?.touched">
+                <ion-input 
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Mínimo 8 caracteres"
+                  class="custom-input">
+                  <ion-icon name="lock-closed" slot="start" class="input-icon"></ion-icon>
+                  <ion-icon 
+                    [name]="showPassword ? 'eye-off' : 'eye'" 
+                    slot="end" 
+                    class="toggle-password"
+                    (click)="togglePassword()">
+                  </ion-icon>
+                </ion-input>
+              </ion-item>
+              <div class="password-strength" *ngIf="password?.value">
+                <div class="strength-bar">
+                  <div class="strength-fill" [style.width.%]="getPasswordStrength()" [class]="getPasswordStrengthClass()"></div>
+                </div>
+                <span class="strength-text" [class]="getPasswordStrengthClass()">
+                  {{ getPasswordStrengthText() }}
+                </span>
+              </div>
+              <div class="error-message" *ngIf="password?.invalid && password?.touched">
+                <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                <span>Mínimo 8 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Botón de Registro -->
+            <ion-button 
+              expand="block" 
+              type="submit"
+              [disabled]="registerForm.invalid || isLoading"
+              class="register-button">
+              <ion-icon name="checkmark-done-outline" slot="start" *ngIf="!isLoading"></ion-icon>
+              <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+              <span>{{ isLoading ? 'Creando cuenta...' : 'Crear cuenta' }}</span>
+            </ion-button>
+
+            <!-- Divisor -->
+            <div class="divider">
+              <span class="divider-text">¿Ya tienes cuenta?</span>
+            </div>
+
+            <!-- Botón de Login -->
+            <ion-button 
+              expand="block" 
+              fill="outline"
+              (click)="goToLogin()"
+              class="login-button">
+              <ion-icon name="log-in-outline" slot="start"></ion-icon>
+              Iniciar sesión
+            </ion-button>
+
+          </form>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-section">
+      <p class="footer-text">
+        <ion-icon name="shield-checkmark" class="footer-icon"></ion-icon>
+        Tus datos están protegidos
+      </p>
+    </div>
+  </div>
+</ion-content>
