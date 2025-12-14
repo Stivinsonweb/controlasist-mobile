@@ -1,0 +1,167 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Editar Perfil</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="guardar()" [disabled]="perfilForm.invalid || isLoading">
+        <ion-icon name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="editar-container">
+    
+    <!-- Avatar -->
+    <div class="avatar-section">
+      <ion-avatar class="edit-avatar">
+        <img [src]="getAvatarUrl()" [alt]="docente?.nombres" />
+      </ion-avatar>
+      <div class="avatar-overlay">
+        <ion-icon name="camera-outline"></ion-icon>
+      </div>
+      <p class="avatar-hint">Cambiar foto (Próximamente)</p>
+    </div>
+
+    <!-- Formulario -->
+    <ion-card class="form-card">
+      <ion-card-content>
+        <form [formGroup]="perfilForm">
+          
+          <!-- Email (Solo lectura) -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="mail-outline" class="label-icon"></ion-icon>
+              Correo electrónico
+            </ion-label>
+            <ion-item lines="none" class="custom-item disabled-item">
+              <ion-input 
+                type="email" 
+                [value]="docente?.email"
+                disabled
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+            <p class="field-hint">El correo no se puede modificar</p>
+          </div>
+
+          <!-- Nombres -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="person-outline" class="label-icon"></ion-icon>
+              Nombres <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="nombres?.invalid && nombres?.touched">
+              <ion-input 
+                type="text" 
+                formControlName="nombres"
+                placeholder="Tus nombres"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+            <div class="error-message" *ngIf="nombres?.invalid && nombres?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>{{ nombres?.hasError('required') ? 'Los nombres son requeridos' : 'Mínimo 2 caracteres' }}</span>
+            </div>
+          </div>
+
+          <!-- Apellidos -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="person-outline" class="label-icon"></ion-icon>
+              Apellidos <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="apellidos?.invalid && apellidos?.touched">
+              <ion-input 
+                type="text" 
+                formControlName="apellidos"
+                placeholder="Tus apellidos"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+            <div class="error-message" *ngIf="apellidos?.invalid && apellidos?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>{{ apellidos?.hasError('required') ? 'Los apellidos son requeridos' : 'Mínimo 2 caracteres' }}</span>
+            </div>
+          </div>
+
+          <!-- Teléfono -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="call-outline" class="label-icon"></ion-icon>
+              Teléfono
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="telefono?.invalid && telefono?.touched">
+              <ion-input 
+                type="tel" 
+                formControlName="telefono"
+                placeholder="3001234567"
+                maxlength="10"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+            <div class="error-message" *ngIf="telefono?.invalid && telefono?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>El teléfono debe tener entre 7 y 10 dígitos</span>
+            </div>
+          </div>
+
+          <!-- Entidad -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="business-outline" class="label-icon"></ion-icon>
+              Entidad
+            </ion-label>
+            <ion-item lines="none" class="custom-item">
+              <ion-input 
+                type="text" 
+                formControlName="entidad"
+                placeholder="Universidad o Institución"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+          </div>
+
+          <!-- Programa -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="school-outline" class="label-icon"></ion-icon>
+              Programa
+            </ion-label>
+            <ion-item lines="none" class="custom-item">
+              <ion-input 
+                type="text" 
+                formControlName="programa"
+                placeholder="Programa académico"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+          </div>
+
+          <!-- Área -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="briefcase-outline" class="label-icon"></ion-icon>
+              Área
+            </ion-label>
+            <ion-item lines="none" class="custom-item">
+              <ion-input 
+                type="text" 
+                formControlName="area"
+                placeholder="Área de conocimiento"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+          </div>
+
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>

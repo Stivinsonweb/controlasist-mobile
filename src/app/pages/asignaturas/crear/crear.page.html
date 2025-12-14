@@ -1,0 +1,296 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Nueva Asignatura</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="crear-container">
+    
+    <!-- Header con icono -->
+    <div class="header-section">
+      <div class="icon-container">
+        <ion-icon name="book-outline" class="header-icon"></ion-icon>
+      </div>
+      <h1 class="page-title">Crear Asignatura</h1>
+      <p class="page-subtitle">Completa la información de la nueva asignatura</p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="form-container">
+      <ion-card class="form-card">
+        <ion-card-content>
+          
+          <form [formGroup]="asignaturaForm" (ngSubmit)="crear()">
+            
+            <!-- Nombre de la Asignatura -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="book-outline" class="label-icon"></ion-icon>
+                Nombre de la Asignatura <span class="required">*</span>
+              </ion-label>
+              <ion-item lines="none" class="custom-item" [class.item-error]="nombre?.invalid && nombre?.touched">
+                <ion-input 
+                  type="text" 
+                  formControlName="nombre"
+                  placeholder="Ej: Programación Orientada a Objetos"
+                  class="custom-input">
+                </ion-input>
+              </ion-item>
+              <div class="error-message" *ngIf="nombre?.invalid && nombre?.touched">
+                <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                <span>{{ nombre?.hasError('required') ? 'El nombre es requerido' : 'Mínimo 3 caracteres' }}</span>
+              </div>
+            </div>
+
+            <!-- Código y Grupo en fila -->
+            <div class="input-row">
+              <!-- Código -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="code-outline" class="label-icon"></ion-icon>
+                  Código <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item" [class.item-error]="codigo?.invalid && codigo?.touched">
+                  <ion-input 
+                    type="text" 
+                    formControlName="codigo"
+                    placeholder="Ej: POO-101"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="codigo?.invalid && codigo?.touched">
+                  <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                  <span>Código requerido</span>
+                </div>
+              </div>
+
+              <!-- Grupo -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="people-outline" class="label-icon"></ion-icon>
+                  Grupo <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item" [class.item-error]="grupo?.invalid && grupo?.touched">
+                  <ion-input 
+                    type="text" 
+                    formControlName="grupo"
+                    placeholder="Ej: A"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="grupo?.invalid && grupo?.touched">
+                  <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                  <span>Grupo requerido</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Facultad y Programa en fila -->
+            <div class="input-row">
+              <!-- Facultad -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="business-outline" class="label-icon"></ion-icon>
+                  Facultad <span class="optional">(Opcional)</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item">
+                  <ion-input 
+                    type="text" 
+                    formControlName="facultad"
+                    placeholder="Ej: Ingeniería"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+              </div>
+
+              <!-- Programa -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="school-outline" class="label-icon"></ion-icon>
+                  Programa <span class="optional">(Opcional)</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item">
+                  <ion-input 
+                    type="text" 
+                    formControlName="programa"
+                    placeholder="Ej: Ing. de Sistemas"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+              </div>
+            </div>
+
+            <!-- Nivel y Periodo en fila -->
+            <div class="input-row">
+              <!-- Nivel -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="trending-up-outline" class="label-icon"></ion-icon>
+                  Nivel <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item" [class.item-error]="nivel?.invalid && nivel?.touched">
+                  <ion-input 
+                    type="text" 
+                    formControlName="nivel"
+                    placeholder="Ej: X, 5, Avanzado"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="nivel?.invalid && nivel?.touched">
+                  <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                  <span>Nivel requerido</span>
+                </div>
+              </div>
+
+              <!-- Periodo -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="calendar-outline" class="label-icon"></ion-icon>
+                  Periodo <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item" [class.item-error]="periodo?.invalid && periodo?.touched">
+                  <ion-input 
+                    type="text" 
+                    formControlName="periodo"
+                    placeholder="Ej: 2025-1"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="periodo?.invalid && periodo?.touched">
+                  <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                  <span>Periodo requerido</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CDS y Créditos en fila -->
+            <div class="input-row">
+              <!-- CDS -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="document-text-outline" class="label-icon"></ion-icon>
+                  CDS <span class="optional">(Opcional)</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item">
+                  <ion-input 
+                    type="text" 
+                    formControlName="cds"
+                    placeholder="Ej: Quibdó, Medellín"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+              </div>
+
+              <!-- Créditos -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="book-outline" class="label-icon"></ion-icon>
+                  Créditos <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item" [class.item-error]="creditos?.invalid && creditos?.touched">
+                  <ion-input 
+                    type="number" 
+                    formControlName="creditos"
+                    min="1"
+                    max="10"
+                    placeholder="3"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+                <div class="error-message" *ngIf="creditos?.invalid && creditos?.touched">
+                  <ion-icon name="alert-circle" class="error-icon"></ion-icon>
+                  <span>Entre 1 y 10</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modalidad y Aula en fila -->
+            <div class="input-row">
+              <!-- Modalidad -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="desktop-outline" class="label-icon"></ion-icon>
+                  Modalidad <span class="required">*</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item">
+                  <ion-select 
+                    formControlName="modalidad"
+                    placeholder="Selecciona modalidad"
+                    interface="action-sheet"
+                    class="custom-select">
+                    <ion-select-option *ngFor="let mod of modalidades" [value]="mod.value">
+                      {{ mod.label }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </div>
+
+              <!-- Aula -->
+              <div class="input-group half">
+                <ion-label class="input-label">
+                  <ion-icon name="location-outline" class="label-icon"></ion-icon>
+                  Aula <span class="optional">(Opcional)</span>
+                </ion-label>
+                <ion-item lines="none" class="custom-item">
+                  <ion-input 
+                    type="text" 
+                    formControlName="aula"
+                    placeholder="Ej: 301-A"
+                    class="custom-input">
+                  </ion-input>
+                </ion-item>
+              </div>
+            </div>
+
+            <!-- Color -->
+            <div class="input-group">
+              <ion-label class="input-label">
+                <ion-icon name="color-palette-outline" class="label-icon"></ion-icon>
+                Color de identificación <span class="required">*</span>
+              </ion-label>
+              <div class="color-selector">
+                <div 
+                  *ngFor="let c of colores"
+                  class="color-option"
+                  [class.selected]="color?.value === c.value"
+                  [style.background]="c.value"
+                  (click)="asignaturaForm.patchValue({color: c.value})">
+                  <ion-icon name="checkmark" *ngIf="color?.value === c.value"></ion-icon>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+              <ion-button 
+                (click)="cancelar()" 
+                expand="block" 
+                fill="outline"
+                color="medium"
+                class="cancel-button">
+                <ion-icon name="close-outline" slot="start"></ion-icon>
+                Cancelar
+              </ion-button>
+
+              <ion-button 
+                type="submit"
+                expand="block" 
+                [disabled]="asignaturaForm.invalid || isLoading"
+                class="submit-button">
+                <ion-icon name="save-outline" slot="start"></ion-icon>
+                <span>{{ isLoading ? 'Guardando...' : 'Crear Asignatura' }}</span>
+              </ion-button>
+            </div>
+
+          </form>
+
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+</ion-content>

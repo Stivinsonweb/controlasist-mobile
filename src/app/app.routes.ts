@@ -23,6 +23,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/admin/dashboard/dashboard.page').then((m) => m.DashboardPage),
   },
   {
+    path: 'asignaturas/crear',
+    loadComponent: () => import('./pages/asignaturas/crear/crear.page').then((m) => m.CrearPage),
+  },
+  {
     path: 'home',
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
   },
