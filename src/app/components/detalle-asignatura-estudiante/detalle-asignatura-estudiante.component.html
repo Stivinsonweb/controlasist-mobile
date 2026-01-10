@@ -1,0 +1,150 @@
+<ion-header>
+  <ion-toolbar [style.--background]="asignatura?.color || '#3b82f6'">
+    <ion-title color="light">{{ asignatura?.nombre }}</ion-title>
+    <ion-button slot="end" fill="clear" (click)="cerrar()">
+      <ion-icon name="close-outline" color="light"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="detalle-container">
+
+    <div class="asignatura-header" [style.background]="asignatura?.color">
+      <div class="header-content">
+        <ion-icon name="book-outline" class="asignatura-icon"></ion-icon>
+        <h1>{{ asignatura?.nombre }}</h1>
+      </div>
+      <ion-card class="acciones-card">
+        <ion-card-content>
+          <ion-button expand="block" color="danger" fill="outline" (click)="desinscribirse()">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Desinscribirme de esta asignatura
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <ion-card class="info-card">
+      <ion-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <ion-icon name="code-outline"></ion-icon>
+            <div>
+              <span class="label">Código</span>
+              <span class="value">{{ asignatura?.codigo }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <ion-icon name="people-outline"></ion-icon>
+            <div>
+              <span class="label">Grupo</span>
+              <span class="value">{{ asignatura?.grupo }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <div>
+              <span class="label">Periodo</span>
+              <span class="value">{{ asignatura?.periodo }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="asignatura?.modalidad">
+            <ion-icon name="school-outline"></ion-icon>
+            <div>
+              <span class="label">Modalidad</span>
+              <span class="value">{{ asignatura?.modalidad }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="asignatura?.aula">
+            <ion-icon name="location-outline"></ion-icon>
+            <div>
+              <span class="label">Aula</span>
+              <span class="value">{{ asignatura?.aula }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="asignatura?.creditos">
+            <ion-icon name="school-outline"></ion-icon>
+            <div>
+              <span class="label">Créditos</span>
+              <span class="value">{{ asignatura?.creditos }}</span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="docente-card" *ngIf="asignatura?.docente">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person-outline"></ion-icon>
+          Docente
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="docente-info">
+          <div class="avatar" [style.background]="asignatura.docente.color_avatar || '#3b82f6'">
+            <img *ngIf="asignatura.docente.foto_url" [src]="asignatura.docente.foto_url" alt="Docente">
+            <span *ngIf="!asignatura.docente.foto_url">
+              {{ (asignatura.docente.nombres?.charAt(0) || '') + (asignatura.docente.apellidos?.charAt(0) || '') }}
+            </span>
+          </div>
+          <div class="docente-data">
+            <h3>{{ asignatura.docente.nombres }} {{ asignatura.docente.apellidos }}</h3>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="horarios-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="time-outline"></ion-icon>
+          Horarios de Clase
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+
+        <div *ngIf="loadingHorarios" class="loading-state">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <p>Cargando horarios...</p>
+        </div>
+
+        <div *ngIf="!loadingHorarios && horarios.length === 0" class="empty-state">
+          <ion-icon name="calendar-outline" class="empty-icon"></ion-icon>
+          <p>No hay horarios registrados</p>
+        </div>
+
+        <div *ngIf="!loadingHorarios && horarios.length > 0" class="horarios-list">
+          <div *ngFor="let dia of [1, 2, 3, 4, 5, 6]" class="dia-group">
+            <div *ngIf="getHorariosPorDia(dia).length > 0">
+
+              <div class="dia-header">
+                <h3>{{ getDiaNombre(dia) }}</h3>
+                <ion-badge color="primary">{{ getHorariosPorDia(dia).length }}</ion-badge>
+              </div>
+
+              <div *ngFor="let horario of getHorariosPorDia(dia)" class="horario-item">
+                <div class="horario-time">
+                  <ion-icon name="time-outline"></ion-icon>
+                  <span>{{ formatHora(horario.hora_inicio) }} - {{ formatHora(horario.hora_fin) }}</span>
+                </div>
+                <div class="horario-location" *ngIf="horario.aula">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ horario.aula }}</span>
+                </div>
+                <ion-chip [style.--background]="getColorEstado(horario.estado || 'pendiente')" class="estado-chip">
+                  <ion-icon [name]="getIconoEstado(horario.estado || 'pendiente')"></ion-icon>
+                  <ion-label>{{ getTextoEstado(horario.estado || 'pendiente') }}</ion-label>
+                </ion-chip>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>

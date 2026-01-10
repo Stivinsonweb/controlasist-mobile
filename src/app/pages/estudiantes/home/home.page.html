@@ -1,0 +1,119 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title color="light">ControlAsist</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="irAPerfil()" class="perfil-button">
+        <div class="avatar-header" [style.background]="estudiante?.avatar_color || '#3b82f6'">
+          {{ estudiante?.iniciales || 'U' }}
+        </div>
+      </ion-button>
+      <ion-button fill="clear" (click)="cerrarSesion()">
+        <ion-icon name="log-out-outline" color="light" size="large"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="home-container">
+
+    <div *ngIf="loading" class="loading-state">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Cargando información...</p>
+    </div>
+
+    <div *ngIf="!loading">
+      <div class="welcome-section" *ngIf="estudiante">
+        <div class="avatar-container">
+          <div class="avatar" [style.background]="estudiante.avatar_color">
+            {{ estudiante.iniciales }}
+          </div>
+        </div>
+        <h1>Hola, {{ estudiante.nombres }}</h1>
+        <p>{{ estudiante.email }}</p>
+        <p class="version">Versión Estudiante</p>
+      </div>
+
+      <div class="asignaturas-section">
+        
+        <div *ngIf="asignaturas.length === 0" class="empty-state">
+          <ion-icon name="school-outline" class="empty-icon"></ion-icon>
+          <h2>No estás inscrito en ninguna asignatura</h2>
+          <p>Inscríbete usando el código que te proporcionó tu docente</p>
+          <ion-button expand="block" (click)="inscribirAsignatura()">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Inscribirse a Asignatura
+          </ion-button>
+        </div>
+
+        <div *ngIf="asignaturas.length > 0">
+          <div class="section-header">
+            <h2>Mis Asignaturas</h2>
+            <ion-badge color="primary">{{ asignaturas.length }}</ion-badge>
+          </div>
+
+          <ion-card *ngFor="let asignatura of asignaturas" class="asignatura-card" (click)="verDetalleAsignatura(asignatura)">
+            <div class="card-color-bar" [style.background]="asignatura.color"></div>
+            <ion-card-content>
+              <div class="asignatura-content">
+                
+                <div class="asignatura-main">
+                  <div class="asignatura-icon" [style.background]="asignatura.color">
+                    <ion-icon name="book-outline"></ion-icon>
+                  </div>
+                  <div class="asignatura-info">
+                    <h3>{{ asignatura.nombre }}</h3>
+                    <div class="asignatura-meta">
+                      <span class="meta-item">
+                        <ion-icon name="code-outline"></ion-icon>
+                        {{ asignatura.codigo }}
+                      </span>
+                      <span class="meta-item">
+                        <ion-icon name="people-outline"></ion-icon>
+                        Grupo {{ asignatura.grupo }}
+                      </span>
+                      <span class="meta-item">
+                        <ion-icon name="calendar-outline"></ion-icon>
+                        {{ asignatura.periodo }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="docente-section" *ngIf="asignatura.docente">
+                  <div class="docente-avatar" [style.background]="asignatura.docente.color_avatar || '#64748b'">
+                    <img *ngIf="asignatura.docente.foto_url" [src]="asignatura.docente.foto_url" alt="Docente">
+                    <span *ngIf="!asignatura.docente.foto_url">
+                      {{ (asignatura.docente.nombres?.charAt(0) || '') + (asignatura.docente.apellidos?.charAt(0) || '') }}
+                    </span>
+                  </div>
+                  <div class="docente-info">
+                    <span class="docente-label">Docente</span>
+                    <span class="docente-nombre">{{ asignatura.docente.nombres }} {{ asignatura.docente.apellidos }}</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="card-footer">
+                <ion-button fill="clear" size="small">
+                  <span>Ver más detalles</span>
+                  <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button color="primary" (click)="inscribirAsignatura()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>

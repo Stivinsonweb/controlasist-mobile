@@ -1,248 +1,356 @@
-ion-content {
-  --background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 25%, #f8fafc 50%, #ffffff 100%);
-}
-
 .editar-container {
-  padding: 20px;
-  max-width: 600px;
+  padding: 16px;
+  max-width: 800px;
   margin: 0 auto;
+  padding-bottom: 80px;
 }
 
-// ========================================
-// AVATAR SECTION
-// ========================================
+// ===================================
+// SECCIÓN DE AVATAR ACTUAL
+// ===================================
+
 .avatar-section {
-  text-align: center;
-  padding: 20px 0 30px;
-  position: relative;
-  animation: fadeInDown 0.6s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+
+  .edit-avatar {
+    width: 120px;
+    height: 120px;
+    border: 5px solid white;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    margin-bottom: 16px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .avatar-hint {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+    opacity: 0.95;
+  }
 }
 
-.edit-avatar {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto;
-  border: 4px solid #3b82f6;
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+// ===================================
+// CARD DE AVATARES
+// ===================================
+
+.avatares-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  overflow: hidden;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 20px 0;
+
+    ion-icon {
+      font-size: 24px;
+      color: #3b82f6;
+    }
+  }
+}
+
+// ===================================
+// LOADING DE AVATARES
+// ===================================
+
+.avatars-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+
+  .loading-icon {
+    font-size: 48px;
+    color: #3b82f6;
+
+    &.spin {
+      animation: spin 2s linear infinite;
+    }
+  }
+
+  p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ===================================
+// GRID DE AVATARES
+// ===================================
+
+.avatars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 16px;
+  padding: 4px;
+}
+
+.avatar-item {
   position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 3px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-}
-
-.avatar-overlay {
-  position: absolute;
-  bottom: 35px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  cursor: pointer;
-
-  ion-icon {
-    font-size: 40px;
-    color: white;
-  }
-}
-
-.avatar-section:hover .avatar-overlay {
-  opacity: 1;
-}
-
-.avatar-hint {
-  font-size: 13px;
-  color: #94a3b8;
-  margin: 12px 0 0;
-  font-weight: 500;
-}
-
-// ========================================
-// FORM CARD
-// ========================================
-.form-card {
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  background: white;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  animation: fadeInUp 0.6s ease-out 0.2s both;
-
-  ion-card-content {
-    padding: 24px;
-  }
-}
-
-// ========================================
-// INPUT GROUPS
-// ========================================
-.input-group {
-  margin-bottom: 24px;
-}
-
-.input-label {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 8px;
-
-  .label-icon {
-    font-size: 18px;
-    margin-right: 8px;
-    color: #3b82f6;
+    display: block;
   }
 
-  .required {
-    color: #ef4444;
-    margin-left: 4px;
-  }
-}
-
-// ========================================
-// CUSTOM ITEMS
-// ========================================
-.custom-item {
-  --background: #f8fafc;
-  --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --inner-padding-end: 0;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-
-  &.item-error {
-    --background: #fef2f2;
-    border-color: #fca5a5;
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   }
 
-  &.ion-focused {
-    --background: white;
+  &.selected {
     border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+
+    .check-icon {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
-  &.disabled-item {
-    opacity: 0.6;
-    --background: #f1f5f9;
-    border-color: #cbd5e1;
+  &:active {
+    transform: scale(0.95);
+  }
+
+  .check-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 32px;
+    color: #3b82f6;
+    background: white;
+    border-radius: 50%;
+    padding: 4px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
-.custom-input {
-  --padding-start: 0;
-  --padding-end: 0;
-  font-size: 15px;
-  font-weight: 500;
-  color: #1e293b;
+// ===================================
+// FORMULARIO
+// ===================================
 
-  &::placeholder {
-    color: #94a3b8;
-    font-weight: 400;
-  }
-}
+.form-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
 
-// ========================================
-// ERROR MESSAGES
-// ========================================
-.error-message {
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: #fef2f2;
-  border-radius: 8px;
-  border-left: 3px solid #ef4444;
-  animation: shake 0.4s ease;
-
-  ion-icon {
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 18px;
-    color: #ef4444;
-    margin-right: 8px;
-    flex-shrink: 0;
-  }
-
-  span {
-    font-size: 13px;
-    color: #dc2626;
-    font-weight: 500;
-  }
-}
-
-// ========================================
-// FIELD HINT
-// ========================================
-.field-hint {
-  font-size: 12px;
-  color: #94a3b8;
-  margin: 6px 0 0 4px;
-  font-style: italic;
-}
-
-// ========================================
-// ANIMATIONS
-// ========================================
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-// ========================================
-// RESPONSIVE
-// ========================================
-@media (max-width: 768px) {
-  .editar-container {
-    padding: 16px;
-  }
-
-  .form-card ion-card-content {
-    padding: 20px;
-  }
-
-  .edit-avatar {
-    width: 100px;
-    height: 100px;
-  }
-
-  .avatar-overlay {
-    width: 100px;
-    height: 100px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 20px 0;
 
     ion-icon {
-      font-size: 32px;
+      font-size: 24px;
+      color: #3b82f6;
+    }
+  }
+}
+
+.input-group {
+  margin-bottom: 24px;
+
+  .input-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+
+    .label-icon {
+      font-size: 18px;
+      color: #64748b;
+    }
+
+    .required {
+      color: #ef4444;
+      font-weight: 700;
+    }
+  }
+
+  .custom-item {
+    --background: #f8fafc;
+    --border-radius: 12px;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    margin: 0;
+
+    &:focus-within {
+      border-color: #3b82f6;
+      --background: white;
+    }
+
+    &.item-error {
+      border-color: #ef4444;
+      --background: #fef2f2;
+    }
+
+    &.disabled-item {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .custom-input {
+      --padding-start: 0;
+      --padding-end: 0;
+      font-size: 15px;
+      color: #1e293b;
+    }
+
+    .toggle-password {
+      font-size: 22px;
+      color: #64748b;
+      cursor: pointer;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #3b82f6;
+      }
+    }
+  }
+
+  .field-hint {
+    font-size: 12px;
+    color: #64748b;
+    margin: 6px 0 0 4px;
+  }
+
+  .error-message {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 6px;
+    padding-left: 4px;
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+}
+
+// ===================================
+// REQUISITOS DE CONTRASEÑA
+// ===================================
+
+.password-requirements {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  .requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    ion-icon {
+      font-size: 18px;
+      color: #94a3b8;
+    }
+
+    &.valid {
+      color: #10b981;
+
+      ion-icon {
+        color: #10b981;
+      }
+    }
+  }
+}
+
+// ===================================
+// BOTONES
+// ===================================
+
+.password-button {
+  margin-top: 20px;
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 700;
+  --background: #f59e0b;
+  --background-activated: #d97706;
+  --background-hover: #d97706;
+}
+
+// ===================================
+// RESPONSIVE
+// ===================================
+
+@media (max-width: 576px) {
+  .avatars-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 12px;
+  }
+
+  .avatar-section {
+    padding: 24px 16px;
+
+    .edit-avatar {
+      width: 100px;
+      height: 100px;
     }
   }
 }

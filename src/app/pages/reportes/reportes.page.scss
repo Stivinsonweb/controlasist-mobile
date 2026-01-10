@@ -1,0 +1,441 @@
+ion-content {
+  --background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 25%, #f8fafc 50%, #ffffff 100%);
+}
+
+.reportes-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+// ========================================
+// FILTROS CARD
+// ========================================
+.filtros-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  margin-bottom: 20px;
+  animation: fadeInDown 0.3s ease-out;
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.filtro-item {
+  --background: white;
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+
+  ion-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+
+  ion-select {
+    font-weight: 600;
+    color: #1e293b;
+  }
+}
+
+// ========================================
+// VISTA SEGMENT
+// ========================================
+.vista-segment {
+  margin: 20px 0;
+  background: white;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+
+  ion-segment-button {
+    --indicator-color: #3b82f6;
+    --indicator-color-checked: #3b82f6;
+    --color-checked: white;
+    --color: #64748b;
+    min-height: 50px;
+    text-transform: none;
+    font-weight: 600;
+    border-radius: 10px;
+    margin: 2px;
+
+    ion-icon {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    ion-label {
+      font-size: 14px;
+      font-weight: 700;
+    }
+  }
+}
+
+// ========================================
+// RESUMEN MES CARD
+// ========================================
+.resumen-mes-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  margin-bottom: 20px;
+  animation: fadeInUp 0.4s ease-out;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #065f46;
+    font-size: 18px;
+    font-weight: 700;
+
+    ion-icon {
+      font-size: 28px;
+    }
+  }
+}
+
+// ========================================
+// STATS GRID
+// ========================================
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.stat-item {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border-left: 4px solid;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  &.total {
+    border-left-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  }
+
+  &.realizada {
+    border-left-color: #10b981;
+  }
+
+  &.cancelada {
+    border-left-color: #ef4444;
+  }
+
+  &.aplazada {
+    border-left-color: #f59e0b;
+  }
+
+  &.pendiente {
+    border-left-color: #94a3b8;
+  }
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-percent {
+  font-size: 16px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin-top: 4px;
+}
+
+// ========================================
+// SEMANAS LIST
+// ========================================
+.semanas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.semana-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
+  animation: fadeInUp 0.5s ease-out;
+  overflow: hidden;
+
+  ion-card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 16px;
+  }
+}
+
+.semana-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.semana-titulo {
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px;
+  }
+
+  p {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+// ========================================
+// SEMANA STATS
+// ========================================
+.semana-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.mini-stat {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  border-left: 3px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  &.realizada {
+    border-left-color: #10b981;
+    
+    ion-icon {
+      color: #10b981;
+    }
+  }
+
+  &.cancelada {
+    border-left-color: #ef4444;
+    
+    ion-icon {
+      color: #ef4444;
+    }
+  }
+
+  &.aplazada {
+    border-left-color: #f59e0b;
+    
+    ion-icon {
+      color: #f59e0b;
+    }
+  }
+
+  &.pendiente {
+    border-left-color: #94a3b8;
+    
+    ion-icon {
+      color: #94a3b8;
+    }
+  }
+
+  ion-icon {
+    font-size: 24px;
+  }
+
+  .numero {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+  }
+}
+
+// ========================================
+// CLASES DETALLE
+// ========================================
+.clases-detalle {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px dashed #e2e8f0;
+}
+
+.detalle-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.clase-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  border-left: 3px solid #e2e8f0;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.clase-fecha {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.clase-horario {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.estado-chip {
+  height: 28px;
+  font-weight: 700;
+  color: white;
+  
+  ion-label {
+    text-transform: capitalize;
+    font-size: 11px;
+  }
+}
+
+// ========================================
+// SELECTOR SEMANA CARD
+// ========================================
+.selector-semana-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 2px solid #3b82f6;
+  margin-bottom: 20px;
+
+  ion-item {
+    --background: white;
+    --border-radius: 12px;
+  }
+}
+
+// ========================================
+// RESUMEN SEMANA CARD
+// ========================================
+.resumen-semana-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  animation: fadeInUp 0.4s ease-out;
+
+  ion-card-title {
+    color: #1e40af;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .fecha-rango {
+    font-size: 14px;
+    color: #3b82f6;
+    font-weight: 600;
+    margin: 8px 0 0;
+  }
+}
+
+// ========================================
+// ANIMATIONS
+// ========================================
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 768px) {
+  .reportes-container {
+    padding: 12px;
+  }
+
+  .filtros-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .semana-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .clase-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

@@ -1,0 +1,159 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Configurar Horarios</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="guardar()">
+        <ion-icon name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="horarios-container">
+    
+    <!-- Instrucciones -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <div class="info-content">
+          <ion-icon name="calendar-outline" class="info-icon"></ion-icon>
+          <div>
+            <h3>Selecciona los días y configura horarios</h3>
+            <p>Toca un día para configurar su horario</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Lista de días -->
+    <div class="dias-list">
+      <div *ngFor="let dia of diasSemana" class="dia-item">
+        
+        <!-- Checkbox del día -->
+        <div class="dia-checkbox-wrapper" (click)="toggleDia(dia)">
+          <ion-checkbox 
+            [(ngModel)]="dia.seleccionado"
+            class="dia-checkbox">
+          </ion-checkbox>
+          <div class="dia-info">
+            <h4>{{ dia.nombre }}</h4>
+            <p *ngIf="dia.seleccionado && dia.hora_inicio && dia.hora_fin">
+              {{ formatHora(dia.hora_inicio) }} - {{ formatHora(dia.hora_fin) }}
+              <span *ngIf="dia.aula"> • {{ dia.aula }}</span>
+            </p>
+            <p *ngIf="dia.seleccionado && (!dia.hora_inicio || !dia.hora_fin)" class="configurar-texto">
+              Toca para configurar
+            </p>
+          </div>
+        </div>
+
+        <!-- Panel de configuración (expandible) -->
+        <div class="config-panel" *ngIf="dia.seleccionado && diaExpandido === dia.dia">
+          
+          <!-- Hora de inicio -->
+          <div class="config-section">
+            <ion-label class="section-label">
+              <ion-icon name="time-outline"></ion-icon>
+              Hora de inicio
+            </ion-label>
+            <div class="hours-grid">
+              <ion-chip 
+                *ngFor="let hora of horasRapidas"
+                class="hour-chip"
+                [class.selected]="dia.hora_inicio === hora"
+                (click)="seleccionarHoraInicio(dia, hora)">
+                {{ formatHora(hora) }}
+              </ion-chip>
+            </div>
+          </div>
+
+          <!-- Duración -->
+          <div class="config-section" *ngIf="dia.hora_inicio">
+            <ion-label class="section-label">
+              <ion-icon name="time-outline"></ion-icon>
+              Duración
+            </ion-label>
+            <div class="duration-grid">
+              <ion-button 
+                *ngFor="let dur of duraciones"
+                [fill]="dia.hora_fin && calcularDuracion(dia) === dur.minutos ? 'solid' : 'outline'"
+                size="small"
+                (click)="seleccionarDuracion(dia, dur.minutos)">
+                {{ dur.label }}
+              </ion-button>
+            </div>
+          </div>
+
+          <!-- Hora de fin calculada -->
+          <div class="config-section" *ngIf="dia.hora_inicio && dia.hora_fin">
+            <ion-label class="section-label">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              Finaliza a las
+            </ion-label>
+            <div class="end-time-display">
+              <span class="time-badge">{{ formatHora(dia.hora_fin) }}</span>
+            </div>
+          </div>
+
+          <!-- Aula (opcional) -->
+          <div class="config-section">
+            <ion-label class="section-label">
+              <ion-icon name="location-outline"></ion-icon>
+              Aula (opcional)
+            </ion-label>
+            <ion-item lines="none" class="aula-item">
+              <ion-input 
+                [(ngModel)]="dia.aula"
+                placeholder="Ej: Lab 101, Aula 302">
+              </ion-input>
+            </ion-item>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Resumen -->
+    <ion-card class="resumen-card" *ngIf="hayDiasSeleccionados()">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="checkmark-circle"></ion-icon>
+          Resumen
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="resumen-list">
+          <div *ngFor="let dia of diasSemana">
+            <div *ngIf="dia.seleccionado && dia.hora_inicio && dia.hora_fin" class="resumen-item">
+              <div class="resumen-dia">{{ dia.nombre }}</div>
+              <div class="resumen-horario">
+                {{ formatHora(dia.hora_inicio) }} - {{ formatHora(dia.hora_fin) }}
+              </div>
+              <div class="resumen-aula" *ngIf="dia.aula">{{ dia.aula }}</div>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botón guardar fijo -->
+    <div class="save-button-container">
+      <ion-button 
+        expand="block" 
+        size="large"
+        (click)="guardar()"
+        [disabled]="!hayDiasSeleccionados()"
+        class="save-button">
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        Guardar Horarios
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

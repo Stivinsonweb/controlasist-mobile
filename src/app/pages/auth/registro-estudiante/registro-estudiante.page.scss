@@ -1,0 +1,100 @@
+.registro-container {
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .main-icon {
+    font-size: 80px;
+    color: #3b82f6;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+  }
+}
+
+.form-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.input-item {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  margin-bottom: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+
+  &:focus-within {
+    border-color: #3b82f6;
+  }
+
+  ion-label {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+  }
+
+  ion-icon {
+    color: #64748b;
+    font-size: 20px;
+  }
+
+  .toggle-icon {
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #3b82f6;
+    }
+  }
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin: -12px 0 16px 12px;
+}
+
+.register-button {
+  margin-top: 24px;
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 700;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 24px;
+
+  p {
+    color: #64748b;
+    font-size: 14px;
+
+    a {
+      color: #3b82f6;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

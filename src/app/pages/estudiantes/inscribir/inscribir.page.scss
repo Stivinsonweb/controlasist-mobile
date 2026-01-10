@@ -1,0 +1,179 @@
+.inscribir-container {
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .main-icon {
+    font-size: 80px;
+    color: #3b82f6;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+  }
+}
+
+.search-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.codigo-item {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  margin-bottom: 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+
+  &:focus-within {
+    border-color: #3b82f6;
+  }
+
+  ion-label {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+  }
+
+  .codigo-input {
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  ion-icon {
+    color: #64748b;
+    font-size: 22px;
+  }
+}
+
+.search-button {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 700;
+}
+
+.result-card {
+  border-radius: 16px;
+  margin-top: 24px;
+  
+  &.success {
+    border: 2px solid #10b981;
+  }
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .result-icon {
+    font-size: 40px;
+    
+    &.success-icon {
+      color: #10b981;
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+}
+
+.asignatura-info {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .value {
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 14px;
+    }
+  }
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .inscribir-button {
+    --background: #10b981;
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 700;
+  }
+
+  .cancel-button {
+    --border-radius: 12px;
+    height: 44px;
+    font-weight: 600;
+  }
+}
+
+.codigo-item {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  margin-bottom: 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+
+  &:focus-within {
+    border-color: #3b82f6;
+  }
+
+  ion-label {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+  }
+
+  ion-input {
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+    --padding-start: 8px;
+  }
+
+  ion-icon {
+    color: #64748b;
+    font-size: 22px;
+  }
+}

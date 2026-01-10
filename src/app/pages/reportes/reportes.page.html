@@ -1,0 +1,251 @@
+<ion-header [translucent]="true">
+    <ion-toolbar [style.--background]="asignatura?.color || '#3b82f6'">
+        <ion-buttons slot="start">
+            <ion-back-button [defaultHref]="'/asignaturas/detalle/' + asignaturaId" color="light"></ion-back-button>
+        </ion-buttons>
+        <ion-title color="light">Reportes - {{ asignatura?.nombre }}</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <div class="reportes-container">
+
+        <!-- Filtros -->
+        <ion-card class="filtros-card">
+            <ion-card-content>
+                <div class="filtros-grid">
+
+                    <!-- Selector de año -->
+                    <ion-item lines="none" class="filtro-item">
+                        <ion-label position="stacked">Año</ion-label>
+                        <ion-select [value]="anioSeleccionado"
+                            (ionChange)="anioSeleccionado = $event.detail.value; onFiltroChange()" interface="popover">
+                            <ion-select-option *ngFor="let anio of anios" [value]="anio">
+                                {{ anio }}
+                            </ion-select-option>
+                        </ion-select>
+                    </ion-item>
+
+                    <!-- Selector de mes -->
+                    <ion-item lines="none" class="filtro-item">
+                        <ion-label position="stacked">Mes</ion-label>
+                        <ion-select [value]="mesSeleccionado"
+                            (ionChange)="mesSeleccionado = $event.detail.value; onFiltroChange()" interface="popover">
+                            <ion-select-option *ngFor="let mes of meses" [value]="mes.valor">
+                                {{ mes.nombre }}
+                            </ion-select-option>
+                        </ion-select>
+                    </ion-item>
+
+                </div>
+            </ion-card-content>
+        </ion-card>
+
+        <!-- Segment Vista -->
+        <ion-segment [value]="vistaActual" (ionChange)="onVistaChange($event)" class="vista-segment">
+            <ion-segment-button value="mes">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <ion-label>Mes</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="semana">
+                <ion-icon name="stats-chart-outline"></ion-icon>
+                <ion-label>Semana</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+
+        <!-- VISTA POR MES -->
+        <div *ngIf="vistaActual === 'mes' && reporteMensual">
+
+            <!-- Resumen del Mes -->
+            <ion-card class="resumen-mes-card">
+                <ion-card-header>
+                    <ion-card-title>
+                        <ion-icon name="calendar-outline"></ion-icon>
+                        Resumen de {{ reporteMensual.mes }} {{ reporteMensual.anio }}
+                    </ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+
+                    <div class="stats-grid">
+                        <div class="stat-item total">
+                            <div class="stat-number">{{ reporteMensual.totalClases }}</div>
+                            <div class="stat-label">Total Clases</div>
+                        </div>
+
+                        <div class="stat-item realizada">
+                            <div class="stat-number">{{ reporteMensual.realizadas }}</div>
+                            <div class="stat-label">Realizadas</div>
+                            <div class="stat-percent">{{ getPorcentaje(reporteMensual.realizadas,
+                                reporteMensual.totalClases) }}%</div>
+                        </div>
+
+                        <div class="stat-item cancelada">
+                            <div class="stat-number">{{ reporteMensual.canceladas }}</div>
+                            <div class="stat-label">Canceladas</div>
+                            <div class="stat-percent">{{ getPorcentaje(reporteMensual.canceladas,
+                                reporteMensual.totalClases) }}%</div>
+                        </div>
+
+                        <div class="stat-item aplazada">
+                            <div class="stat-number">{{ reporteMensual.aplazadas }}</div>
+                            <div class="stat-label">Aplazadas</div>
+                            <div class="stat-percent">{{ getPorcentaje(reporteMensual.aplazadas,
+                                reporteMensual.totalClases) }}%</div>
+                        </div>
+
+                        <div class="stat-item pendiente">
+                            <div class="stat-number">{{ reporteMensual.pendientes }}</div>
+                            <div class="stat-label">Pendientes</div>
+                            <div class="stat-percent">{{ getPorcentaje(reporteMensual.pendientes,
+                                reporteMensual.totalClases) }}%</div>
+                        </div>
+                    </div>
+
+                </ion-card-content>
+            </ion-card>
+
+            <!-- Reporte por Semanas -->
+            <div class="semanas-list">
+                <ion-card *ngFor="let semana of reporteMensual.semanas" class="semana-card">
+                    <ion-card-header>
+                        <div class="semana-header">
+                            <div class="semana-titulo">
+                                <h3>Semana {{ semana.semana }}</h3>
+                                <p>{{ semana.fechaInicio }} - {{ semana.fechaFin }}</p>
+                            </div>
+                            <ion-badge color="primary">{{ semana.totalClases }} clases</ion-badge>
+                        </div>
+                    </ion-card-header>
+                    <ion-card-content>
+
+                        <div class="semana-stats">
+                            <div class="mini-stat realizada">
+                                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                                <span class="numero">{{ semana.realizadas }}</span>
+                                <span class="label">Realizadas</span>
+                            </div>
+
+                            <div class="mini-stat cancelada">
+                                <ion-icon name="close-circle-outline"></ion-icon>
+                                <span class="numero">{{ semana.canceladas }}</span>
+                                <span class="label">Canceladas</span>
+                            </div>
+
+                            <div class="mini-stat aplazada">
+                                <ion-icon name="time-outline"></ion-icon>
+                                <span class="numero">{{ semana.aplazadas }}</span>
+                                <span class="label">Aplazadas</span>
+                            </div>
+
+                            <div class="mini-stat pendiente">
+                                <ion-icon name="time-outline"></ion-icon>
+                                <span class="numero">{{ semana.pendientes }}</span>
+                                <span class="label">Pendientes</span>
+                            </div>
+                        </div>
+
+                        <!-- Lista de clases de la semana -->
+                        <div class="clases-detalle" *ngIf="semana.clases && semana.clases.length > 0">
+                            <div class="detalle-header">Detalle de clases:</div>
+                            <div *ngFor="let clase of semana.clases" class="clase-item">
+                                <div class="clase-fecha">
+                                    {{ diasSemana[clase.diaSemana] }}, {{ clase.fecha }}
+                                </div>
+                                <div class="clase-horario">
+                                    {{ clase.horario.hora_inicio }} - {{ clase.horario.hora_fin }}
+                                    <span *ngIf="clase.horario.aula"> • {{ clase.horario.aula }}</span>
+                                </div>
+                                <ion-chip [style.--background]="getColorEstado(clase.estado)" class="estado-chip">
+                                    <ion-label>{{ clase.estado }}</ion-label>
+                                </ion-chip>
+                            </div>
+                        </div>
+
+                    </ion-card-content>
+                </ion-card>
+            </div>
+
+        </div>
+
+        <!-- VISTA POR SEMANA -->
+        <div *ngIf="vistaActual === 'semana' && reporteSemanal">
+
+            <!-- Selector de semana -->
+            <ion-card class="selector-semana-card">
+                <ion-card-content>
+                    <ion-item lines="none">
+                        <ion-label position="stacked">Seleccionar Semana</ion-label>
+                        <ion-select [value]="semanaSeleccionada"
+                            (ionChange)="semanaSeleccionada = $event.detail.value; onFiltroChange()"
+                            interface="popover">
+                            <ion-select-option [value]="1">Semana 1</ion-select-option>
+                            <ion-select-option [value]="2">Semana 2</ion-select-option>
+                            <ion-select-option [value]="3">Semana 3</ion-select-option>
+                            <ion-select-option [value]="4">Semana 4</ion-select-option>
+                            <ion-select-option [value]="5">Semana 5</ion-select-option>
+                        </ion-select>
+                    </ion-item>
+                </ion-card-content>
+            </ion-card>
+
+            <!-- Resumen de la Semana -->
+            <ion-card class="resumen-semana-card">
+                <ion-card-header>
+                    <ion-card-title>
+                        Semana {{ reporteSemanal.semana }}
+                    </ion-card-title>
+                    <p class="fecha-rango">{{ reporteSemanal.fechaInicio }} - {{ reporteSemanal.fechaFin }}</p>
+                </ion-card-header>
+                <ion-card-content>
+
+                    <div class="stats-grid">
+                        <div class="stat-item total">
+                            <div class="stat-number">{{ reporteSemanal.totalClases }}</div>
+                            <div class="stat-label">Total Clases</div>
+                        </div>
+
+                        <div class="stat-item realizada">
+                            <div class="stat-number">{{ reporteSemanal.realizadas }}</div>
+                            <div class="stat-label">Realizadas</div>
+                        </div>
+
+                        <div class="stat-item cancelada">
+                            <div class="stat-number">{{ reporteSemanal.canceladas }}</div>
+                            <div class="stat-label">Canceladas</div>
+                        </div>
+
+                        <div class="stat-item aplazada">
+                            <div class="stat-number">{{ reporteSemanal.aplazadas }}</div>
+                            <div class="stat-label">Aplazadas</div>
+                        </div>
+
+                        <div class="stat-item pendiente">
+                            <div class="stat-number">{{ reporteSemanal.pendientes }}</div>
+                            <div class="stat-label">Pendientes</div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de clases -->
+                    <div class="clases-detalle" *ngIf="reporteSemanal.clases && reporteSemanal.clases.length > 0">
+                        <div class="detalle-header">Detalle de clases:</div>
+                        <div *ngFor="let clase of reporteSemanal.clases" class="clase-item">
+                            <div class="clase-fecha">
+                                {{ diasSemana[clase.diaSemana] }}, {{ clase.fecha }}
+                            </div>
+                            <div class="clase-horario">
+                                {{ clase.horario.hora_inicio }} - {{ clase.horario.hora_fin }}
+                                <span *ngIf="clase.horario.aula"> • {{ clase.horario.aula }}</span>
+                            </div>
+                            <ion-chip [style.--background]="getColorEstado(clase.estado)" class="estado-chip">
+                                <ion-label>{{ clase.estado }}</ion-label>
+                            </ion-chip>
+                        </div>
+                    </div>
+
+                </ion-card-content>
+            </ion-card>
+
+        </div>
+
+    </div>
+</ion-content>

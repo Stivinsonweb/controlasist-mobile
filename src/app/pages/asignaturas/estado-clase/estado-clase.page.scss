@@ -1,0 +1,274 @@
+ion-content {
+  --background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 25%, #f8fafc 50%, #ffffff 100%);
+}
+
+.estado-container {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+// ========================================
+// INFO CARD
+// ========================================
+.info-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  margin-bottom: 20px;
+  animation: fadeInUp 0.3s ease-out;
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+.clase-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  ion-icon {
+    font-size: 24px;
+    color: #3b82f6;
+    flex-shrink: 0;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e40af;
+  }
+}
+
+// ========================================
+// ESTADOS CARD
+// ========================================
+.estados-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.4s ease-out;
+
+  ion-card-title {
+    font-size: 18px;
+    color: #1e293b;
+  }
+}
+
+.estados-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.estado-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border: 3px solid;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  &.selected {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: scale(1.02);
+  }
+}
+
+.estado-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  ion-icon {
+    font-size: 32px;
+    color: white;
+  }
+}
+
+.estado-info {
+  flex: 1;
+
+  h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    transition: color 0.3s ease;
+  }
+
+  p {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+  }
+}
+
+.check-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 28px;
+  animation: scaleIn 0.3s ease-out;
+}
+
+// ========================================
+// DETALLES CARD
+// ========================================
+.detalles-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.5s ease-out;
+
+  ion-card-title {
+    font-size: 16px;
+    color: #1e293b;
+  }
+}
+
+.textarea-item {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  margin-top: 8px;
+
+  &.ion-focused {
+    --background: white;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  ion-textarea {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+
+    &::placeholder {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+  }
+}
+
+// ========================================
+// SAVE BUTTON
+// ========================================
+.save-button-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: linear-gradient(to top, white 0%, rgba(255, 255, 255, 0.95) 90%, transparent 100%);
+  z-index: 100;
+}
+
+.save-button {
+  --border-radius: 12px;
+  height: 56px;
+  font-weight: 700;
+  text-transform: none;
+  font-size: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  margin: 0 auto;
+
+  ion-icon {
+    font-size: 24px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+// ========================================
+// ANIMATIONS
+// ========================================
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 768px) {
+  .estado-container {
+    padding: 12px;
+  }
+
+  .estado-icon {
+    width: 48px;
+    height: 48px;
+
+    ion-icon {
+      font-size: 28px;
+    }
+  }
+
+  .estado-info h4 {
+    font-size: 15px;
+  }
+}

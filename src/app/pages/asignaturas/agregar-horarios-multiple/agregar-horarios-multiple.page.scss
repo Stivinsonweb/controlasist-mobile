@@ -1,0 +1,360 @@
+ion-content {
+  --background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 25%, #f8fafc 50%, #ffffff 100%);
+}
+
+.horarios-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 100px;
+}
+
+// ========================================
+// INFO CARD
+// ========================================
+.info-card {
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #3b82f6;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+.info-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .info-icon {
+    font-size: 40px;
+    color: #3b82f6;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e40af;
+    margin: 0 0 4px;
+  }
+
+  p {
+    font-size: 13px;
+    color: #3b82f6;
+    margin: 0;
+  }
+}
+
+// ========================================
+// DÍAS LIST
+// ========================================
+.dias-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dia-item {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+
+  &:has(.dia-checkbox:checked) {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+  }
+}
+
+.dia-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &:active {
+    background: #f1f5f9;
+  }
+}
+
+.dia-checkbox {
+  --size: 28px;
+  --checkbox-background-checked: #3b82f6;
+  --border-color-checked: #3b82f6;
+}
+
+.dia-info {
+  flex: 1;
+
+  h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px;
+  }
+
+  p {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .configurar-texto {
+    color: #3b82f6;
+    font-style: italic;
+  }
+}
+
+// ========================================
+// PANEL DE CONFIGURACIÓN
+// ========================================
+.config-panel {
+  padding: 16px;
+  background: #fafbfc;
+  border-top: 2px solid #e2e8f0;
+  animation: slideDown 0.3s ease-out;
+}
+
+.config-section {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  ion-icon {
+    font-size: 18px;
+    color: #3b82f6;
+  }
+}
+
+// ========================================
+// HOURS GRID
+// ========================================
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.hour-chip {
+  --background: white;
+  --color: #475569;
+  height: 40px;
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  border: 2px solid #e2e8f0;
+
+  &:hover {
+    --background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+
+  &.selected {
+    --background: #3b82f6;
+    --color: white;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  }
+}
+
+// ========================================
+// DURATION GRID
+// ========================================
+.duration-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+
+  ion-button {
+    --border-width: 2px;
+    --border-radius: 10px;
+    margin: 0;
+    text-transform: none;
+    font-weight: 700;
+  }
+}
+
+// ========================================
+// END TIME DISPLAY
+// ========================================
+.end-time-display {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.time-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+// ========================================
+// AULA ITEM
+// ========================================
+.aula-item {
+  --background: white;
+  --border-radius: 10px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+
+  ion-input {
+    font-weight: 600;
+  }
+}
+
+// ========================================
+// RESUMEN CARD
+// ========================================
+.resumen-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  margin-bottom: 20px;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #065f46;
+    font-size: 16px;
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+.resumen-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resumen-item {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  border-left: 4px solid #10b981;
+}
+
+.resumen-dia {
+  font-weight: 700;
+  color: #065f46;
+  font-size: 14px;
+}
+
+.resumen-horario {
+  font-weight: 600;
+  color: #047857;
+  font-size: 13px;
+}
+
+.resumen-aula {
+  background: #10b981;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// ========================================
+// SAVE BUTTON
+// ========================================
+.save-button-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: linear-gradient(to top, white 0%, rgba(255, 255, 255, 0.95) 90%, transparent 100%);
+  z-index: 100;
+}
+
+.save-button {
+  --border-radius: 12px;
+  height: 56px;
+  font-weight: 700;
+  text-transform: none;
+  font-size: 16px;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  max-width: 600px;
+  margin: 0 auto;
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+// ========================================
+// ANIMATIONS
+// ========================================
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 768px) {
+  .hours-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+
+  .duration-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .resumen-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}

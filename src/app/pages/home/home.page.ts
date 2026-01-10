@@ -24,10 +24,11 @@ import {
   IonSegment,
   IonSegmentButton,
   IonBadge,
+  IonSelect,
+  IonSelectOption,
   LoadingController,
   AlertController,
-  ModalController
-} from '@ionic/angular/standalone';
+  ModalController, IonItem } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   personCircleOutline,
@@ -45,7 +46,9 @@ import {
   codeOutline,
   chevronForwardOutline,
   calendarOutline,
-  createOutline
+  createOutline,
+  funnelOutline,
+  desktopOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth/auth.service';
 import { SupabaseService } from '../../services/supabase/supabase.service';
@@ -71,7 +74,7 @@ interface Asignatura {
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonItem, 
     CommonModule,
     IonContent,
     IonHeader,
@@ -94,7 +97,9 @@ interface Asignatura {
     IonSkeletonText,
     IonSegment,
     IonSegmentButton,
-    IonBadge
+    IonBadge,
+    IonSelect,
+    IonSelectOption
   ]
 })
 export class HomePage implements OnInit {
@@ -133,7 +138,9 @@ export class HomePage implements OnInit {
       codeOutline,
       chevronForwardOutline,
       calendarOutline,
-      createOutline
+      createOutline,
+      funnelOutline,
+      desktopOutline
     });
   }
 
@@ -227,6 +234,7 @@ export class HomePage implements OnInit {
       const { data, error } = await this.supabase
         .from('asignaturas')
         .select('*')
+        .eq('activa', true)
         .eq('docente_id', this.docente.id)
         .order('created_at', { ascending: false });
 

@@ -1,0 +1,104 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Agregar Horario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="guardar()" [disabled]="horarioForm.invalid">
+        <ion-icon name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="horario-container">
+    
+    <ion-card class="form-card">
+      <ion-card-content>
+        <form [formGroup]="horarioForm">
+          
+          <!-- Día de la semana -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="calendar-outline" class="label-icon"></ion-icon>
+              Día de la semana <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item">
+              <ion-select 
+                formControlName="dia_semana"
+                placeholder="Selecciona un día"
+                interface="action-sheet"
+                class="custom-select">
+                <ion-select-option *ngFor="let dia of diasSemana" [value]="dia.value">
+                  {{ dia.label }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+
+          <!-- Hora de inicio -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="time-outline" class="label-icon"></ion-icon>
+              Hora de inicio <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="hora_inicio?.invalid && hora_inicio?.touched">
+              <ion-input 
+                type="time"
+                formControlName="hora_inicio"
+                placeholder="HH:MM"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+            <div class="error-message" *ngIf="hora_inicio?.invalid && hora_inicio?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>La hora de inicio es requerida</span>
+            </div>
+          </div>
+
+          <!-- Hora de fin -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="time-outline" class="label-icon"></ion-icon>
+              Hora de fin <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="hora_fin?.invalid && hora_fin?.touched">
+              <ion-input 
+                type="time"
+                formControlName="hora_fin"
+                placeholder="HH:MM"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+            <div class="error-message" *ngIf="hora_fin?.invalid && hora_fin?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>La hora de fin es requerida</span>
+            </div>
+          </div>
+
+          <!-- Aula (opcional) -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="location-outline" class="label-icon"></ion-icon>
+              Aula
+            </ion-label>
+            <ion-item lines="none" class="custom-item">
+              <ion-input 
+                type="text"
+                formControlName="aula"
+                placeholder="Ej: Laboratorio 101"
+                class="custom-input">
+              </ion-input>
+            </ion-item>
+          </div>
+
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>

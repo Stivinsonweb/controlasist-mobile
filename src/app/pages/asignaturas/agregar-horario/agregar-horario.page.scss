@@ -1,0 +1,156 @@
+ion-content {
+  --background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 25%, #f8fafc 50%, #ffffff 100%);
+}
+
+.horario-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+// ========================================
+// FORM CARD
+// ========================================
+.form-card {
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: white;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  animation: fadeInUp 0.6s ease-out;
+
+  ion-card-content {
+    padding: 24px;
+  }
+}
+
+// ========================================
+// INPUT GROUPS
+// ========================================
+.input-group {
+  margin-bottom: 24px;
+}
+
+.input-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+
+  .label-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: #3b82f6;
+  }
+
+  .required {
+    color: #ef4444;
+    margin-left: 4px;
+  }
+}
+
+// ========================================
+// CUSTOM ITEMS
+// ========================================
+.custom-item {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+
+  &.item-error {
+    --background: #fef2f2;
+    border-color: #fca5a5;
+  }
+
+  &.ion-focused {
+    --background: white;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.custom-input {
+  --padding-start: 0;
+  --padding-end: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1e293b;
+
+  &::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+  }
+}
+
+.custom-select {
+  width: 100%;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+// ========================================
+// ERROR MESSAGES
+// ========================================
+.error-message {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+  border-left: 3px solid #ef4444;
+  animation: shake 0.4s ease;
+
+  ion-icon {
+    font-size: 18px;
+    color: #ef4444;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
+  }
+}
+
+// ========================================
+// ANIMATIONS
+// ========================================
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 768px) {
+  .horario-container {
+    padding: 16px;
+  }
+
+  .form-card ion-card-content {
+    padding: 20px;
+  }
+}

@@ -1,0 +1,52 @@
+<div class="calendario-wrapper">
+  <div class="dias-grid">
+    <div *ngFor="let dia of [1, 2, 3, 4, 5, 6]" class="dia-column">
+      
+      <!-- Header del día -->
+      <div class="dia-header">
+        <h4>{{ diasSemana[dia] }}</h4>
+      </div>
+
+      <!-- Horarios del día -->
+      <div class="horarios-dia">
+        <div 
+          *ngFor="let horario of getHorariosPorDia(dia)" 
+          class="clase-card"
+          [style.border-left-color]="getColorEstado(getEstadoClase(horario))"
+          (click)="onClaseClick(horario)">
+          
+          <div class="clase-header">
+            <ion-icon 
+              [name]="getIconoEstado(getEstadoClase(horario))"
+              [style.color]="getColorEstado(getEstadoClase(horario))">
+            </ion-icon>
+            <span class="clase-estado" [style.color]="getColorEstado(getEstadoClase(horario))">
+              {{ getEstadoClase(horario) === 'realizada' ? 'Realizada' : 
+                 getEstadoClase(horario) === 'cancelada' ? 'Cancelada' : 'Pendiente' }}
+            </span>
+          </div>
+
+          <div class="clase-tiempo">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ formatHora(horario.hora_inicio) }} - {{ formatHora(horario.hora_fin) }}</span>
+          </div>
+
+          <div class="clase-aula" *ngIf="horario.aula">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>{{ horario.aula }}</span>
+          </div>
+
+          <ion-button fill="clear" size="small" class="clase-action">
+            <ion-icon name="ellipsis-horizontal-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        <!-- Sin clases -->
+        <div *ngIf="getHorariosPorDia(dia).length === 0" class="no-clases">
+          <span>Sin clases</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

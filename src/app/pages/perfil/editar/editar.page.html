@@ -17,20 +17,50 @@
 <ion-content>
   <div class="editar-container">
     
-    <!-- Avatar -->
+    <!-- Avatar Actual -->
     <div class="avatar-section">
       <ion-avatar class="edit-avatar">
         <img [src]="getAvatarUrl()" [alt]="docente?.nombres" />
       </ion-avatar>
-      <div class="avatar-overlay">
-        <ion-icon name="camera-outline"></ion-icon>
-      </div>
-      <p class="avatar-hint">Cambiar foto (Próximamente)</p>
+      <p class="avatar-hint">Selecciona un avatar a continuación</p>
     </div>
 
-    <!-- Formulario -->
+    <!-- Selector de Avatares -->
+    <ion-card class="avatares-card">
+      <ion-card-content>
+        <h3 class="section-title">
+          <ion-icon name="camera-outline"></ion-icon>
+          Cambiar Avatar
+        </h3>
+
+        <!-- Loading de avatares -->
+        <div *ngIf="loadingAvatars" class="avatars-loading">
+          <ion-icon name="reload-outline" class="loading-icon spin"></ion-icon>
+          <p>Cargando avatares...</p>
+        </div>
+
+        <!-- Grid de avatares -->
+        <div class="avatars-grid" *ngIf="!loadingAvatars">
+          <div 
+            *ngFor="let avatar of avatars; let i = index"
+            class="avatar-item"
+            [class.selected]="selectedAvatarIndex === i"
+            (click)="selectAvatar(i)">
+            <img [src]="avatar" [alt]="'Avatar ' + (i + 1)" (error)="onImageError($event, i)">
+            <ion-icon name="checkmark-circle" class="check-icon" *ngIf="selectedAvatarIndex === i"></ion-icon>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Formulario de Perfil -->
     <ion-card class="form-card">
       <ion-card-content>
+        <h3 class="section-title">
+          <ion-icon name="person-outline"></ion-icon>
+          Información Personal
+        </h3>
+
         <form [formGroup]="perfilForm">
           
           <!-- Email (Solo lectura) -->
@@ -158,6 +188,129 @@
               </ion-input>
             </ion-item>
           </div>
+
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Cambiar Contraseña -->
+    <ion-card class="form-card password-card">
+      <ion-card-content>
+        <h3 class="section-title">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          Cambiar Contraseña
+        </h3>
+
+        <form [formGroup]="passwordForm">
+          
+          <!-- Contraseña Actual -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="lock-closed-outline" class="label-icon"></ion-icon>
+              Contraseña Actual <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="currentPassword?.invalid && currentPassword?.touched">
+              <ion-input 
+                [type]="showCurrentPassword ? 'text' : 'password'"
+                formControlName="currentPassword"
+                placeholder="Tu contraseña actual"
+                class="custom-input">
+                <ion-icon 
+                  [name]="showCurrentPassword ? 'eye-off-outline' : 'eye-outline'" 
+                  slot="end" 
+                  class="toggle-password"
+                  (click)="toggleCurrentPassword()">
+                </ion-icon>
+              </ion-input>
+            </ion-item>
+            <div class="error-message" *ngIf="currentPassword?.invalid && currentPassword?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>La contraseña actual es requerida</span>
+            </div>
+          </div>
+
+          <!-- Nueva Contraseña -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="lock-closed-outline" class="label-icon"></ion-icon>
+              Nueva Contraseña <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="newPassword?.invalid && newPassword?.touched">
+              <ion-input 
+                [type]="showNewPassword ? 'text' : 'password'"
+                formControlName="newPassword"
+                placeholder="Mínimo 8 caracteres"
+                class="custom-input">
+                <ion-icon 
+                  [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'" 
+                  slot="end" 
+                  class="toggle-password"
+                  (click)="toggleNewPassword()">
+                </ion-icon>
+              </ion-input>
+            </ion-item>
+            
+            <!-- Indicadores de fortaleza -->
+            <div class="password-requirements" *ngIf="newPassword?.value">
+              <div class="requirement-item" [class.valid]="newPassword?.value.length >= 8">
+                <ion-icon [name]="newPassword?.value.length >= 8 ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>Al menos 8 caracteres</span>
+              </div>
+              <div class="requirement-item" [class.valid]="hasUpperCase(newPassword?.value)">
+                <ion-icon [name]="hasUpperCase(newPassword?.value) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>Una letra mayúscula</span>
+              </div>
+              <div class="requirement-item" [class.valid]="hasLowerCase(newPassword?.value)">
+                <ion-icon [name]="hasLowerCase(newPassword?.value) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>Una letra minúscula</span>
+              </div>
+              <div class="requirement-item" [class.valid]="hasNumber(newPassword?.value)">
+                <ion-icon [name]="hasNumber(newPassword?.value) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+                <span>Un número</span>
+              </div>
+            </div>
+
+            <div class="error-message" *ngIf="newPassword?.invalid && newPassword?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>La contraseña debe tener al menos 8 caracteres</span>
+            </div>
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div class="input-group">
+            <ion-label class="input-label">
+              <ion-icon name="lock-closed-outline" class="label-icon"></ion-icon>
+              Confirmar Nueva Contraseña <span class="required">*</span>
+            </ion-label>
+            <ion-item lines="none" class="custom-item" [class.item-error]="(confirmPassword?.invalid || passwordForm.hasError('passwordMismatch')) && confirmPassword?.touched">
+              <ion-input 
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                placeholder="Repite la nueva contraseña"
+                class="custom-input">
+                <ion-icon 
+                  [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'" 
+                  slot="end" 
+                  class="toggle-password"
+                  (click)="toggleConfirmPassword()">
+                </ion-icon>
+              </ion-input>
+            </ion-item>
+            <div class="error-message" *ngIf="passwordForm.hasError('passwordMismatch') && confirmPassword?.touched">
+              <ion-icon name="alert-circle"></ion-icon>
+              <span>Las contraseñas no coinciden</span>
+            </div>
+          </div>
+
+          <!-- Botón Cambiar Contraseña -->
+          <ion-button 
+            (click)="cambiarPassword()"
+            expand="block" 
+            [disabled]="passwordForm.invalid"
+            class="password-button">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            Cambiar Contraseña
+          </ion-button>
 
         </form>
       </ion-card-content>

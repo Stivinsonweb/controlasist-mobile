@@ -18,6 +18,8 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
+  IonSegment,
+  IonSegmentButton,
   AlertController,
   LoadingController,
   ToastController,
@@ -35,8 +37,12 @@ import {
   personAddOutline,
   shieldCheckmark,
   alertCircle,
+  personOutline,
+  schoolOutline,
+  keyOutline,
 } from "ionicons/icons";
 import { AuthService } from "../../../services/auth/auth.service";
+import { SupabaseService } from "../../../services/supabase/supabase.service";
 
 @Component({
   selector: "app-login",
@@ -56,17 +62,21 @@ import { AuthService } from "../../../services/auth/auth.service";
     IonButton,
     IonIcon,
     IonSpinner,
+    IonSegment,
+    IonSegmentButton,
   ],
 })
 export class LoginPage implements OnInit {
   loginForm!: FormGroup;
   isLoading = false;
   showPassword = false;
+  tipoUsuario: "docente" | "estudiante" = "docente";
 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
     private authService: AuthService,
+    private supabase: SupabaseService,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private toastController: ToastController
@@ -83,6 +93,9 @@ export class LoginPage implements OnInit {
       personAddOutline,
       shieldCheckmark,
       alertCircle,
+      personOutline,
+      schoolOutline,
+      keyOutline,
     });
   }
 
@@ -112,7 +125,6 @@ export class LoginPage implements OnInit {
 
       try {
         const { email, password } = this.loginForm.value;
-
         const result = await this.authService.login({ email, password });
 
         await loading.dismiss();
@@ -121,20 +133,49 @@ export class LoginPage implements OnInit {
           const nombre = result.profile.nombres || "Usuario";
           const rol = result.profile.rol;
 
-          console.log("✅ Login exitoso. Rol:", rol);
+          console.log("Login exitoso. Rol:", rol);
 
-          await this.showToast(`¡Bienvenido ${nombre}!`, "success");
+          if (result.success && result.profile) {
+            const nombre = result.profile.nombres || "Usuario";
+            const rol = result.profile.rol as
+              | "docente"
+              | "administrador"
+              | "estudiante";
 
-          // Redirigir según el rol
-          if (rol === "administrador") {
-            console.log("🔄 Redirigiendo a /admin/dashboard");
-            this.router.navigate(["/admin/dashboard"]);
-          } else if (rol === "docente") {
-            console.log("🔄 Redirigiendo a /home");
-            this.router.navigate(["/home"]);
-          } else {
-            console.warn("⚠️ Rol desconocido:", rol);
-            this.router.navigate(["/home"]); // Por defecto
+            console.log("Login exitoso. Rol:", rol);
+
+            if (this.tipoUsuario === "estudiante") {
+              if (rol !== "estudiante") {
+                await this.supabase.auth.signOut();
+                await this.showAlert(
+                  "Acceso denegado",
+                  'Esta cuenta no es de estudiante. Por favor selecciona "Docente" para iniciar sesión.'
+                );
+                return;
+              }
+
+              await this.showToast(`Bienvenido ${nombre}`, "success");
+              this.router.navigate(["/estudiante/home"]);
+            } else {
+              if (rol !== "administrador" && rol !== "docente") {
+                await this.supabase.auth.signOut();
+                await this.showAlert(
+                  "Acceso denegado",
+                  'Esta cuenta es de estudiante. Por favor selecciona "Estudiante" para iniciar sesión.'
+                );
+                return;
+              }
+
+              await this.showToast(`Bienvenido ${nombre}`, "success");
+
+              if (rol === "administrador") {
+                console.log("Redirigiendo a /admin/dashboard");
+                this.router.navigate(["/admin/dashboard"]);
+              } else {
+                console.log("Redirigiendo a /home");
+                this.router.navigate(["/home"]);
+              }
+            }
           }
         } else {
           let errorMessage = "Credenciales inválidas";
@@ -219,7 +260,6 @@ export class LoginPage implements OnInit {
               return false;
             }
 
-            // Cerrar el alert antes de mostrar el loading
             await alert.dismiss();
 
             const loading = await this.loadingController.create({
@@ -228,14 +268,13 @@ export class LoginPage implements OnInit {
             });
             await loading.present();
 
-            // Verificar y enviar correo de recuperación
             const result = await this.authService.forgotPassword(data.email);
 
             await loading.dismiss();
 
             if (result.success) {
               await this.showSuccessAlert(
-                "✓ Correo enviado",
+                "Correo enviado",
                 result.message ||
                   "Hemos enviado un enlace de recuperación a tu correo electrónico. Revisa tu bandeja de entrada y carpeta de spam."
               );
@@ -247,7 +286,7 @@ export class LoginPage implements OnInit {
               );
             }
 
-            return false; // Prevenir que el alert se cierre automáticamente
+            return false;
           },
         },
       ],
@@ -258,7 +297,11 @@ export class LoginPage implements OnInit {
   }
 
   goToRegister() {
-    this.router.navigate(["/auth/register"]);
+    if (this.tipoUsuario === "estudiante") {
+      this.router.navigate(["/auth/registro-estudiante"]);
+    } else {
+      this.router.navigate(["/auth/register"]);
+    }
   }
 
   async showAlert(header: string, message: string) {

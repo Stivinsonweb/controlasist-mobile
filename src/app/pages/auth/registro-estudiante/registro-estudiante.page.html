@@ -1,0 +1,117 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-button slot="start" fill="clear" (click)="volverLogin()">
+      <ion-icon name="arrow-back-outline" color="light"></ion-icon>
+    </ion-button>
+    <ion-title color="light">Registro de Estudiante</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="registro-container">
+
+    <div class="header-section">
+      <ion-icon name="school-outline" class="main-icon"></ion-icon>
+      <h1>Crear Cuenta</h1>
+      <p>Regístrate para inscribirte en tus asignaturas</p>
+    </div>
+
+    <ion-card class="form-card">
+      <ion-card-content>
+        <form [formGroup]="registroForm">
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Nombres *</ion-label>
+            <ion-input
+              type="text"
+              formControlName="nombres"
+              placeholder="Tus nombres">
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="nombres?.invalid && nombres?.touched">
+            Ingresa tus nombres
+          </div>
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Apellidos *</ion-label>
+            <ion-input
+              type="text"
+              formControlName="apellidos"
+              placeholder="Tus apellidos">
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="apellidos?.invalid && apellidos?.touched">
+            Ingresa tus apellidos
+          </div>
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Correo Electrónico *</ion-label>
+            <ion-input
+              type="email"
+              formControlName="email"
+              placeholder="ejemplo@correo.com">
+              <ion-icon name="mail-outline" slot="start"></ion-icon>
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="email?.invalid && email?.touched">
+            Ingresa un correo válido
+          </div>
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Contraseña *</ion-label>
+            <ion-input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Mínimo 8 caracteres">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              <ion-icon
+                [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+                slot="end"
+                (click)="togglePassword()"
+                class="toggle-icon">
+              </ion-icon>
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="password?.invalid && password?.touched">
+            Mínimo 8 caracteres
+          </div>
+
+          <ion-item lines="none" class="input-item">
+            <ion-label position="stacked">Confirmar Contraseña *</ion-label>
+            <ion-input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="Repite la contraseña">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              <ion-icon
+                [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"
+                slot="end"
+                (click)="toggleConfirmPassword()"
+                class="toggle-icon">
+              </ion-icon>
+            </ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="registroForm.hasError('passwordMismatch') && confirmPassword?.touched">
+            Las contraseñas no coinciden
+          </div>
+
+          <ion-button
+            expand="block"
+            (click)="registrar()"
+            [disabled]="registroForm.invalid"
+            class="register-button">
+            Crear Cuenta
+          </ion-button>
+
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="login-link">
+      <p>¿Ya tienes cuenta? <a (click)="volverLogin()">Inicia sesión</a></p>
+    </div>
+
+  </div>
+</ion-content>

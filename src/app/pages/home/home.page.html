@@ -1,6 +1,11 @@
 ﻿<ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>ControlAsist</ion-title>
+    <div class="header-content">
+      <div class="app-info">
+        <ion-title class="app-title">ControlAsist</ion-title>
+        <span class="version-badge">v1.0.0</span>
+      </div>
+    </div>
   </ion-toolbar>
 </ion-header>
 
@@ -17,7 +22,7 @@
 
   <div class="home-container">
     
-    <!-- Perfil del Docente -->
+    <!-- Perfil del Docente MEJORADO -->
     <div class="profile-section">
       
       <!-- Loading Skeleton del perfil -->
@@ -33,19 +38,42 @@
         </ion-card-content>
       </ion-card>
 
-      <!-- Perfil cargado -->
+      <!-- Perfil cargado CON BOTONES -->
       <ion-card class="profile-card" *ngIf="!loadingProfile && docente">
         <ion-card-content>
-          <div class="profile-header">
-            <ion-avatar class="profile-avatar">
-              <img [src]="getAvatarUrl()" [alt]="getNombreCompleto()" />
-            </ion-avatar>
-            <div class="profile-info">
-              <h2 class="profile-name">{{ getNombreCompleto() }}</h2>
-              <div class="profile-email">
-                <ion-icon name="mail-outline"></ion-icon>
-                {{ docente.email }}
+          <div class="profile-header-wrapper">
+            <!-- Información del perfil -->
+            <div class="profile-header">
+              <ion-avatar class="profile-avatar">
+                <img [src]="getAvatarUrl()" [alt]="getNombreCompleto()" />
+              </ion-avatar>
+              <div class="profile-info">
+                <h2 class="profile-name">{{ getNombreCompleto() }}</h2>
+                <div class="profile-email">
+                  <ion-icon name="mail-outline"></ion-icon>
+                  {{ docente.email }}
+                </div>
               </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="profile-actions">
+              <ion-button 
+                (click)="editarPerfil()" 
+                fill="solid" 
+                color="primary"
+                class="action-button edit-button">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                Editar Perfil
+              </ion-button>
+              <ion-button 
+                (click)="logout()" 
+                fill="outline" 
+                color="danger"
+                class="action-button logout-button-header">
+                <ion-icon name="log-out-outline" slot="start"></ion-icon>
+                Cerrar Sesión
+              </ion-button>
             </div>
           </div>
         </ion-card-content>
@@ -70,23 +98,21 @@
 
       <!-- Filtro por Periodo/Año -->
       <div class="filter-section" *ngIf="!loadingAsignaturas && periodos.length > 0">
-        <ion-segment [value]="periodoSeleccionado" (ionChange)="onPeriodoChange($event)" class="periodo-segment">
-          <ion-segment-button value="todos">
-            <ion-label>
-              <div class="segment-label">Todos</div>
-              <div class="segment-count">{{ asignaturas.length }}</div>
-            </ion-label>
-          </ion-segment-button>
-          <ion-segment-button *ngFor="let periodo of periodos" [value]="periodo">
-            <ion-label>
-              <div class="segment-label">
-                <ion-icon name="calendar-outline"></ion-icon>
-                {{ periodo }}
-              </div>
-              <div class="segment-count">{{ getAsignaturasPorPeriodo(periodo) }}</div>
-            </ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <div class="filter-header">
+          <ion-icon name="funnel-outline"></ion-icon>
+          <span>Filtrar por periodo:</span>
+        </div>
+        <ion-item lines="none" class="filter-select">
+          <ion-select [value]="periodoSeleccionado" (ionChange)="onPeriodoChange($event)" interface="action-sheet"
+            placeholder="Selecciona un periodo">
+            <ion-select-option value="todos">
+              Todos ({{ asignaturas.length }})
+            </ion-select-option>
+            <ion-select-option *ngFor="let periodo of periodos" [value]="periodo">
+              {{ periodo }} ({{ getAsignaturasPorPeriodo(periodo) }})
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
       </div>
 
       <!-- Loading Skeletons -->
@@ -178,12 +204,5 @@
       </div>
     </div>
 
-    <!-- Botón de Cerrar Sesión -->
-    <div class="logout-section">
-      <ion-button (click)="logout()" expand="block" color="danger" fill="outline" class="logout-button">
-        <ion-icon name="log-out-outline" slot="start"></ion-icon>
-        Cerrar sesión
-      </ion-button>
-    </div>
   </div>
 </ion-content>

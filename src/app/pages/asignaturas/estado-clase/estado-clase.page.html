@@ -1,0 +1,97 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Estado de la Clase</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="guardar()">
+        <ion-icon name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="estado-container">
+    
+    <!-- Info de la clase -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <div class="clase-info">
+          <div class="info-item">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <div>
+              <span class="label">Día</span>
+              <span class="value">{{ diasSemana[horario.dia_semana] }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <ion-icon name="time-outline"></ion-icon>
+            <div>
+              <span class="label">Horario</span>
+              <span class="value">{{ formatHora(horario.hora_inicio) }} - {{ formatHora(horario.hora_fin) }}</span>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="horario.aula">
+            <ion-icon name="location-outline"></ion-icon>
+            <div>
+              <span class="label">Aula</span>
+              <span class="value">{{ horario.aula }}</span>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Selección de estado -->
+    <ion-card class="estados-card">
+      <ion-card-header>
+        <ion-card-title>¿Cómo fue la clase?</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="estados-grid">
+          <div 
+            *ngFor="let estado of estados"
+            class="estado-option"
+            [class.selected]="estadoSeleccionado === estado.valor"
+            [style.border-color]="estadoSeleccionado === estado.valor ? estado.color : '#e2e8f0'"
+            (click)="seleccionarEstado(estado.valor)">
+            
+            <div class="estado-icon" [style.background]="estado.color">
+              <ion-icon [name]="estado.icono"></ion-icon>
+            </div>
+            
+            <div class="estado-info">
+              <h4 [style.color]="estadoSeleccionado === estado.valor ? estado.color : '#1e293b'">
+                {{ estado.label }}
+              </h4>
+              <p>{{ estado.descripcion }}</p>
+            </div>
+
+            <div class="check-icon" *ngIf="estadoSeleccionado === estado.valor" [style.color]="estado.color">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botón guardar -->
+    <div class="save-button-container">
+      <ion-button 
+        expand="block" 
+        size="large"
+        [disabled]="!estadoSeleccionado"
+        [style.--background]="getColorEstado(estadoSeleccionado)"
+        (click)="guardar()"
+        class="save-button">
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        Guardar Estado
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

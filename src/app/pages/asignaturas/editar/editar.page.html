@@ -1,0 +1,136 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="cerrar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Editar Asignatura</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="guardar()" [disabled]="!asignaturaForm || asignaturaForm.invalid">
+        <ion-icon name="save-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+  <div class="editar-container">
+    
+    <form [formGroup]="asignaturaForm">
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Información Básica</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          
+          <ion-item>
+            <ion-label position="stacked">Nombre de la Asignatura *</ion-label>
+            <ion-input formControlName="nombre" placeholder="Ej: Cálculo I"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Código *</ion-label>
+            <ion-input formControlName="codigo" placeholder="Ej: MAT101"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Grupo *</ion-label>
+            <ion-input formControlName="grupo" placeholder="Ej: A"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Facultad</ion-label>
+            <ion-input formControlName="facultad" placeholder="Ej: Ingeniería"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Programa</ion-label>
+            <ion-input formControlName="programa" placeholder="Ej: Ingeniería de Sistemas"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Localidad / CDS</ion-label>
+            <ion-input formControlName="localidad" placeholder="Ej: Campus Principal"></ion-input>
+          </ion-item>
+
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Detalles Académicos</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          
+          <ion-item>
+            <ion-label position="stacked">Nivel *</ion-label>
+            <ion-input formControlName="nivel" placeholder="Ej: Pregrado"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Periodo *</ion-label>
+            <ion-input formControlName="periodo" placeholder="Ej: 2025-1"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Créditos *</ion-label>
+            <ion-input formControlName="creditos" type="number" min="1" max="10"></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Modalidad *</ion-label>
+            <ion-select formControlName="modalidad" interface="popover">
+              <ion-select-option *ngFor="let mod of modalidades" [value]="mod">
+                {{ mod }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">Aula</ion-label>
+            <ion-input formControlName="aula" placeholder="Ej: Laboratorio 301"></ion-input>
+          </ion-item>
+
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Personalización</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          
+          <ion-item>
+            <ion-label position="stacked">Color</ion-label>
+            <ion-select formControlName="color" interface="popover">
+              <ion-select-option *ngFor="let col of colores" [value]="col.valor">
+                {{ col.nombre }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <div class="color-preview" *ngIf="color && color.value">
+            <p>Vista previa:</p>
+            <div class="preview-badge" [style.background]="color.value">
+              {{ nombre && nombre.value ? nombre.value : 'Nombre de la asignatura' }}
+            </div>
+          </div>
+
+        </ion-card-content>
+      </ion-card>
+
+      <div class="button-container">
+        <ion-button expand="block" (click)="guardar()" [disabled]="!asignaturaForm || asignaturaForm.invalid">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          Guardar Cambios
+        </ion-button>
+      </div>
+
+    </form>
+
+  </div>
+
+</ion-content>

@@ -9,7 +9,7 @@
 }
 
 // ========================================
-// PROFILE SECTION
+// PROFILE SECTION - MEJORADO
 // ========================================
 .profile-section {
   animation: fadeInDown 0.6s ease-out;
@@ -26,6 +26,12 @@
   ion-card-content {
     padding: 28px;
   }
+}
+
+.profile-header-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .profile-header {
@@ -78,6 +84,80 @@
     margin-right: 8px;
     font-size: 18px;
     color: #3b82f6;
+  }
+}
+
+// ========================================
+// PROFILE ACTIONS - NUEVO
+// ========================================
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 2px solid #f1f5f9;
+}
+
+.action-button {
+  --border-radius: 12px;
+  flex: 1;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 14px;
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+
+.edit-button {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.logout-button-header {
+  --border-width: 2px;
+
+  &:hover {
+    --background: #fee2e2;
+  }
+}
+
+// ========================================
+// RESPONSIVE - ACTUALIZADO
+// ========================================
+@media (max-width: 768px) {
+  .home-container {
+    padding: 16px;
+  }
+
+  .profile-card ion-card-content {
+    padding: 20px;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .profile-name {
+    font-size: 22px;
+  }
+
+  .profile-email {
+    justify-content: center;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+
+    .action-button {
+      width: 100%;
+    }
   }
 }
 
@@ -162,61 +242,42 @@
   animation: fadeIn 0.6s ease-out 0.3s both;
 }
 
-// ========================================
-// FILTER SECTION
-// ========================================
-.filter-section {
-  margin-bottom: 24px;
-  animation: fadeIn 0.6s ease-out 0.3s both;
-}
-
-.periodo-segment {
-  background: white;
-  border-radius: 16px;
-  padding: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  overflow-x: auto;
-  
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 2px;
-  }
-
-  ion-segment-button {
-    --indicator-color: #3b82f6;
-    --indicator-color-checked: #3b82f6;
-    --color: #64748b;  // ← Color texto NO seleccionado
-    --color-checked: white;  // ← Color texto seleccionado
-    --background-checked: #3b82f6;  // ← Fondo cuando está seleccionado
-    min-width: 100px;
-    text-transform: none;
-    font-weight: 600;
-    border-radius: 10px;
-  }
-}
-
-.segment-label {
-  font-size: 13px;
-  font-weight: 600;
+.filter-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  justify-content: center;
-  margin-bottom: 4px;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 10px;
 
   ion-icon {
-    font-size: 16px;
+    font-size: 18px;
+    color: #3b82f6;
   }
 }
 
-.segment-count {
-  font-size: 18px;
-  font-weight: 800;
+.filter-select {
+  --background: white;
+  --border-radius: 14px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+
+  &.ion-focused {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+
+  ion-select {
+    font-weight: 600;
+    color: #1e293b;
+    width: 100%;
+  }
 }
 
 // ========================================
@@ -633,5 +694,57 @@
     ion-icon {
       font-size: 28px;
     }
+  }
+}
+
+// ========================================
+// HEADER MEJORADO
+// ========================================
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.app-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-title {
+  padding: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+// ========================================
+// RESPONSIVE HEADER
+// ========================================
+@media (max-width: 576px) {
+  .app-title {
+    font-size: 18px;
+  }
+
+  .version-badge {
+    font-size: 10px;
+    padding: 3px 8px;
   }
 }

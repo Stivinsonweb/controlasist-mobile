@@ -1,0 +1,95 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Código de Acceso</ion-title>
+    <ion-button slot="end" fill="clear" (click)="cerrar()">
+      <ion-icon name="close-outline" color="light"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="codigo-container">
+
+    <ion-card class="codigo-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          Código Actual
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="codigo-display">
+          <h1>{{ asignatura?.codigo_acceso }}</h1>
+        </div>
+
+        <div class="button-group">
+          <ion-button expand="block" (click)="copiarCodigo()">
+            <ion-icon name="copy-outline" slot="start"></ion-icon>
+            Copiar
+          </ion-button>
+          <ion-button expand="block" (click)="compartirCodigo()">
+            <ion-icon name="share-social-outline" slot="start"></ion-icon>
+            Compartir
+          </ion-button>
+        </div>
+
+        <ion-button 
+          expand="block" 
+          fill="outline" 
+          color="warning"
+          (click)="regenerarCodigo()">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Regenerar Código
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="expiracion-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="calendar-outline"></ion-icon>
+          Fecha de Expiración
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        
+        <ion-item lines="none">
+          <ion-label>Habilitar fecha de expiración</ion-label>
+          <ion-toggle [(ngModel)]="tieneExpiracion"></ion-toggle>
+        </ion-item>
+
+        <div *ngIf="tieneExpiracion" class="fecha-selector">
+          <ion-item>
+            <ion-label position="stacked">Fecha de expiración</ion-label>
+            <ion-datetime
+              [(ngModel)]="fechaExpiracion"
+              presentation="date"
+              [min]="minDate"
+              locale="es-ES">
+            </ion-datetime>
+          </ion-item>
+
+          <div class="info-box" *ngIf="fechaExpiracion">
+            <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+            <p>El código expirará el {{ formatearFecha(fechaExpiracion) }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="!tieneExpiracion" class="info-box">
+          <ion-icon name="lock-closed-outline" color="medium"></ion-icon>
+          <p>El código no tiene fecha de expiración</p>
+        </div>
+
+        <ion-button 
+          expand="block" 
+          color="success"
+          (click)="guardarExpiracion()">
+          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          Guardar Configuración
+        </ion-button>
+
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>

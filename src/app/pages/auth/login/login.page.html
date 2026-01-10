@@ -1,7 +1,6 @@
 <ion-content [fullscreen]="true">
   <div class="login-container">
     
-    <!-- Header con logo/icono -->
     <div class="header-section">
       <div class="logo-container">
         <ion-icon name="people-circle-outline" class="logo-icon"></ion-icon>
@@ -10,20 +9,32 @@
       <p class="app-subtitle">Sistema de Control de Asistencia Académica</p>
     </div>
 
-    <!-- Formulario -->
+    <ion-segment [(ngModel)]="tipoUsuario" class="tipo-selector">
+      <ion-segment-button value="docente">
+        <ion-label>
+          <ion-icon name="person-outline"></ion-icon>
+          <div>Docente</div>
+        </ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="estudiante">
+        <ion-label>
+          <ion-icon name="school-outline"></ion-icon>
+          <div>Estudiante</div>
+        </ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
     <div class="form-container">
       <ion-card class="login-card">
         <ion-card-content>
           
-          <!-- Título del formulario -->
           <div class="form-header">
             <h2 class="form-title">Iniciar Sesión</h2>
-            <p class="form-subtitle">Accede a tu panel de control</p>
+            <p class="form-subtitle">{{ tipoUsuario === 'docente' ? 'Accede a tu panel de control' : 'Consulta tus asignaturas' }}</p>
           </div>
 
           <form [formGroup]="loginForm" (ngSubmit)="login()">
             
-            <!-- Correo electrónico -->
             <div class="input-group">
               <ion-label class="input-label">
                 <ion-icon name="mail-outline" class="label-icon"></ion-icon>
@@ -44,7 +55,6 @@
               </div>
             </div>
 
-            <!-- Contraseña -->
             <div class="input-group">
               <div class="label-row">
                 <ion-label class="input-label">
@@ -73,7 +83,6 @@
               </div>
             </div>
 
-            <!-- Link de recuperar contraseña -->
             <div class="forgot-password-container">
               <a class="forgot-password-link" (click)="forgotPassword()">
                 <ion-icon name="key-outline" class="forgot-icon"></ion-icon>
@@ -81,7 +90,6 @@
               </a>
             </div>
 
-            <!-- Botón de Login -->
             <ion-button 
               expand="block" 
               type="submit"
@@ -92,19 +100,17 @@
               <span>{{ isLoading ? 'Iniciando sesión...' : 'Iniciar sesión' }}</span>
             </ion-button>
 
-            <!-- Divisor -->
             <div class="divider">
               <span class="divider-text">¿No tienes cuenta?</span>
             </div>
 
-            <!-- Botón de Registro -->
             <ion-button 
               expand="block" 
               fill="outline"
               (click)="goToRegister()"
               class="register-button">
               <ion-icon name="person-add-outline" slot="start"></ion-icon>
-              Crear cuenta nueva
+              {{ tipoUsuario === 'docente' ? 'Crear cuenta de docente' : 'Crear cuenta de estudiante' }}
             </ion-button>
 
           </form>
@@ -112,7 +118,6 @@
       </ion-card>
     </div>
 
-    <!-- Footer -->
     <div class="footer-section">
       <p class="footer-text">
         <ion-icon name="shield-checkmark" class="footer-icon"></ion-icon>

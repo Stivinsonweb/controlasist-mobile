@@ -1,0 +1,247 @@
+.detalle-container {
+  padding-bottom: 20px;
+}
+
+.asignatura-header {
+  padding: 40px 20px;
+  text-align: center;
+  color: white;
+
+  .header-content {
+    max-width: 600px;
+    margin: 0 auto;
+
+    .asignatura-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+    }
+  }
+}
+
+.info-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 12px;
+
+    ion-icon {
+      font-size: 24px;
+      color: #3b82f6;
+      flex-shrink: 0;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+
+      .label {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 600;
+      }
+
+      .value {
+        font-size: 14px;
+        color: #1e293b;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+.docente-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+
+    ion-icon {
+      font-size: 24px;
+      color: #3b82f6;
+    }
+  }
+}
+
+.docente-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    span {
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+    }
+  }
+
+  .docente-data {
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+  }
+}
+
+.horarios-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+
+    ion-icon {
+      font-size: 24px;
+      color: #3b82f6;
+    }
+  }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 14px;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+
+  .empty-icon {
+    font-size: 64px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 14px;
+  }
+}
+
+.horarios-list {
+  .dia-group {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .dia-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 12px;
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+  }
+
+  .horario-item {
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .horario-time,
+    .horario-location {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #475569;
+
+      ion-icon {
+        font-size: 18px;
+        color: #64748b;
+      }
+    }
+
+    .estado-chip {
+      align-self: flex-start;
+      --color: white;
+      font-size: 12px;
+      font-weight: 600;
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.acciones-card {
+  margin: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  ion-button {
+    --border-radius: 12px;
+    height: 48px;
+    font-weight: 700;
+  }
+}

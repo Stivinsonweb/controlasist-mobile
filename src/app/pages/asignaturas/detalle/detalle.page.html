@@ -1,0 +1,260 @@
+<ion-header [translucent]="true">
+    <ion-toolbar [style.--background]="asignatura?.color || '#3b82f6'">
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/home" color="light"></ion-back-button>
+        </ion-buttons>
+        <ion-title color="light">{{ asignatura?.nombre || 'Cargando...' }}</ion-title>
+        <ion-buttons slot="end" *ngIf="asignatura">
+            <ion-button (click)="gestionarCodigoAcceso()" color="light">
+                <ion-icon name="qr-code-outline"></ion-icon>
+            </ion-button>
+            <ion-button (click)="irAReportes()" color="light">
+                <ion-icon name="stats-chart-outline"></ion-icon>
+            </ion-button>
+            <ion-button (click)="editarAsignatura()" color="light">
+                <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button (click)="eliminarAsignatura()" color="light">
+                <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <div class="detalle-container">
+
+        <div *ngIf="loadingAsignatura" class="page-loading">
+            <ion-spinner name="crescent" color="primary"></ion-spinner>
+            <p>Cargando información...</p>
+        </div>
+
+        <div *ngIf="!loadingAsignatura && asignatura">
+
+            <div class="asignatura-header" [style.background]="asignatura.color">
+                <div class="header-content">
+                    <div class="asignatura-icon">
+                        <ion-icon name="book-outline"></ion-icon>
+                    </div>
+                    <div class="asignatura-info">
+                        <h1>{{ asignatura.nombre }}</h1>
+                        <div class="info-chips">
+                            <ion-chip class="info-chip">
+                                <ion-icon name="code-outline"></ion-icon>
+                                <ion-label>{{ asignatura.codigo }}</ion-label>
+                            </ion-chip>
+                            <ion-chip class="info-chip">
+                                <ion-icon name="people-outline"></ion-icon>
+                                <ion-label>Grupo {{ asignatura.grupo }}</ion-label>
+                            </ion-chip>
+                            <ion-chip class="info-chip">
+                                <ion-icon name="calendar-outline"></ion-icon>
+                                <ion-label>{{ asignatura.periodo }}</ion-label>
+                            </ion-chip>
+                            <ion-chip class="codigo-acceso-chip" (click)="gestionarCodigoAcceso()">
+                                <ion-icon name="lock-closed-outline"></ion-icon>
+                                <ion-label>{{ asignatura.codigo_acceso }}</ion-label>
+                            </ion-chip>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ion-card class="info-card">
+                <ion-card-content>
+                    <div class="info-grid">
+                        <div class="info-item" *ngIf="asignatura.nivel">
+                            <span class="label">Nivel:</span>
+                            <span class="value">{{ asignatura.nivel }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Créditos:</span>
+                            <span class="value">{{ asignatura.creditos }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Modalidad:</span>
+                            <span class="value">{{ asignatura.modalidad }}</span>
+                        </div>
+                        <div class="info-item" *ngIf="asignatura.aula">
+                            <span class="label">Aula:</span>
+                            <span class="value">{{ asignatura.aula }}</span>
+                        </div>
+                        <div class="info-item" *ngIf="asignatura.facultad">
+                            <span class="label">Facultad:</span>
+                            <span class="value">{{ asignatura.facultad }}</span>
+                        </div>
+                        <div class="info-item" *ngIf="asignatura.programa">
+                            <span class="label">Programa:</span>
+                            <span class="value">{{ asignatura.programa }}</span>
+                        </div>
+                    </div>
+                </ion-card-content>
+            </ion-card>
+
+            <ion-segment [value]="segmentValue" (ionChange)="onSegmentChange($event)" class="main-segment">
+                <ion-segment-button value="horarios">
+                    <ion-label>
+                        <ion-icon name="time-outline"></ion-icon>
+                        <div>Horarios</div>
+                    </ion-label>
+                    <ion-badge *ngIf="!loadingHorarios && horarios.length > 0">{{ horarios.length }}</ion-badge>
+                </ion-segment-button>
+                <ion-segment-button value="estudiantes">
+                    <ion-label>
+                        <ion-icon name="people-outline"></ion-icon>
+                        <div>Estudiantes</div>
+                    </ion-label>
+                    <ion-badge *ngIf="!loadingEstudiantes && estudiantes.length > 0">{{ estudiantes.length }}</ion-badge>
+                </ion-segment-button>
+            </ion-segment>
+
+            <div *ngIf="segmentValue === 'horarios' && asignatura" class="section-content">
+
+                <div *ngIf="loadingHorarios" class="loading-state">
+                    <ion-spinner name="crescent" color="primary"></ion-spinner>
+                    <p>Cargando horarios...</p>
+                </div>
+
+                <div *ngIf="!loadingHorarios && horarios.length === 0" class="empty-state">
+                    <ion-icon name="calendar-outline" class="empty-icon"></ion-icon>
+                    <h3>No hay horarios registrados</h3>
+                    <p>Configura los horarios de clase para esta asignatura</p>
+                    <ion-button (click)="agregarHorario()" expand="block" class="empty-button">
+                        <ion-icon name="add-outline" slot="start"></ion-icon>
+                        Configurar Horarios
+                    </ion-button>
+                </div>
+
+                <div *ngIf="!loadingHorarios && horarios.length > 0" class="horarios-list">
+                    
+                    <div *ngFor="let dia of [1, 2, 3, 4, 5, 6]" class="dia-group">
+                        <div *ngIf="getHorariosPorDia(dia).length > 0">
+                            
+                            <div class="dia-header">
+                                <h3>{{ getDiaNombre(dia) }}</h3>
+                                <ion-badge color="primary">{{ getHorariosPorDia(dia).length }}</ion-badge>
+                            </div>
+
+                            <ion-card *ngFor="let horario of getHorariosPorDia(dia)" class="horario-card">
+                                <ion-card-content>
+                                    
+                                    <div class="horario-content">
+                                        
+                                        <div class="estado-indicator" [style.background]="getColorEstado(horario.estado || 'pendiente')">
+                                            <ion-icon [name]="getIconoEstado(horario.estado || 'pendiente')"></ion-icon>
+                                        </div>
+
+                                        <div class="horario-info">
+                                            <div class="horario-tiempo">
+                                                <ion-icon name="time-outline"></ion-icon>
+                                                <span>{{ formatHora(horario.hora_inicio) }} - {{ formatHora(horario.hora_fin) }}</span>
+                                            </div>
+                                            
+                                            <div class="horario-aula" *ngIf="horario.aula">
+                                                <ion-icon name="location-outline"></ion-icon>
+                                                <span>{{ horario.aula }}</span>
+                                            </div>
+
+                                            <div class="horario-fecha">
+                                                <ion-icon name="calendar-outline"></ion-icon>
+                                                <span>Desde: {{ formatFecha(horario.fecha_inicio || horario.created_at) }}</span>
+                                            </div>
+
+                                            <div class="horario-estado">
+                                                <ion-chip [style.--background]="getColorEstado(horario.estado || 'pendiente')" class="estado-chip">
+                                                    <ion-label>{{ getTextoEstado(horario.estado || 'pendiente') }}</ion-label>
+                                                </ion-chip>
+                                            </div>
+                                        </div>
+
+                                        <div class="horario-actions">
+                                            <ion-button 
+                                                fill="clear" 
+                                                (click)="cambiarEstadoHorario(horario)"
+                                                [style.color]="asignatura.color">
+                                                <ion-icon name="create-outline"></ion-icon>
+                                            </ion-button>
+                                            <ion-button 
+                                                fill="clear" 
+                                                color="danger"
+                                                (click)="eliminarHorario(horario)">
+                                                <ion-icon name="trash-outline"></ion-icon>
+                                            </ion-button>
+                                        </div>
+
+                                    </div>
+
+                                </ion-card-content>
+                            </ion-card>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div *ngIf="segmentValue === 'estudiantes'" class="section-content">
+
+                <div *ngIf="loadingEstudiantes" class="loading-state">
+                    <ion-spinner name="crescent" color="primary"></ion-spinner>
+                    <p>Cargando estudiantes...</p>
+                </div>
+
+                <div *ngIf="!loadingEstudiantes && estudiantes.length === 0" class="empty-state">
+                    <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+                    <h3>No hay estudiantes inscritos</h3>
+                    <p>Comparte el código de acceso con tus estudiantes para que se inscriban</p>
+                    <ion-button (click)="gestionarCodigoAcceso()" expand="block" class="empty-button">
+                        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+                        Ver Código de Acceso
+                    </ion-button>
+                </div>
+
+                <div *ngIf="!loadingEstudiantes && estudiantes.length > 0" class="estudiantes-container">
+                    <ion-card class="estudiantes-card">
+                        <ion-card-header>
+                            <div class="estudiantes-header">
+                                <ion-card-title>Listado de Estudiantes</ion-card-title>
+                                <ion-badge color="primary">{{ estudiantes.length }}</ion-badge>
+                            </div>
+                        </ion-card-header>
+                        <ion-card-content>
+                            <ion-list class="estudiantes-list">
+                                <ion-item *ngFor="let estudiante of estudiantes; let i = index" class="estudiante-item" lines="none">
+                                    <div class="estudiante-number">{{ i + 1 }}</div>
+                                    <ion-avatar slot="start">
+                                        <img [src]="getAvatarUrl(estudiante)" [alt]="estudiante.nombres">
+                                    </ion-avatar>
+                                    <ion-label>
+                                        <h3>{{ estudiante.nombres }} {{ estudiante.apellidos }}</h3>
+                                        <p>{{ estudiante.cedula }}</p>
+                                        <p *ngIf="estudiante.email">{{ estudiante.email }}</p>
+                                    </ion-label>
+                                    <ion-button slot="end" fill="clear" size="small">
+                                        <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+                                    </ion-button>
+                                </ion-item>
+                            </ion-list>
+                        </ion-card-content>
+                    </ion-card>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end" *ngIf="asignatura">
+        <ion-fab-button 
+            [style.--background]="asignatura.color" 
+            [style.--background-activated]="asignatura.color"
+            [style.--background-focused]="asignatura.color" 
+            [style.--background-hover]="asignatura.color"
+            (click)="segmentValue === 'horarios' ? agregarHorario() : gestionarCodigoAcceso()">
+            <ion-icon name="add-outline" style="color: white;"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
+
+</ion-content>

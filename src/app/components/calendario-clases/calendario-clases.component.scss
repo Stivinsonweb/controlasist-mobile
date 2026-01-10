@@ -1,0 +1,120 @@
+.calendario-wrapper {
+  width: 100%;
+}
+
+.dias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.dia-column {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.dia-header {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  padding: 10px;
+  text-align: center;
+
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+  }
+}
+
+.horarios-dia {
+  padding: 8px;
+  min-height: 100px;
+}
+
+.clase-card {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-left: 4px solid;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+
+  &:hover {
+    background: #f1f5f9;
+    transform: translateX(2px);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.clase-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 16px;
+  }
+
+  .clase-estado {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.clase-tiempo,
+.clase-aula {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 4px;
+
+  ion-icon {
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  span {
+    font-weight: 600;
+  }
+}
+
+.clase-action {
+  position: absolute;
+  top: 8px;
+  right: 4px;
+  --padding-start: 4px;
+  --padding-end: 4px;
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+.no-clases {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .dias-grid {
+    grid-template-columns: 1fr;
+  }
+}

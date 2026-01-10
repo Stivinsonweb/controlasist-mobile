@@ -1,0 +1,88 @@
+.codigo-container {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.codigo-card {
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+
+    ion-icon {
+      font-size: 24px;
+      color: #3b82f6;
+    }
+  }
+}
+
+.codigo-display {
+  text-align: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  margin-bottom: 20px;
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+  }
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.expiracion-card {
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+
+    ion-icon {
+      font-size: 24px;
+      color: #f59e0b;
+    }
+  }
+}
+
+.fecha-selector {
+  margin-top: 16px;
+
+  ion-item {
+    --background: #f8fafc;
+    --border-radius: 12px;
+    margin-bottom: 16px;
+  }
+}
+
+.info-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f0f9ff;
+  border-radius: 12px;
+  margin: 16px 0;
+
+  ion-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    color: #1e293b;
+    font-size: 14px;
+  }
+}

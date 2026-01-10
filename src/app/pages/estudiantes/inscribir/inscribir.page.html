@@ -1,0 +1,78 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title color="light">Inscribirse a Asignatura</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="inscribir-container">
+
+    <div class="header-section">
+      <ion-icon name="school-outline" class="main-icon"></ion-icon>
+      <h1>Buscar Asignatura</h1>
+      <p>Ingresa el código que te proporcionó tu docente</p>
+    </div>
+
+    <ion-card class="search-card">
+      <ion-card-content>
+
+        <ion-item lines="none" class="codigo-item">
+          <ion-label position="stacked">Código de Acceso</ion-label>
+          <ion-input [(ngModel)]="codigoAcceso" placeholder="Ej: MAT101-A-2025-1"
+            class="codigo-input">
+            <ion-icon name="key-outline" slot="start"></ion-icon>
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" (click)="buscarAsignatura()" [disabled]="!codigoAcceso.trim() || buscando"
+          class="search-button">
+          <ion-icon name="search-outline" slot="start"></ion-icon>
+          Buscar Asignatura
+        </ion-button>
+
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="asignaturaEncontrada" class="result-card success">
+      <ion-card-content>
+
+        <div class="result-header">
+          <ion-icon name="checkmark-circle-outline" class="result-icon success-icon"></ion-icon>
+          <h2>Asignatura Encontrada</h2>
+        </div>
+
+        <div class="asignatura-info">
+          <div class="info-item">
+            <span class="label">Asignatura:</span>
+            <span class="value">{{ asignaturaEncontrada.nombre }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Código:</span>
+            <span class="value">{{ asignaturaEncontrada.codigo }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Grupo:</span>
+            <span class="value">{{ asignaturaEncontrada.grupo }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Periodo:</span>
+            <span class="value">{{ asignaturaEncontrada.periodo }}</span>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <ion-button expand="block" (click)="inscribirse()" class="inscribir-button">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Continuar Inscripción
+          </ion-button>
+
+          <ion-button expand="block" fill="outline" (click)="limpiar()" class="cancel-button">
+            Buscar Otra
+          </ion-button>
+        </div>
+
+      </ion-card-content>
+    </ion-card>
+
+  </div>
+</ion-content>
