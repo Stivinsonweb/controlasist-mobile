@@ -1,6 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-<<<<<<< HEAD
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import {
@@ -8,19 +7,10 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-=======
-import { Router, RouterModule } from '@angular/router';
-import { 
-  IonContent, 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
   IonButton,
   IonCard,
   IonCardContent,
   IonIcon,
-<<<<<<< HEAD
   IonBadge,
   IonRefresher,
   IonRefresherContent,
@@ -36,21 +26,10 @@ import {
   IonSkeletonText,
   AlertController,
   MenuController
-=======
-  IonSpinner,
-  IonMenu,
-  IonMenuButton,
-  IonMenuToggle,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButtons
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   peopleOutline,
-<<<<<<< HEAD
   people,
   schoolOutline,
   school,
@@ -72,15 +51,6 @@ import {
   briefcaseOutline,
   barcodeOutline,
   statsChartOutline
-=======
-  schoolOutline,
-  personOutline,
-  logOutOutline,
-  menuOutline,
-  gridOutline,
-  barChartOutline,
-  arrowForwardOutline
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
 } from 'ionicons/icons';
 import { SupabaseService } from '../../../services/supabase/supabase.service';
 import { ToastService } from '../../../services/toast.service';
@@ -131,10 +101,7 @@ interface Administrador {
   standalone: true,
   imports: [
     CommonModule,
-<<<<<<< HEAD
     FormsModule,
-=======
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
     RouterModule,
     IonContent,
     IonHeader,
@@ -144,7 +111,6 @@ interface Administrador {
     IonCard,
     IonCardContent,
     IonIcon,
-<<<<<<< HEAD
     IonBadge,
     IonRefresher,
     IonRefresherContent,
@@ -158,21 +124,10 @@ interface Administrador {
     IonSearchbar,
     IonAvatar,
     IonSkeletonText
-=======
-    IonSpinner,
-    IonMenu,
-    IonMenuButton,
-    IonMenuToggle,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonButtons
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
   ]
 })
 export class DashboardPage implements OnInit {
   adminName: string = 'Administrador';
-<<<<<<< HEAD
   totalDocentes: number = 0;
   totalEstudiantes: number = 0;
   totalAdmins: number = 0;
@@ -207,35 +162,11 @@ export class DashboardPage implements OnInit {
     private router: Router,
     private alertController: AlertController,
     private menuController: MenuController
-=======
-  loading = false;
-  
-  estadisticas = {
-    totalDocentes: 0,
-    totalEstudiantes: 0,
-    totalAdministradores: 0
-  };
-
-  admin: any = {
-    nombres: 'Administrador',
-    apellidos: '',
-    email: 'admin@example.com',
-    rol: 'administrador'
-  };
-
-  constructor(
-    private authService: AuthService,
-    private supabaseService: SupabaseService,
-    private toastService: ToastService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
   ) {
     // Register Chart.js components
     Chart.register(...registerables);
     addIcons({
       peopleOutline,
-<<<<<<< HEAD
       people,
       schoolOutline,
       school,
@@ -257,21 +188,11 @@ export class DashboardPage implements OnInit {
       briefcaseOutline,
       barcodeOutline,
       statsChartOutline
-=======
-      schoolOutline,
-      personOutline,
-      logOutOutline,
-      menuOutline,
-      gridOutline,
-      barChartOutline,
-      arrowForwardOutline
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
     });
   }
 
   async ngOnInit() {
     console.log('✅ Dashboard de Administrador cargado');
-<<<<<<< HEAD
     await this.loadAllData();
     // Inicializar gráfica después de cargar datos
     setTimeout(() => this.initDashboardChart(), 500);
@@ -651,104 +572,5 @@ export class DashboardPage implements OnInit {
       ]
     });
     await alert.present();
-=======
-    this.loadDashboard();
-  }
-
-  async loadDashboard() {
-    this.loading = true;
-    console.log('🔄 Iniciando carga del dashboard...');
-    
-    try {
-      // Cargar estadísticas
-      console.log('📊 Cargando estadísticas...');
-      await this.loadEstadisticas();
-      
-      // Cargar admin
-      console.log('👤 Cargando datos del admin...');
-      const user = await this.supabaseService.getCurrentUser();
-      console.log('Usuario obtenido:', user?.id);
-      
-      if (user) {
-        const { data: adminData } = await this.supabaseService.supabase
-          .from('administradores')
-          .select('nombres, apellidos, email, rol, puede_cerrar_app')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (adminData) {
-          this.admin = adminData;
-          this.adminName = adminData.nombres || 'Administrador';
-          console.log('✅ Admin cargado:', this.admin);
-        }
-      }
-      
-      console.log('✅ Dashboard cargado completamente');
-    } catch (error) {
-      console.error('❌ Error cargando dashboard:', error);
-    } finally {
-      this.loading = false;
-      this.cdr.detectChanges();
-      console.log('🎉 Loading:', this.loading);
-    }
-  }
-
-  async loadEstadisticas() {
-    try {
-      // Total de docentes
-      const { count: docentes } = await this.supabaseService.supabase
-        .from('docentes')
-        .select('id', { count: 'exact', head: true });
-
-      // Total de estudiantes
-      const { count: estudiantes } = await this.supabaseService.supabase
-        .from('estudiantes')
-        .select('id', { count: 'exact', head: true });
-
-      // Total de administradores
-      const { count: administradores } = await this.supabaseService.supabase
-        .from('administradores')
-        .select('id', { count: 'exact', head: true });
-
-      this.estadisticas = {
-        totalDocentes: docentes || 0,
-        totalEstudiantes: estudiantes || 0,
-        totalAdministradores: administradores || 0
-      };
-
-      console.log('📊 Estadísticas cargadas:', this.estadisticas);
-    } catch (error) {
-      console.error('Error cargando estadísticas:', error);
-    }
-  }
-
-  // 🆕 NUEVO: Método para navegar a estadísticas
-  goToEstadisticas() {
-    console.log('📊 Navegando a estadísticas...');
-    this.router.navigate(['/admin/estadisticas']);
-  }
-
-  async logout() {
-    try {
-      this.loading = true;
-      await this.authService.logout();
-      this.toastService.showSuccess('Sesión cerrada correctamente');
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-      this.toastService.showError('Error al cerrar sesión');
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  getInitials(nombre: string): string {
-    if (!nombre) return 'A';
-    return nombre
-      .split(' ')
-      .map(n => n.charAt(0))
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
->>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
   }
 }
