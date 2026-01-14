@@ -61,5 +61,21 @@ export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
+  },  {
+    path: 'admin-perfil',
+    loadComponent: () => import('./pages/admin/admin-perfil/admin-perfil.page').then( m => m.AdminPerfilPage)
   },
+  {
+    path: 'admin-docentes',
+    loadComponent: () => import('./pages/admin/admin-docentes/admin-docentes.page').then( m => m.AdminDocentesPage)
+  },
+  {
+    path: 'admin-estudiantes',
+    loadComponent: () => import('./pages/admin/admin-estudiantes/admin-estudiantes.page').then( m => m.AdminEstudiantesPage)
+  },
+  {
+    path: 'admin-usuarios',
+    loadComponent: () => import('./pages/admin/admin-usuarios/admin-usuarios.page').then( m => m.AdminUsuariosPage)
+  },
+
 ];

@@ -1,0 +1,131 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-title">
+        <ion-icon name="settings-outline"></ion-icon>
+        Gestión de Administradores
+      </div>
+    </ion-title>
+    <ion-button slot="end" fill="clear" (click)="handleRefresh()">
+      <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingIcon="refresh-outline" pullingText="Desliza para actualizar"
+      refreshingSpinner="crescent" refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="usuarios-container">
+
+    <!-- Header Info -->
+    <div class="info-section">
+      <div class="info-header">
+        <div>
+          <ion-badge color="medium" class="readonly-badge">
+            <ion-icon name="eye-outline"></ion-icon>
+            Solo lectura
+          </ion-badge>
+          <h2 class="page-subtitle">Visualización de administradores del sistema</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <ion-card class="stats-card">
+      <ion-card-content>
+        <div class="stat-item">
+          <ion-icon name="shield-checkmark" color="primary"></ion-icon>
+          <div class="stat-info">
+            <h3>{{ administradores.length }}</h3>
+            <p>Total de administradores</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Loading Skeleton -->
+    <div class="admins-list" *ngIf="loading">
+      <ion-card class="admin-card skeleton-card" *ngFor="let item of [1,2,3]">
+        <ion-card-content>
+          <div class="admin-header">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-info">
+              <ion-skeleton-text [animated]="true"
+                style="width: 60%; height: 20px; margin-bottom: 8px;"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%; height: 16px;"></ion-skeleton-text>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Sin administradores -->
+    <div *ngIf="!loading && administradores.length === 0" class="empty-state">
+      <div class="empty-icon-container">
+        <ion-icon name="shield-checkmark-outline" class="empty-icon"></ion-icon>
+      </div>
+      <h3>No hay administradores registrados</h3>
+      <p>Aún no se han registrado administradores en el sistema</p>
+    </div>
+
+    <!-- Lista de administradores -->
+    <div class="admins-list" *ngIf="!loading && administradores.length > 0">
+      <ion-card class="admin-card" *ngFor="let admin of administradores; let i = index"
+        [style.animation-delay]="(i * 0.05) + 's'">
+        <ion-card-content>
+          <div class="admin-header">
+            <ion-avatar class="admin-avatar">
+              <img [src]="getAvatarUrl(admin)" [alt]="getNombreCompleto(admin)" />
+            </ion-avatar>
+            <div class="admin-info">
+              <h3 class="admin-nombre">{{ getNombreCompleto(admin) }}</h3>
+              <div class="admin-email">
+                <ion-icon name="mail-outline"></ion-icon>
+                {{ admin.email }}
+              </div>
+            </div>
+            <ion-badge color="primary" class="role-badge">
+              <ion-icon name="shield-checkmark"></ion-icon>
+              Admin
+            </ion-badge>
+          </div>
+
+          <div class="admin-details" *ngIf="admin.telefono || admin.entidad || admin.programa || admin.area">
+            <div class="detail-item" *ngIf="admin.telefono">
+              <ion-icon name="call-outline" color="medium"></ion-icon>
+              <span>{{ admin.telefono }}</span>
+            </div>
+            <div class="detail-item" *ngIf="admin.entidad">
+              <ion-icon name="business-outline" color="medium"></ion-icon>
+              <span>{{ admin.entidad }}</span>
+            </div>
+            <div class="detail-item" *ngIf="admin.programa">
+              <ion-icon name="school-outline" color="medium"></ion-icon>
+              <span>{{ admin.programa }}</span>
+            </div>
+            <div class="detail-item" *ngIf="admin.area">
+              <ion-icon name="briefcase-outline" color="medium"></ion-icon>
+              <span>{{ admin.area }}</span>
+            </div>
+          </div>
+
+          <div class="admin-footer">
+            <span class="created-date">
+              <ion-icon name="calendar-outline"></ion-icon>
+              Registrado: {{ formatDate(admin.created_at) }}
+            </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+</ion-content>

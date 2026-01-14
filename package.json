@@ -50,6 +50,7 @@
     "@ionic/angular": "^8.7.12",
     "@ionic/angular-toolkit": "^12.3.0",
     "@supabase/supabase-js": "^2.87.1",
+    "chart.js": "^4.5.1",
     "date-fns": "^4.1.0",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",

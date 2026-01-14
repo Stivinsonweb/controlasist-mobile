@@ -1,0 +1,135 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-title">
+        <ion-icon name="school-outline"></ion-icon>
+        Estudiantes Registrados
+      </div>
+    </ion-title>
+    <ion-button slot="end" fill="clear" (click)="handleRefresh()">
+      <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingIcon="refresh-outline" pullingText="Desliza para actualizar"
+      refreshingSpinner="crescent" refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="estudiantes-container">
+
+    <!-- Header Info -->
+    <div class="info-section">
+      <ion-badge color="medium" class="readonly-badge">
+        <ion-icon name="eye-outline"></ion-icon>
+        Solo lectura
+      </ion-badge>
+      <h2 class="page-subtitle">Visualización de estudiantes del sistema</h2>
+    </div>
+
+    <!-- Estadísticas -->
+    <ion-card class="stats-card">
+      <ion-card-content>
+        <div class="stat-item">
+          <ion-icon name="school" color="danger"></ion-icon>
+          <div class="stat-info">
+            <h3>{{ estudiantes.length }}</h3>
+            <p>Total de estudiantes</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Buscador -->
+    <div class="search-section" *ngIf="estudiantes.length > 0">
+      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="filterEstudiantes()"
+        placeholder="Buscar por nombre, código o email..." animated="true" debounce="300">
+      </ion-searchbar>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div class="estudiantes-list" *ngIf="loading">
+      <ion-card class="estudiante-card skeleton-card" *ngFor="let item of [1,2,3,4]">
+        <ion-card-content>
+          <div class="estudiante-header">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-info">
+              <ion-skeleton-text [animated]="true"
+                style="width: 60%; height: 20px; margin-bottom: 8px;"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 80%; height: 16px;"></ion-skeleton-text>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Sin estudiantes -->
+    <div *ngIf="!loading && estudiantes.length === 0" class="empty-state">
+      <div class="empty-icon-container">
+        <ion-icon name="school-outline" class="empty-icon"></ion-icon>
+      </div>
+      <h3>No hay estudiantes registrados</h3>
+      <p>Aún no se han registrado estudiantes en el sistema</p>
+    </div>
+
+    <!-- Sin resultados de búsqueda -->
+    <div *ngIf="!loading && estudiantes.length > 0 && estudiantesFiltrados.length === 0" class="empty-state">
+      <div class="empty-icon-container">
+        <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+      </div>
+      <h3>No se encontraron resultados</h3>
+      <p>Intenta con otros términos de búsqueda</p>
+    </div>
+
+    <!-- Lista de estudiantes -->
+    <div class="estudiantes-list" *ngIf="!loading && estudiantesFiltrados.length > 0">
+      <ion-card class="estudiante-card" *ngFor="let estudiante of estudiantesFiltrados; let i = index"
+        [style.animation-delay]="(i * 0.05) + 's'">
+        <ion-card-content>
+          <div class="estudiante-header">
+            <ion-avatar class="estudiante-avatar">
+              <img [src]="getAvatarUrl(estudiante)" [alt]="getNombreCompleto(estudiante)" />
+            </ion-avatar>
+            <div class="estudiante-info">
+              <h3 class="estudiante-nombre">{{ getNombreCompleto(estudiante) }}</h3>
+              <div class="estudiante-email">
+                <ion-icon name="mail-outline"></ion-icon>
+                {{ estudiante.email }}
+              </div>
+            </div>
+          </div>
+
+          <div class="estudiante-details">
+            <div class="detail-item" *ngIf="estudiante.codigo">
+              <ion-icon name="barcode-outline" color="medium"></ion-icon>
+              <span>Código: {{ estudiante.codigo }}</span>
+            </div>
+            <div class="detail-item" *ngIf="estudiante.programa">
+              <ion-icon name="school-outline" color="medium"></ion-icon>
+              <span>{{ estudiante.programa }}</span>
+            </div>
+            <div class="detail-item" *ngIf="estudiante.telefono">
+              <ion-icon name="call-outline" color="medium"></ion-icon>
+              <span>{{ estudiante.telefono }}</span>
+            </div>
+          </div>
+
+          <div class="estudiante-footer">
+            <span class="created-date">
+              <ion-icon name="calendar-outline"></ion-icon>
+              Registrado: {{ formatDate(estudiante.created_at) }}
+            </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+</ion-content>
