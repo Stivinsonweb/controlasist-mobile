@@ -1,0 +1,259 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mi Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="main-content">
+  <!-- Spinner de carga -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando perfil...</p>
+  </div>
+
+  <!-- Contenido del perfil -->
+  <div *ngIf="!loading" class="perfil-container">
+
+    <!-- Card principal de perfil -->
+    <div class="profile-header-card">
+      <div class="profile-avatar">
+        {{ getInitials(admin.nombres) }}
+      </div>
+      <div class="profile-info">
+        <h2>{{ admin.nombres }} {{ admin.apellidos }}</h2>
+        <p class="profile-email">
+          <ion-icon name="mail-outline"></ion-icon>
+          {{ admin.email }}
+        </p>
+        <p class="profile-phone" *ngIf="admin.telefono">
+          <ion-icon name="call-outline"></ion-icon>
+          {{ admin.telefono }}
+        </p>
+        <span class="profile-role">{{ admin.rol | uppercase }}</span>
+      </div>
+    </div>
+
+    <!-- Información Personal Card -->
+    <div class="info-card">
+      <div class="card-header">
+        <h4>📋 Información Personal</h4>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-label">Registrado:</span>
+          <span class="info-value">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ formatDate(admin.created_at) }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Última actualización:</span>
+          <span class="info-value">
+            <ion-icon name="calendar-outline"></ion-icon>
+            {{ formatDate(admin.updated_at) }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Estado:</span>
+          <span class="info-value badge badge-active">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            Activo
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del Sistema Card -->
+    <div class="info-card">
+      <div class="card-header">
+        <h4>📊 Información del Sistema</h4>
+      </div>
+      <div class="card-body">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ systemInfo.totalDocentes }}</div>
+            <div class="stat-label">Docentes</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ systemInfo.totalEstudiantes }}</div>
+            <div class="stat-label">Estudiantes</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ systemInfo.totalAdministradores }}</div>
+            <div class="stat-label">Administradores</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seguridad Card -->
+    <div class="info-card security-card">
+      <div class="card-header">
+        <h4>🔐 Seguridad</h4>
+      </div>
+      <div class="card-body">
+        <div class="security-item">
+          <div class="security-info">
+            <span class="security-label">Contraseña</span>
+            <span class="security-desc">Última actualización: Hace 30 días</span>
+          </div>
+          <span class="security-badge">Segura</span>
+        </div>
+        <div class="security-item">
+          <div class="security-info">
+            <span class="security-label">Sesión Activa</span>
+            <span class="security-desc">{{ systemInfo.ultimoAcceso }}</span>
+          </div>
+          <span class="security-badge active">En línea</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones Card -->
+    <div *ngIf="!isEditingProfile && !isChangingPassword" class="action-buttons">
+      <ion-button expand="block" (click)="startEditProfile()" class="btn-edit">
+        <ion-icon slot="start" name="pencil-outline"></ion-icon>
+        Editar Información
+      </ion-button>
+
+      <ion-button expand="block" (click)="startChangePassword()" class="btn-password">
+        <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+        Cambiar Contraseña
+      </ion-button>
+    </div>
+
+    <!-- Modal backdrop + Edit Section -->
+    <div *ngIf="isEditingProfile" class="modal-backdrop">
+      <div class="modal-content edit-section">
+        <h3>✏️ Editar Información Personal</h3>
+
+        <ion-card class="input-card">
+          <ion-card-content>
+            <!-- Nombres -->
+            <ion-item class="input-item">
+              <ion-label>Nombres</ion-label>
+              <ion-input
+                type="text"
+                [(ngModel)]="editForm.nombres"
+                placeholder="Ingresa tus nombres">
+              </ion-input>
+            </ion-item>
+
+            <!-- Apellidos -->
+            <ion-item class="input-item">
+              <ion-label>Apellidos</ion-label>
+              <ion-input
+                type="text"
+                [(ngModel)]="editForm.apellidos"
+                placeholder="Ingresa tus apellidos">
+              </ion-input>
+            </ion-item>
+
+            <!-- Teléfono -->
+            <ion-item class="input-item">
+              <ion-label>Teléfono</ion-label>
+              <ion-input
+                type="tel"
+                [(ngModel)]="editForm.telefono"
+                placeholder="Ingresa tu teléfono (opcional)">
+              </ion-input>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+          <ion-button expand="block" (click)="saveProfileChanges()" [disabled]="loading" class="btn-save">
+            <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+            Guardar Cambios
+          </ion-button>
+
+          <ion-button expand="block" (click)="cancelEditProfile()" fill="outline" class="btn-cancel">
+            <ion-icon slot="start" name="close-outline"></ion-icon>
+            Cancelar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal backdrop + Password Section -->
+    <div *ngIf="isChangingPassword" class="modal-backdrop">
+      <div class="modal-content password-section">
+        <h3>🔑 Cambiar Contraseña</h3>
+
+        <ion-card class="input-card">
+          <ion-card-content>
+            <!-- Contraseña Actual -->
+            <ion-item class="input-item password-item">
+              <ion-label>Contraseña Actual</ion-label>
+              <ion-input
+                [type]="showCurrentPassword ? 'text' : 'password'"
+                [(ngModel)]="passwordForm.currentPassword"
+                >
+              </ion-input>
+              <ion-icon
+                slot="end"
+                [name]="showCurrentPassword ? 'eye-outline' : 'eye-off-outline'"
+                (click)="togglePasswordVisibility('current')"
+                class="password-toggle">
+              </ion-icon>
+            </ion-item>
+
+            <!-- Nueva Contraseña -->
+            <ion-item class="input-item password-item">
+              <ion-label>Nueva Contraseña</ion-label>
+              <ion-input
+                [type]="showNewPassword ? 'text' : 'password'"
+                [(ngModel)]="passwordForm.newPassword"
+                >
+              </ion-input>
+              <ion-icon
+                slot="end"
+                [name]="showNewPassword ? 'eye-outline' : 'eye-off-outline'"
+                (click)="togglePasswordVisibility('new')"
+                class="password-toggle">
+              </ion-icon>
+            </ion-item>
+
+            <!-- Confirmar Contraseña -->
+            <ion-item class="input-item password-item">
+              <ion-label>Confirmar Contraseña</ion-label>
+              <ion-input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                [(ngModel)]="passwordForm.confirmPassword"
+                >
+              </ion-input>
+              <ion-icon
+                slot="end"
+                [name]="showConfirmPassword ? 'eye-outline' : 'eye-off-outline'"
+                (click)="togglePasswordVisibility('confirm')"
+                class="password-toggle">
+              </ion-icon>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+
+        <div class="password-hint">
+          <small>⚠️ Mínimo 6 caracteres. Usa mayúsculas, números y símbolos para mayor seguridad.</small>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+          <ion-button expand="block" (click)="changePassword()" [disabled]="loading" class="btn-save">
+            <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+            Actualizar Contraseña
+          </ion-button>
+
+          <ion-button expand="block" (click)="cancelChangePassword()" fill="outline" class="btn-cancel">
+            <ion-icon slot="start" name="close-outline"></ion-icon>
+            Cancelar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

@@ -38,10 +38,32 @@ export const routes: Routes = [
     path: 'auth/reset-password',
     loadComponent: () => import('./pages/auth/reset-password/reset-password.page').then((m) => m.ResetPasswordPage),
   },
+  // ===== RUTAS DEL ADMIN =====
   {
     path: 'admin/dashboard',
     loadComponent: () => import('./pages/admin/dashboard/dashboard.page').then((m) => m.DashboardPage),
   },
+  {
+    path: 'admin/perfil',
+    loadComponent: () => import('./pages/admin/admin-perfil/admin-perfil.page').then((m) => m.AdminPerfilPage),
+  },
+  {
+  path: 'admin/estadisticas',
+  loadComponent: () => import('./pages/admin/admin-estadisticas/admin-estadisticas.page').then((m) => m.AdminEstadisticasPage)
+  },
+ {
+    path: 'admin/docentes',
+    loadComponent: () => import('./pages/admin/admin-docentes/admin-docentes.page').then((m) => m.AdminDocentesPage),
+  }, 
+  {
+    path: 'admin/estudiantes',
+    loadComponent: () => import('./pages/admin/admin-estudiantes/admin-estudiantes.page').then((m) => m.AdminEstudiantesPage),
+  },/*
+  {
+    path: 'admin/usuarios',
+    loadComponent: () => import('./pages/admin/admin-usuarios/admin-usuarios.page').then((m) => m.AdminUsuariosPage),
+  },*/
+  // ===== RUTAS DE ASIGNATURAS =====
   {
     path: 'asignaturas/crear',
     loadComponent: () => import('./pages/asignaturas/crear/crear.page').then((m) => m.CrearPage),

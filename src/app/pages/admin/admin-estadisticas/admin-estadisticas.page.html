@@ -1,0 +1,72 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Estadísticas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="main-content">
+  <!-- Spinner de carga -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <!-- Contenido de estadísticas -->
+  <div *ngIf="!loading" class="estadisticas-container">
+    
+    <!-- Total de Estudiantes -->
+    <div class="stats-section">
+      <h3>Total de Estudiantes</h3>
+      <div class="chart-wrapper">
+        <canvas 
+          baseChart
+          [data]="chartEstudiantesData"
+          type="bar"
+          [options]="chartEstudiantesOptions"
+          #chartEstudiantes>
+        </canvas>
+      </div>
+      <div class="stats-summary">
+        <p class="total-number">{{ totalEstudiantes }}</p>
+        <p class="total-label">Estudiantes registrados</p>
+      </div>
+    </div>
+
+    <!-- Total de Docentes -->
+    <div class="stats-section">
+      <h3>Total de Docentes</h3>
+      <div class="chart-wrapper">
+        <canvas 
+          baseChart
+          [data]="chartDocentesData"
+          type="bar"
+          [options]="chartDocentesOptions"
+          #chartDocentes>
+        </canvas>
+      </div>
+      <div class="stats-summary">
+        <p class="total-number">{{ totalDocentes }}</p>
+        <p class="total-label">Docentes registrados</p>
+      </div>
+    </div>
+
+    <!-- Registros Semanales -->
+    <div class="stats-section">
+      <h3>Registros Semanales</h3>
+      <p class="section-description">Estudiantes y docentes registrados por semana</p>
+      <div class="chart-wrapper large">
+        <canvas 
+          baseChart
+          [data]="chartSemanalData"
+          type="bar"
+          [options]="chartSemanalOptions"
+          #chartSemanal>
+        </canvas>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
