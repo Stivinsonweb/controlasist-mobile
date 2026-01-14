@@ -1,0 +1,117 @@
+.header-toolbar {
+  --background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  --color: white;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.2);
+}
+
+.main-content {
+  --background: #f8f9ff;
+  padding: 20px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 20px;
+
+  p {
+    font-size: 16px;
+    color: #666;
+    font-weight: 500;
+  }
+}
+
+.estadisticas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding-bottom: 30px;
+}
+
+.stats-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid #a855f7;
+
+  h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .section-description {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    color: #6b7280;
+  }
+}
+
+// 🔑 IMPORTANTE: Altura mínima para que el canvas se vea
+.chart-wrapper {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  margin-bottom: 20px;
+
+  canvas {
+    max-height: 100%;
+  }
+
+  &.large {
+    height: 350px;
+  }
+}
+
+.stats-summary {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+
+  .total-number {
+    font-size: 36px;
+    font-weight: 700;
+    color: #a855f7;
+    margin: 10px 0 5px 0;
+  }
+
+  .total-label {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px;
+  }
+
+  .estadisticas-container {
+    gap: 20px;
+  }
+
+  .stats-section {
+    padding: 15px;
+  }
+
+  .chart-wrapper {
+    height: 250px;
+
+    &.large {
+      height: 300px;
+    }
+  }
+
+  .stats-summary {
+    .total-number {
+      font-size: 28px;
+    }
+  }
+}

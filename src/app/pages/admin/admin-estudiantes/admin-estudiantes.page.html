@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
@@ -131,5 +132,380 @@
       </ion-card>
     </div>
 
+=======
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Estudiantes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="main-content">
+  <!-- Spinner de carga -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando estudiantes...</p>
+  </div>
+
+  <!-- Contenido de estudiantes -->
+  <div *ngIf="!loading" class="estudiantes-container">
+    
+    <!-- Sección de búsqueda y filtros -->
+    <div class="filters-section">
+      <div class="search-bar">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          type="text"
+          placeholder="Buscar por nombre, email o cédula..."
+          [(ngModel)]="filters.searchText"
+          (input)="onSearchChange()"
+          class="search-input"
+        />
+        <ion-button
+          *ngIf="filters.searchText"
+          fill="clear"
+          size="small"
+          (click)="filters.searchText = ''; onSearchChange()"
+        >
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-grid">
+        <!-- Filtro Programa -->
+        <div class="filter-group">
+          <label>Programa</label>
+          <select
+            [(ngModel)]="filters.programa"
+            (change)="onFilterChange()"
+            class="filter-select"
+          >
+            <option value="">Todos los programas</option>
+            <option *ngFor="let prog of programas" [value]="prog">
+              {{ prog }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro Estado -->
+        <div class="filter-group">
+          <label>Estado</label>
+          <select
+            [(ngModel)]="filters.estado"
+            (change)="onFilterChange()"
+            class="filter-select"
+          >
+            <option value="">Todos</option>
+            <option *ngFor="let est of estados" [value]="est.value">
+              {{ est.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Botón limpiar filtros -->
+        <div class="filter-group" *ngIf="hasActiveFilters()">
+          <button class="clear-filters-btn" (click)="clearFilters()">
+            <ion-icon name="close-outline"></ion-icon>
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- Resultado de búsqueda -->
+      <div class="search-results">
+        <p>
+          <strong>{{ estudiantesFiltrados.length }}</strong> estudiante(s) encontrado(s)
+          <span *ngIf="hasActiveFilters()" class="filter-badge">
+            (filtrados de {{ estudiantes.length }})
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Tabla de estudiantes (Desktop) -->
+    <div *ngIf="!isMobile()" class="table-container">
+      <!-- Encabezado de tabla -->
+      <div class="table-header">
+        <div class="header-cell header-name">Estudiante</div>
+        <div class="header-cell header-email">Email</div>
+        <div class="header-cell header-estado">Estado</div>
+        <div class="header-cell header-expand"></div>
+      </div>
+
+      <!-- Filas de tabla expandibles -->
+      <div class="table-body">
+        <div *ngFor="let estudiante of estudiantesFiltrados" class="table-row-wrapper">
+          <!-- Fila principal -->
+          <div class="table-row" [class.expanded]="estudiante.expanded">
+            <!-- Estudiante con avatar -->
+            <div class="cell estudiante-cell">
+              <div class="estudiante-info">
+                <div class="avatar" [ngStyle]="getAvatarStyle(estudiante)">
+                  {{ getInitials(estudiante) }}
+                </div>
+                <div class="info">
+                  <p class="name">{{ estudiante.nombres }} {{ estudiante.apellidos }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="cell email-cell">
+              <div class="cell-content">
+                <ion-icon name="mail-outline"></ion-icon>
+                <span>{{ estudiante.email }}</span>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="cell estado-cell">
+              <span [class]="'badge ' + getEstadoBadgeClass(estudiante.activo)">
+                <ion-icon 
+                  [name]="estudiante.activo ? 'checkmark-circle-outline' : 'close-circle-outline'"
+                ></ion-icon>
+                {{ getEstadoLabel(estudiante.activo) }}
+              </span>
+            </div>
+
+            <!-- Botón expandir/contraer -->
+            <div class="cell expand-cell">
+              <button 
+                class="expand-btn" 
+                (click)="toggleExpand(estudiante)"
+                [class.active]="estudiante.expanded"
+              >
+                <ion-icon 
+                  [name]="estudiante.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+                ></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido expandible -->
+          <div class="expand-content" *ngIf="estudiante.expanded">
+            <div class="detail-grid">
+              <!-- Cédula -->
+              <div class="detail-item">
+                <label>Cédula</label>
+                <div class="detail-value">
+                  <ion-icon name="id-card-outline"></ion-icon>
+                  <span>{{ estudiante.cedula }} ({{ estudiante.tipo_documento }})</span>
+                </div>
+              </div>
+
+              <!-- Teléfono -->
+              <div class="detail-item">
+                <label>Teléfono</label>
+                <div class="detail-value">
+                  <ion-icon name="call-outline"></ion-icon>
+                  <span>{{ estudiante.telefono || 'N/A' }}</span>
+                </div>
+              </div>
+
+              <!-- Programa -->
+              <div class="detail-item">
+                <label>Programa</label>
+                <span class="badge badge-programa">{{ estudiante.programa }}</span>
+              </div>
+
+              <!-- Fecha de nacimiento -->
+              <div class="detail-item">
+                <label>Fecha de Nacimiento</label>
+                <div class="detail-value">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>{{ formatDate(estudiante.fecha_nacimiento) }}</span>
+                </div>
+              </div>
+
+              <!-- Dirección -->
+              <div class="detail-item">
+                <label>Dirección</label>
+                <div class="detail-value">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ estudiante.direccion || 'N/A' }}</span>
+                </div>
+              </div>
+
+              <!-- Ciudad -->
+              <div class="detail-item">
+                <label>Ciudad</label>
+                <span class="text">{{ estudiante.ciudad || 'N/A' }}</span>
+              </div>
+
+              <!-- Observaciones -->
+              <div class="detail-item detail-full" *ngIf="estudiante.observaciones">
+                <label>Observaciones</label>
+                <div class="detail-value">
+                  <ion-icon name="chatbox-outline"></ion-icon>
+                  <span>{{ estudiante.observaciones }}</span>
+                </div>
+              </div>
+
+              <!-- Fecha creado -->
+              <div class="detail-item">
+                <label>Registrado</label>
+                <span class="date">{{ estudiante.created_at | date: 'dd/MM/yyyy' }}</span>
+              </div>
+
+              <!-- Fecha actualizado -->
+              <div class="detail-item">
+                <label>Última actualización</label>
+                <span class="date">{{ estudiante.updated_at | date: 'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje vacío -->
+      <div *ngIf="estudiantesFiltrados.length === 0" class="empty-state">
+        <ion-icon name="school-outline"></ion-icon>
+        <p>No hay estudiantes para mostrar</p>
+        <small>Intenta ajustar tus filtros o búsqueda</small>
+      </div>
+    </div>
+
+    <!-- Cards de estudiantes (Mobile) -->
+    <div *ngIf="isMobile()" class="cards-container">
+      <div *ngFor="let estudiante of estudiantesFiltrados" class="estudiante-card" [class.expanded]="estudiante.expanded">
+        <!-- Header clickeable -->
+        <div class="card-header-clickable" (click)="toggleExpand(estudiante)">
+          <div class="card-header">
+            <div class="avatar" [ngStyle]="getAvatarStyle(estudiante)">
+              {{ getInitials(estudiante) }}
+            </div>
+            <div class="card-title">
+              <h4>{{ estudiante.nombres }} {{ estudiante.apellidos }}</h4>
+              <small>{{ estudiante.programa }}</small>
+            </div>
+          </div>
+
+          <div class="expand-icon" [class.active]="estudiante.expanded">
+            <ion-icon 
+              [name]="estudiante.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+            ></ion-icon>
+          </div>
+        </div>
+
+        <!-- Información básica siempre visible -->
+        <div class="card-basic-info">
+          <div class="info-row">
+            <ion-icon name="mail-outline"></ion-icon>
+            <span>{{ estudiante.email }}</span>
+          </div>
+          <div class="info-row">
+            <span [class]="'badge ' + getEstadoBadgeClass(estudiante.activo)">
+              <ion-icon 
+                [name]="estudiante.activo ? 'checkmark-circle-outline' : 'close-circle-outline'"
+              ></ion-icon>
+              {{ getEstadoLabel(estudiante.activo) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Contenido expandible -->
+        <div *ngIf="estudiante.expanded" class="card-expand-content">
+          <!-- Cédula -->
+          <div class="info-row">
+            <ion-icon name="id-card-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Cédula</span>
+              <span class="value">{{ estudiante.cedula }} ({{ estudiante.tipo_documento }})</span>
+            </div>
+          </div>
+
+          <!-- Teléfono -->
+          <div class="info-row">
+            <ion-icon name="call-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Teléfono</span>
+              <span class="value">{{ estudiante.telefono || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <!-- Fecha de nacimiento -->
+          <div class="info-row">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Fecha de Nacimiento</span>
+              <span class="value">{{ formatDate(estudiante.fecha_nacimiento) }}</span>
+            </div>
+          </div>
+
+          <!-- Dirección -->
+          <div class="info-row">
+            <ion-icon name="location-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Dirección</span>
+              <span class="value">{{ estudiante.direccion || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <!-- Ciudad -->
+          <div class="info-row">
+            <div class="info-text">
+              <span class="label">Ciudad</span>
+              <span class="value">{{ estudiante.ciudad || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="info-row" *ngIf="estudiante.observaciones">
+            <ion-icon name="chatbox-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Observaciones</span>
+              <span class="value">{{ estudiante.observaciones }}</span>
+            </div>
+          </div>
+
+          <!-- Fechas -->
+          <div class="info-row">
+            <small class="date">
+              Registrado: {{ estudiante.created_at | date: 'dd/MM/yyyy' }}
+            </small>
+          </div>
+
+          <div class="info-row">
+            <small class="date">
+              Actualizado: {{ estudiante.updated_at | date: 'dd/MM/yyyy' }}
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje vacío -->
+      <div *ngIf="estudiantesFiltrados.length === 0" class="empty-state">
+        <ion-icon name="school-outline"></ion-icon>
+        <p>No hay estudiantes para mostrar</p>
+        <small>Intenta ajustar tus filtros o búsqueda</small>
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="pagination-btn"
+      >
+        ← Anterior
+      </button>
+
+      <div class="pagination-info">
+        Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong>
+      </div>
+
+      <button
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="pagination-btn"
+      >
+        Siguiente →
+      </button>
+    </div>
+>>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
   </div>
 </ion-content>

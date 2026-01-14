@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
@@ -188,5 +189,305 @@
       </ion-card>
     </div>
 
+=======
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/dashboard" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Docentes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="main-content">
+  <!-- Spinner de carga -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando docentes...</p>
+  </div>
+
+  <!-- Contenido de docentes -->
+  <div *ngIf="!loading" class="docentes-container">
+    
+    <!-- Sección de búsqueda y filtros -->
+    <div class="filters-section">
+      <div class="search-bar">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          type="text"
+          placeholder="Buscar por nombre o email..."
+          [(ngModel)]="filters.searchText"
+          (input)="onSearchChange()"
+          class="search-input"
+        />
+        <ion-button
+          *ngIf="filters.searchText"
+          fill="clear"
+          size="small"
+          (click)="filters.searchText = ''; onSearchChange()"
+        >
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-grid">
+        <!-- Filtro Programa -->
+        <div class="filter-group">
+          <label>Programa</label>
+          <select
+            [(ngModel)]="filters.programa"
+            (change)="onFilterChange()"
+            class="filter-select"
+          >
+            <option value="">Todos los programas</option>
+            <option *ngFor="let prog of programas" [value]="prog">
+              {{ prog }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro Área -->
+        <div class="filter-group">
+          <label>Área</label>
+          <select
+            [(ngModel)]="filters.area"
+            (change)="onFilterChange()"
+            class="filter-select"
+          >
+            <option value="">Todas las áreas</option>
+            <option *ngFor="let ar of areas" [value]="ar">
+              {{ ar }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Botón limpiar filtros -->
+        <div class="filter-group" *ngIf="hasActiveFilters()">
+          <button class="clear-filters-btn" (click)="clearFilters()">
+            <ion-icon name="close-outline"></ion-icon>
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- Resultado de búsqueda -->
+      <div class="search-results">
+        <p>
+          <strong>{{ docentesFiltrados.length }}</strong> docente(s) encontrado(s)
+          <span *ngIf="hasActiveFilters()" class="filter-badge">
+            (filtrados de {{ docentes.length }})
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Tabla de docentes (Desktop) -->
+    <div *ngIf="!isMobile()" class="table-container">
+      <!-- Encabezado de tabla -->
+      <div class="table-header">
+        <div class="header-cell header-name">Docente</div>
+        <div class="header-cell header-email">Email</div>
+        <div class="header-cell header-expand"></div>
+      </div>
+
+      <!-- Filas de tabla expandibles -->
+      <div class="table-body">
+        <div *ngFor="let docente of docentesFiltrados" class="table-row-wrapper">
+          <!-- Fila principal -->
+          <div class="table-row" [class.expanded]="docente.expanded">
+            <!-- Docente con avatar -->
+            <div class="cell docente-cell">
+              <div class="docente-info">
+                <div class="avatar" [ngStyle]="getAvatarStyle(docente)">
+                  {{ getInitials(docente) }}
+                </div>
+                <div class="info">
+                  <p class="name">{{ docente.nombres }} {{ docente.apellidos }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="cell email-cell">
+              <div class="cell-content">
+                <ion-icon name="mail-outline"></ion-icon>
+                <span>{{ docente.email }}</span>
+              </div>
+            </div>
+
+            <!-- Botón expandir/contraer -->
+            <div class="cell expand-cell">
+              <button 
+                class="expand-btn" 
+                (click)="toggleExpand(docente)"
+                [class.active]="docente.expanded"
+              >
+                <ion-icon 
+                  [name]="docente.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+                ></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contenido expandible -->
+          <div class="expand-content" *ngIf="docente.expanded" [@expandCollapse]>
+            <div class="detail-grid">
+              <!-- Teléfono -->
+              <div class="detail-item">
+                <label>Teléfono</label>
+                <div class="detail-value">
+                  <ion-icon name="call-outline"></ion-icon>
+                  <span>{{ docente.telefono || 'N/A' }}</span>
+                </div>
+              </div>
+
+              <!-- Programa -->
+              <div class="detail-item">
+                <label>Programa</label>
+                <span class="badge badge-programa">{{ docente.programa }}</span>
+              </div>
+
+              <!-- Área -->
+              <div class="detail-item">
+                <label>Área</label>
+                <span class="badge badge-area">{{ docente.area }}</span>
+              </div>
+
+              <!-- Entidad -->
+              <div class="detail-item">
+                <label>Entidad</label>
+                <span class="badge badge-entidad">{{ docente.entidad }}</span>
+              </div>
+
+              <!-- Fecha creado -->
+              <div class="detail-item">
+                <label>Registrado</label>
+                <span class="date">{{ docente.created_at | date: 'dd/MM/yyyy' }}</span>
+              </div>
+
+              <!-- Fecha actualizado -->
+              <div class="detail-item">
+                <label>Última actualización</label>
+                <span class="date">{{ docente.updated_at | date: 'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje vacío -->
+      <div *ngIf="docentesFiltrados.length === 0" class="empty-state">
+        <ion-icon name="school-outline"></ion-icon>
+        <p>No hay docentes para mostrar</p>
+        <small>Intenta ajustar tus filtros o búsqueda</small>
+      </div>
+    </div>
+
+    <!-- Cards de docentes (Mobile) -->
+    <div *ngIf="isMobile()" class="cards-container">
+      <div *ngFor="let docente of docentesFiltrados" class="docente-card" [class.expanded]="docente.expanded">
+        <!-- Header clickeable -->
+        <div class="card-header-clickable" (click)="toggleExpand(docente)">
+          <div class="card-header">
+            <div class="avatar" [ngStyle]="getAvatarStyle(docente)">
+              {{ getInitials(docente) }}
+            </div>
+            <div class="card-title">
+              <h4>{{ docente.nombres }} {{ docente.apellidos }}</h4>
+              <small>{{ docente.entidad }}</small>
+            </div>
+          </div>
+
+          <div class="expand-icon" [class.active]="docente.expanded">
+            <ion-icon 
+              [name]="docente.expanded ? 'chevron-up-outline' : 'chevron-down-outline'"
+            ></ion-icon>
+          </div>
+        </div>
+
+        <!-- Información básica siempre visible -->
+        <div class="card-basic-info">
+          <div class="info-row">
+            <ion-icon name="mail-outline"></ion-icon>
+            <span>{{ docente.email }}</span>
+          </div>
+        </div>
+
+        <!-- Contenido expandible -->
+        <div *ngIf="docente.expanded" class="card-expand-content">
+          <!-- Teléfono -->
+          <div class="info-row">
+            <ion-icon name="call-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Teléfono</span>
+              <span class="value">{{ docente.telefono || 'N/A' }}</span>
+            </div>
+          </div>
+
+          <!-- Programa -->
+          <div class="info-row">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Programa</span>
+              <span class="value badge badge-programa">{{ docente.programa }}</span>
+            </div>
+          </div>
+
+          <!-- Área -->
+          <div class="info-row">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <div class="info-text">
+              <span class="label">Área</span>
+              <span class="value badge badge-area">{{ docente.area }}</span>
+            </div>
+          </div>
+
+          <!-- Fecha -->
+          <div class="info-row">
+            <small class="date">
+              Registrado: {{ docente.created_at | date: 'dd/MM/yyyy' }}
+            </small>
+          </div>
+
+          <div class="info-row">
+            <small class="date">
+              Actualizado: {{ docente.updated_at | date: 'dd/MM/yyyy' }}
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje vacío -->
+      <div *ngIf="docentesFiltrados.length === 0" class="empty-state">
+        <ion-icon name="school-outline"></ion-icon>
+        <p>No hay docentes para mostrar</p>
+        <small>Intenta ajustar tus filtros o búsqueda</small>
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="pagination-btn"
+      >
+        ← Anterior
+      </button>
+
+      <div class="pagination-info">
+        Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong>
+      </div>
+
+      <button
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="pagination-btn"
+      >
+        Siguiente →
+      </button>
+    </div>
+>>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f
   </div>
 </ion-content>

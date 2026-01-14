@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <ion-split-pane contentId="main-content" when="md">
     <!-- Sidebar -->
     <ion-menu contentId="main-content" type="overlay">
@@ -491,3 +492,187 @@
         </ion-content>
     </div>
 </ion-split-pane>
+=======
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-menu side="start" menuId="main-menu" class="sidebar-menu">
+  <ion-header>
+    <ion-toolbar class="sidebar-header">
+      <ion-title>ControlAsist</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-list>
+      <ion-menu-toggle auto-hide="false">
+        <ion-item button routerLink="/admin/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
+          <ion-icon slot="start" name="grid-outline"></ion-icon>
+          <ion-label>Dashboard</ion-label>
+        </ion-item>
+
+        <!-- 🆕 NUEVO: Opción de Estadísticas en el menú -->
+        <ion-item button routerLink="/admin/estadisticas" routerLinkActive="active" class="menu-item">
+          <ion-icon slot="start" name="bar-chart-outline"></ion-icon>
+          <ion-label>Estadísticas</ion-label>
+        </ion-item>
+
+        <ion-item button routerLink="/admin/docentes" routerLinkActive="active" class="menu-item">
+          <ion-icon slot="start" name="school-outline"></ion-icon>
+          <ion-label>Docentes</ion-label>
+        </ion-item>
+
+        <ion-item button routerLink="/admin/estudiantes" routerLinkActive="active" class="menu-item">
+          <ion-icon slot="start" name="people-outline"></ion-icon>
+          <ion-label>Estudiantes</ion-label>
+        </ion-item>
+
+        <ion-item button routerLink="/admin/usuarios" routerLinkActive="active" class="menu-item">
+          <ion-icon slot="start" name="person-outline"></ion-icon>
+          <ion-label>Administradores</ion-label>
+        </ion-item>
+
+        <ion-item button routerLink="/admin/perfil" routerLinkActive="active" class="menu-item">
+          <ion-icon slot="start" name="person-outline"></ion-icon>
+          <ion-label>Mi Perfil</ion-label>
+        </ion-item>
+
+        <ion-item button (click)="logout()" class="menu-item menu-logout">
+          <ion-icon slot="start" name="log-out-outline"></ion-icon>
+          <ion-label>Cerrar Sesión</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ion-list>
+  </ion-content>
+</ion-menu>
+
+<ion-content class="main-content">
+  <!-- Spinner de carga -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando dashboard...</p>
+  </div>
+
+  <!-- Contenido del dashboard -->
+  <div *ngIf="!loading" class="dashboard-container">
+    
+    <!-- Header con información del usuario -->
+    <div class="user-header">
+      <div class="user-avatar">
+        {{ getInitials(admin.nombres) }}
+      </div>
+      <div class="user-info">
+        <h2>{{ admin.nombres }} {{ admin.apellidos }}</h2>
+        <p class="user-email">{{ admin.email }}</p>
+        <span class="user-role">{{ admin.rol | uppercase }}</span>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-section">
+      <div class="stats-header">
+        <h3>Estadísticas Generales</h3>
+        <ion-button fill="clear" size="small" (click)="goToEstadisticas()">
+          <ion-icon slot="start" name="bar-chart-outline"></ion-icon>
+          Ver Detalle
+        </ion-button>
+      </div>
+      <div class="stats-grid">
+        <!-- Docentes - CLICKEABLE -->
+        <div class="stat-card docentes-card" (click)="goToEstadisticas()" role="button" tabindex="0">
+          <div class="stat-header">
+            <ion-icon name="school-outline"></ion-icon>
+            <span class="stat-number">{{ estadisticas.totalDocentes }}</span>
+          </div>
+          <div class="stat-footer">
+            <p>Docentes</p>
+          </div>
+          <div class="stat-overlay">
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </div>
+        </div>
+
+        <!-- Estudiantes - CLICKEABLE -->
+        <div class="stat-card estudiantes-card" (click)="goToEstadisticas()" role="button" tabindex="0">
+          <div class="stat-header">
+            <ion-icon name="people-outline"></ion-icon>
+            <span class="stat-number">{{ estadisticas.totalEstudiantes }}</span>
+          </div>
+          <div class="stat-footer">
+            <p>Estudiantes</p>
+          </div>
+          <div class="stat-overlay">
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </div>
+        </div>
+
+        <!-- Administradores - CLICKEABLE -->
+        <div class="stat-card administradores-card" (click)="goToEstadisticas()" role="button" tabindex="0">
+          <div class="stat-header">
+            <ion-icon name="person-outline"></ion-icon>
+            <span class="stat-number">{{ estadisticas.totalAdministradores }}</span>
+          </div>
+          <div class="stat-footer">
+            <p>Administradores</p>
+          </div>
+          <div class="stat-overlay">
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="quick-access-section">
+      <h3>Accesos Rápidos</h3>
+      <div class="quick-access-grid">
+        <ion-card class="quick-card" routerLink="/admin/docentes">
+          <ion-card-content>
+            <ion-icon name="school-outline"></ion-icon>
+            <h4>Gestionar Docentes</h4>
+            <p>Ver y editar docentes</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="quick-card" routerLink="/admin/estudiantes">
+          <ion-card-content>
+            <ion-icon name="people-outline"></ion-icon>
+            <h4>Gestionar Estudiantes</h4>
+            <p>Ver y editar estudiantes</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="quick-card" routerLink="/admin/usuarios">
+          <ion-card-content>
+            <ion-icon name="person-outline"></ion-icon>
+            <h4>Administradores</h4>
+            <p>Gestionar permisos</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="quick-card" routerLink="/admin/perfil">
+          <ion-card-content>
+            <ion-icon name="person-outline"></ion-icon>
+            <h4>Mi Perfil</h4>
+            <p>Editar información</p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+
+    <!-- Footer con botón de cerrar sesión -->
+    <div class="dashboard-footer">
+      <ion-button expand="block" (click)="logout()" class="logout-button">
+        <ion-icon slot="start" name="log-out-outline"></ion-icon>
+        Cerrar Sesión
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>
+>>>>>>> 12b5483e3a772962cb6c43c35c1e4be0fc4d057f

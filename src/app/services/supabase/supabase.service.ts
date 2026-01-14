@@ -6,7 +6,7 @@ import { environment } from "../../../environments/environment";
   providedIn: "root",
 })
 export class SupabaseService {
-  private supabase: SupabaseClient;
+  public supabase: SupabaseClient;
 
   constructor() {
     this.supabase = createClient(
@@ -33,5 +33,50 @@ export class SupabaseService {
 
   rpc(functionName: string, params?: any) {
     return this.supabase.rpc(functionName, params);
+  }
+
+  // Obtener usuario actual autenticado
+  async getCurrentUser() {
+    try {
+      const { data: { user }, error } = await this.supabase.auth.getUser();
+      if (error) {
+        console.error('Error obteniendo usuario:', error);
+        return null;
+      }
+      return user;
+    } catch (error) {
+      console.error('Error en getCurrentUser:', error);
+      return null;
+    }
+  }
+
+  // Obtener sesión actual
+  async getSession() {
+    try {
+      const { data: { session }, error } = await this.supabase.auth.getSession();
+      if (error) {
+        console.error('Error obteniendo sesión:', error);
+        return null;
+      }
+      return session;
+    } catch (error) {
+      console.error('Error en getSession:', error);
+      return null;
+    }
+  }
+
+  // Cerrar sesión
+  async logout() {
+    try {
+      const { error } = await this.supabase.auth.signOut();
+      if (error) {
+        console.error('Error cerrando sesión:', error);
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Error en logout:', error);
+      return false;
+    }
   }
 }
