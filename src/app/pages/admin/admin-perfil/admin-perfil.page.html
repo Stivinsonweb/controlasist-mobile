@@ -113,7 +113,7 @@
     </div>
 
     <!-- Acciones Card -->
-    <div *ngIf="!isEditingProfile && !isChangingPassword" class="action-buttons">
+    <div *ngIf="!isEditingProfile && !isChangingPassword && !isStoppingAccess" class="action-buttons">
       <ion-button expand="block" (click)="startEditProfile()" class="btn-edit">
         <ion-icon slot="start" name="pencil-outline"></ion-icon>
         Editar Información
@@ -123,51 +123,71 @@
         <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
         Cambiar Contraseña
       </ion-button>
+
+      <ion-button expand="block" (click)="startStoppingAccess()" class="btn-stop-access">
+        <ion-icon slot="start" name="shield-alert-outline"></ion-icon>
+        Detener Acceso 
+      </ion-button>
     </div>
 
     <!-- Modal backdrop + Edit Section -->
-    <div *ngIf="isEditingProfile" class="modal-backdrop">
-      <div class="modal-content edit-section">
-        <h3>✏️ Editar Información Personal</h3>
+    <div *ngIf="isEditingProfile" class="modal-backdrop" (click)="cancelEditProfile()">
+      <div class="modal-content edit-section" (click)="$event.stopPropagation()">
+        <!-- Header Gradient -->
+        <div class="modal-header">
+          <div class="header-content">
+            <h3>
+              <ion-icon name="pencil"></ion-icon>
+              Editar Información Personal
+            </h3>
+            <p class="header-subtitle">Actualiza tus datos personales</p>
+          </div>
+        </div>
 
-        <ion-card class="input-card">
-          <ion-card-content>
-            <!-- Nombres -->
-            <ion-item class="input-item">
-              <ion-label>Nombres</ion-label>
-              <ion-input
-                type="text"
-                [(ngModel)]="editForm.nombres"
-                placeholder="Ingresa tus nombres">
-              </ion-input>
-            </ion-item>
+        <!-- Form Content -->
+        <div class="modal-body">
+          <ion-card class="input-card">
+            <ion-card-content>
+              <!-- Nombres -->
+              <ion-item class="input-item">
+                <ion-label position="floating">Nombres</ion-label>
+                <ion-input type="text" [(ngModel)]="editForm.nombres" placeholder="Ingresa tus nombres">
+                </ion-input>
+              </ion-item>
 
-            <!-- Apellidos -->
-            <ion-item class="input-item">
-              <ion-label>Apellidos</ion-label>
-              <ion-input
-                type="text"
-                [(ngModel)]="editForm.apellidos"
-                placeholder="Ingresa tus apellidos">
-              </ion-input>
-            </ion-item>
+              <!-- Divider -->
+              <div class="field-divider"></div>
 
-            <!-- Teléfono -->
-            <ion-item class="input-item">
-              <ion-label>Teléfono</ion-label>
-              <ion-input
-                type="tel"
-                [(ngModel)]="editForm.telefono"
-                placeholder="Ingresa tu teléfono (opcional)">
-              </ion-input>
-            </ion-item>
-          </ion-card-content>
-        </ion-card>
+              <!-- Apellidos -->
+              <ion-item class="input-item">
+                <ion-label position="floating">Apellidos</ion-label>
+                <ion-input type="text" [(ngModel)]="editForm.apellidos" placeholder="Ingresa tus apellidos">
+                </ion-input>
+              </ion-item>
 
-        <!-- Botones de acción -->
-        <div class="form-actions">
+              <!-- Divider -->
+              <div class="field-divider"></div>
+
+              <!-- Teléfono -->
+              <ion-item class="input-item">
+                <ion-label position="floating">Teléfono</ion-label>
+                <ion-input type="tel" [(ngModel)]="editForm.telefono" placeholder="Ingresa tu teléfono (opcional)">
+                </ion-input>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Info Helper -->
+          <div class="info-helper">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <span>Completa los campos para actualizar tu información</span>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="modal-footer">
           <ion-button expand="block" (click)="saveProfileChanges()" [disabled]="loading" class="btn-save">
-            <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
             Guardar Cambios
           </ion-button>
 
@@ -180,74 +200,149 @@
     </div>
 
     <!-- Modal backdrop + Password Section -->
-    <div *ngIf="isChangingPassword" class="modal-backdrop">
-      <div class="modal-content password-section">
-        <h3>🔑 Cambiar Contraseña</h3>
-
-        <ion-card class="input-card">
-          <ion-card-content>
-            <!-- Contraseña Actual -->
-            <ion-item class="input-item password-item">
-              <ion-label>Contraseña Actual</ion-label>
-              <ion-input
-                [type]="showCurrentPassword ? 'text' : 'password'"
-                [(ngModel)]="passwordForm.currentPassword"
-                >
-              </ion-input>
-              <ion-icon
-                slot="end"
-                [name]="showCurrentPassword ? 'eye-outline' : 'eye-off-outline'"
-                (click)="togglePasswordVisibility('current')"
-                class="password-toggle">
-              </ion-icon>
-            </ion-item>
-
-            <!-- Nueva Contraseña -->
-            <ion-item class="input-item password-item">
-              <ion-label>Nueva Contraseña</ion-label>
-              <ion-input
-                [type]="showNewPassword ? 'text' : 'password'"
-                [(ngModel)]="passwordForm.newPassword"
-                >
-              </ion-input>
-              <ion-icon
-                slot="end"
-                [name]="showNewPassword ? 'eye-outline' : 'eye-off-outline'"
-                (click)="togglePasswordVisibility('new')"
-                class="password-toggle">
-              </ion-icon>
-            </ion-item>
-
-            <!-- Confirmar Contraseña -->
-            <ion-item class="input-item password-item">
-              <ion-label>Confirmar Contraseña</ion-label>
-              <ion-input
-                [type]="showConfirmPassword ? 'text' : 'password'"
-                [(ngModel)]="passwordForm.confirmPassword"
-                >
-              </ion-input>
-              <ion-icon
-                slot="end"
-                [name]="showConfirmPassword ? 'eye-outline' : 'eye-off-outline'"
-                (click)="togglePasswordVisibility('confirm')"
-                class="password-toggle">
-              </ion-icon>
-            </ion-item>
-          </ion-card-content>
-        </ion-card>
-
-        <div class="password-hint">
-          <small>⚠️ Mínimo 6 caracteres. Usa mayúsculas, números y símbolos para mayor seguridad.</small>
+    <div *ngIf="isChangingPassword" class="modal-backdrop" (click)="cancelChangePassword()">
+      <div class="modal-content password-section" (click)="$event.stopPropagation()">
+        <!-- Header Gradient -->
+        <div class="modal-header password-header">
+          <div class="header-content">
+            <h3>
+              <ion-icon name="key"></ion-icon>
+              Cambiar Contraseña
+            </h3>
+            <p class="header-subtitle">Protege tu cuenta con una nueva contraseña</p>
+          </div>
         </div>
 
-        <!-- Botones de acción -->
-        <div class="form-actions">
-          <ion-button expand="block" (click)="changePassword()" [disabled]="loading" class="btn-save">
-            <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+        <!-- Form Content -->
+        <div class="modal-body">
+          <ion-card class="input-card">
+            <ion-card-content>
+              <!-- Contraseña Actual -->
+              <ion-item class="input-item password-item">
+                <ion-label position="floating">Contraseña Actual</ion-label>
+                <ion-input [type]="showCurrentPassword ? 'text' : 'password'" [(ngModel)]="passwordForm.currentPassword">
+                </ion-input>
+                <ion-icon slot="end" [name]="showCurrentPassword ? 'eye' : 'eye-off'"
+                  (click)="togglePasswordVisibility('current')" class="password-toggle">
+                </ion-icon>
+              </ion-item>
+
+              <!-- Divider -->
+              <div class="field-divider"></div>
+
+              <!-- Nueva Contraseña -->
+              <ion-item class="input-item password-item">
+                <ion-label position="floating">Nueva Contraseña</ion-label>
+                <ion-input [type]="showNewPassword ? 'text' : 'password'" [(ngModel)]="passwordForm.newPassword">
+                </ion-input>
+                <ion-icon slot="end" [name]="showNewPassword ? 'eye' : 'eye-off'"
+                  (click)="togglePasswordVisibility('new')" class="password-toggle">
+                </ion-icon>
+              </ion-item>
+
+              <!-- Divider -->
+              <div class="field-divider"></div>
+
+              <!-- Confirmar Contraseña -->
+              <ion-item class="input-item password-item">
+                <ion-label position="floating">Confirmar Contraseña</ion-label>
+                <ion-input [type]="showConfirmPassword ? 'text' : 'password'" [(ngModel)]="passwordForm.confirmPassword">
+                </ion-input>
+                <ion-icon slot="end" [name]="showConfirmPassword ? 'eye' : 'eye-off'"
+                  (click)="togglePasswordVisibility('confirm')" class="password-toggle">
+                </ion-icon>
+              </ion-item>
+            </ion-card-content>
+          </ion-card>
+
+          <!-- Password Hint -->
+          <div class="password-requirements">
+            <h4>Requisitos de Seguridad</h4>
+            <ul class="requirements-list">
+              <li>
+                <span class="requirement-check">✓</span>
+                <span>Mínimo 6 caracteres</span>
+              </li>
+              <li>
+                <span class="requirement-check">✓</span>
+                <span>Incluye mayúsculas (A-Z)</span>
+              </li>
+              <li>
+                <span class="requirement-check">✓</span>
+                <span>Incluye números (0-9)</span>
+              </li>
+              <li>
+                <span class="requirement-check">✓</span>
+                <span>Incluye símbolos (!@#$%)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="modal-footer">
+          <ion-button expand="block" (click)="changePassword()" [disabled]="loading" class="btn-save password-btn-save">
+            <ion-icon slot="start" name="shield-checkmark-outline"></ion-icon>
             Actualizar Contraseña
           </ion-button>
 
           <ion-button expand="block" (click)="cancelChangePassword()" fill="outline" class="btn-cancel">
+            <ion-icon slot="start" name="close-outline"></ion-icon>
+            Cancelar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal backdrop + Stop Access Section -->
+    <div *ngIf="isStoppingAccess" class="modal-backdrop" (click)="cancelStoppingAccess()">
+      <div class="modal-content stop-access-section" (click)="$event.stopPropagation()">
+        <!-- Header Gradient -->
+        <div class="modal-header stop-access-header">
+          <div class="header-content">
+            <h3>
+              <ion-icon name="shield-alert-outline"></ion-icon>
+              Detener Acceso De La Aplicación
+            </h3>
+            <p class="header-subtitle">Esta acción deshabilitará la aplicación para docentes y estudiantes</p>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <div class="modal-body stop-access-body">
+          <!-- Warning Box -->
+          <div class="warning-box">
+            <ion-icon name="warning-outline"></ion-icon>
+            <div class="warning-content">
+              <h4>⚠️ Advertencia</h4>
+              <p>Al detener el acceso, los siguientes usuarios NO podrán usar la aplicación:</p>
+              <ul>
+                <li>Docentes</li>
+                <li>Estudiantes</li>
+              </ul>
+              <div class="warning-note">
+                <strong>Nota:</strong> Los administradores seguirán teniendo acceso completo a la plataforma.
+              </div>
+            </div>
+          </div>
+
+          <!-- Info Box -->
+          <div class="info-box">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <div class="info-content">
+              <p>Esta acción es <strong>inmediata</strong> y afectará a todos los docentes y estudiantes logueados en la aplicación.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="modal-footer">
+          <ion-button expand="block" (click)="confirmStopAccess()" [disabled]="loading" class="btn-save stop-access-btn">
+            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+            Confirmar - Detener Acceso
+          </ion-button>
+
+          <ion-button expand="block" (click)="cancelStoppingAccess()" fill="outline" class="btn-cancel">
             <ion-icon slot="start" name="close-outline"></ion-icon>
             Cancelar
           </ion-button>

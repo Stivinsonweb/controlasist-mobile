@@ -27,10 +27,12 @@ import {
   eyeOffOutline,
   lockClosedOutline,
   shieldOutline,
+  alertCircleOutline,
   settingsOutline,
   informationCircleOutline,
   calendarOutline,
   checkmarkCircleOutline,
+  warningOutline,
   callOutline,
   mailOutline
 } from 'ionicons/icons';
@@ -93,6 +95,7 @@ export class AdminPerfilPage implements OnInit {
   loading = false;
   isEditingProfile = false;
   isChangingPassword = false;
+  isStoppingAccess = false;
 
   editForm = {
     nombres: '',
@@ -124,10 +127,12 @@ export class AdminPerfilPage implements OnInit {
       eyeOffOutline,
       lockClosedOutline,
       shieldOutline,
+      alertCircleOutline,
       settingsOutline,
       informationCircleOutline,
       calendarOutline,
       checkmarkCircleOutline,
+      warningOutline,
       callOutline,
       mailOutline
     });
@@ -363,6 +368,74 @@ export class AdminPerfilPage implements OnInit {
       this.showNewPassword = !this.showNewPassword;
     } else {
       this.showConfirmPassword = !this.showConfirmPassword;
+    }
+  }
+
+  // ============================================================
+  // DETENER ACCESO A USUARIOS
+  // ============================================================
+
+  startStoppingAccess() {
+    console.log('🛑 Abriendo modal de detener acceso...');
+    this.isStoppingAccess = true;
+    this.cdr.markForCheck();
+  }
+
+  cancelStoppingAccess() {
+    console.log('❌ Cancelando detención de acceso');
+    this.isStoppingAccess = false;
+    this.cdr.markForCheck();
+  }
+
+  async confirmStopAccess() {
+    try {
+      this.loading = true;
+      console.log('🔄 Confirmando detención de acceso...');
+
+      // Obtener usuario autenticado
+      const user = await this.supabaseService.getCurrentUser();
+
+      if (!user) {
+        this.toastService.showError('Usuario no autenticado');
+        console.error('❌ Usuario no autenticado');
+        return;
+      }
+
+      console.log('👤 Usuario ID:', user.id);
+
+      // Insertar registro en Supabase
+      const { error } = await this.supabaseService.supabase
+        .from('app_access_control')
+        .insert({
+          admin_id: user.id,
+          access_enabled: false,
+          allowed_roles: ['administrador'],
+          stopped_at: new Date().toISOString(),
+          stopped_by: user.id,
+          reason: 'Acceso detenido por administrador'
+        });
+
+      if (error) {
+        console.error('❌ Error en Supabase:', error);
+        throw error;
+      }
+
+      console.log('✅ Acceso detenido exitosamente');
+
+      // Cerrar modal
+      this.isStoppingAccess = false;
+
+      // Mostrar mensaje de éxito
+      this.toastService.showSuccess('✓ Acceso detenido para docentes y estudiantes');
+
+      // Actualizar UI
+      this.cdr.markForCheck();
+
+    } catch (error: any) {
+      console.error('❌ Error en confirmStopAccess:', error);
+      this.toastService.showError('Error al detener acceso: ' + error.message);
+    } finally {
+      this.loading = false;
     }
   }
 

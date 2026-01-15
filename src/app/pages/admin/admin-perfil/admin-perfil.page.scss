@@ -1,17 +1,24 @@
-// Variables
+// ============================================================
+// VARIABLES Y COLORES
+// ============================================================
 $color-primary: #10b981;
 $color-primary-dark: #059669;
+$color-primary-light: #d1fae5;
 $color-secondary: #a855f7;
 $color-secondary-dark: #7c3aed;
+$color-secondary-light: #f3e8ff;
 $color-white: #ffffff;
 $color-bg: linear-gradient(135deg, #f8f9fa 0%, #f0fdf4 50%, #f3e8ff 100%);
 $color-text-dark: #1f2937;
+$color-text-medium: #374151;
 $color-text-light: #6b7280;
-$color-border: #0000001f;
+$color-text-lighter: #9ca3af;
+$color-border: #e5e7eb;
+$color-border-light: #f3f4f6;
 $color-error: #ef4444;
 $color-success: #10b981;
 
-// Forzar modo claro (sin dark mode)
+// Forzar modo claro
 :host {
   color-scheme: light;
 }
@@ -28,17 +35,20 @@ ion-page {
   --android-background-color: #f8f9fa !important;
 }
 
-// Header
+// ============================================================
+// HEADER
+// ============================================================
 ion-header {
   .header-toolbar {
     --background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
     --color: $color-white;
-    --border-bottom: 1px solid $color-primary-dark;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    --border-bottom: 1px solid rgba(5, 150, 105, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 
     ion-title {
       font-weight: 700;
       font-size: 1.25rem;
+      letter-spacing: -0.5px;
     }
 
     ion-back-button {
@@ -48,7 +58,9 @@ ion-header {
   }
 }
 
-// Main content
+// ============================================================
+// MAIN CONTENT
+// ============================================================
 ion-content {
   --background: $color-bg;
   --padding-start: 0;
@@ -82,7 +94,9 @@ ion-page {
   }
 }
 
-// Container principal
+// ============================================================
+// PROFILE CONTAINER
+// ============================================================
 .perfil-container {
   padding: 1.5rem;
   max-width: 600px;
@@ -90,41 +104,57 @@ ion-page {
   padding-bottom: 2rem;
 }
 
-// ===== PROFILE HEADER CARD =====
+// Profile Header Card
 .profile-header-card {
-  background: linear-gradient(135deg, $color-secondary, $color-secondary-dark);
-  padding: 2rem 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-dark 100%);
+  padding: 2.5rem 1.5rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 24px rgba(168, 85, 247, 0.2);
   margin-bottom: 2rem;
   text-align: center;
   color: $color-white;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+  }
 
   .profile-avatar {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1.75rem;
-    margin: 0 auto 1rem;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
   h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.5rem;
+    margin: 0 0 0.75rem 0;
+    font-size: 1.75rem;
     font-weight: 700;
+    letter-spacing: -0.5px;
   }
 
   .profile-email,
   .profile-phone {
-    margin: 0.5rem 0;
+    margin: 0.75rem 0;
     font-size: 0.95rem;
-    opacity: 0.95;
+    opacity: 0.9;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -138,34 +168,44 @@ ion-page {
   .profile-role {
     display: inline-block;
     background: rgba(255, 255, 255, 0.2);
-    padding: 0.375rem 1rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    margin-top: 1rem;
+    margin-top: 1.25rem;
+    letter-spacing: 0.5px;
   }
 }
 
-// ===== INFO CARDS =====
+// ============================================================
+// INFO CARDS
+// ============================================================
 .info-card {
   background: $color-white;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
   margin-bottom: 1.5rem;
   overflow: hidden;
-  border-left: 4px solid $color-primary;
+  border-left: 5px solid $color-primary;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
 
   .card-header {
-    background: #f9fafb;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid $color-border;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid $color-border-light;
 
     h4 {
       margin: 0;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: $color-text-dark;
+      letter-spacing: -0.3px;
     }
   }
 
@@ -183,11 +223,18 @@ ion-page {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid $color-border;
+  padding: 1rem 0;
+  border-bottom: 1px solid $color-border-light;
+  transition: all 0.2s ease;
 
   &:last-child {
     border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(16, 185, 129, 0.02);
+    padding: 1rem 0.5rem;
+    border-radius: 0.5rem;
   }
 
   .info-label {
@@ -209,20 +256,23 @@ ion-page {
     }
 
     &.badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
+      padding: 0.35rem 1rem;
+      border-radius: 20px;
       font-size: 0.85rem;
       gap: 0.35rem;
 
       &.badge-active {
-        background: #dcfce7;
+        background: rgba(16, 185, 129, 0.1);
         color: #166534;
+        font-weight: 600;
       }
     }
   }
 }
 
-// ===== STATS GRID =====
+// ============================================================
+// STATS GRID
+// ============================================================
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -230,14 +280,23 @@ ion-page {
 
   .stat-item {
     text-align: center;
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 0.75rem;
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-radius: 1rem;
     border: 1px solid $color-border;
+    transition: all 0.3s ease;
+    cursor: default;
+
+    &:hover {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dbeafe 100%);
+      border-color: $color-primary-light;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(16, 185, 129, 0.15);
+    }
 
     .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
+      font-size: 2.25rem;
+      font-weight: 800;
       color: $color-primary;
       margin-bottom: 0.5rem;
     }
@@ -246,59 +305,71 @@ ion-page {
       font-size: 0.85rem;
       color: $color-text-light;
       font-weight: 600;
+      letter-spacing: 0.3px;
     }
   }
 }
 
-// ===== SECURITY ITEMS =====
+// ============================================================
+// SECURITY ITEMS
+// ============================================================
 .security-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  margin-bottom: 0.75rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 0.875rem;
+  margin-bottom: 1rem;
   border: 1px solid $color-border;
+  transition: all 0.2s ease;
 
   &:last-child {
     margin-bottom: 0;
   }
 
+  &:hover {
+    background: linear-gradient(135deg, #f0fdf4 0%, #f5f3ff 100%);
+    border-color: $color-primary-light;
+  }
+
   .security-info {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.35rem;
 
     .security-label {
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
       color: $color-text-dark;
     }
 
     .security-desc {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: $color-text-light;
     }
   }
 
   .security-badge {
     display: inline-block;
-    padding: 0.35rem 0.75rem;
-    border-radius: 9999px;
+    padding: 0.4rem 0.9rem;
+    border-radius: 16px;
     font-size: 0.75rem;
     font-weight: 700;
-    background: #fee2e2;
+    background: rgba(239, 68, 68, 0.1);
     color: #991b1b;
+    letter-spacing: 0.3px;
 
     &.active {
-      background: #dcfce7;
+      background: rgba(16, 185, 129, 0.1);
       color: #166534;
     }
   }
 }
 
-// ===== ACTION BUTTONS =====
+// ============================================================
+// ACTION BUTTONS
+// ============================================================
 .action-buttons {
   display: flex;
   flex-direction: column;
@@ -306,21 +377,27 @@ ion-page {
   margin-bottom: 1.5rem;
 
   ion-button {
-    --border-radius: 0.5rem;
+    --border-radius: 0.75rem;
     font-weight: 600;
     text-transform: none;
-    height: 48px;
+    height: 52px;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
 
     &.btn-edit {
       --background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
       --background-activated: $color-primary-dark;
       --color: $color-white;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+      }
+
+      &:active {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
       }
     }
 
@@ -328,102 +405,175 @@ ion-page {
       --background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-dark 100%);
       --background-activated: $color-secondary-dark;
       --color: $color-white;
-      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.35);
-      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        box-shadow: 0 8px 25px rgba(168, 85, 247, 0.45);
+        box-shadow: 0 12px 32px rgba(168, 85, 247, 0.4);
+        transform: translateY(-4px);
+      }
+
+      &:active {
+        transform: translateY(-2px);
+      }
+    }
+
+    &.btn-stop-access {
+      --background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      --background-activated: #991b1b;
+      --color: $color-white;
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        box-shadow: 0 12px 32px rgba(220, 38, 38, 0.4);
+        transform: translateY(-4px);
+      }
+
+      &:active {
         transform: translateY(-2px);
       }
     }
 
     ion-icon {
-      margin-right: 0.5rem;
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
     }
   }
 }
 
-// ===== LOGOUT SECTION =====
-.logout-section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 2px solid $color-border;
-
-  ion-button.btn-logout {
-    --background: $color-error;
-    --background-activated: #dc2626;
-    --background-hover: #dc2626;
-    --color: $color-white;
-    --border-radius: 0.5rem;
-    font-weight: 600;
-    text-transform: none;
-    height: 48px;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-    transition: all 0.3s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.45);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-    }
-
-    ion-icon {
-      margin-right: 0.5rem;
-    }
-  }
-}
-
-// ===== MODAL BACKDROP =====
+// ============================================================
+// MODAL BACKDROP
+// ============================================================
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: flex-end;
   z-index: 1000;
-  animation: slideUp 0.3s ease-out;
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(6px);
 
   .modal-content {
     width: 100%;
     background: $color-white;
-    border-radius: 1.5rem 1.5rem 0 0;
-    padding: 1.5rem;
+    border-radius: 2rem 2rem 0 0;
+    padding: 0;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.25);
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+// ============================================================
+// MODAL HEADER
+// ============================================================
+.modal-header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  padding: 2.5rem 1.5rem;
+  color: $color-white;
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem 2rem 0 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
 
     h3 {
-      margin: 0 0 1.5rem 0;
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: $color-text-dark;
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: -0.5px;
+
+      ion-icon {
+        font-size: 1.75rem;
+      }
+    }
+
+    .header-subtitle {
+      margin: 0;
+      font-size: 0.95rem;
+      opacity: 0.9;
+      font-weight: 400;
+      letter-spacing: 0.2px;
     }
   }
-}
 
-// ===== EDIT SECTION =====
-.edit-section,
-.password-section {
-  h3 {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: $color-text-dark;
+  &.password-header {
+    background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-dark 100%);
+  }
+
+  &.stop-access-header {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   }
 }
 
-// ===== INPUT CARD =====
+// ============================================================
+// MODAL BODY
+// ============================================================
+.modal-body {
+  padding: 2rem 1.5rem;
+}
+
+// ============================================================
+// MODAL FOOTER
+// ============================================================
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid $color-border-light;
+  background: linear-gradient(to bottom, transparent, rgba(16, 185, 129, 0.02));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ============================================================
+// INPUT CARD
+// ============================================================
 .input-card {
   --background: $color-white;
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin: 0 0 1.5rem 0;
-  border-radius: 0.75rem;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin: 0;
+  border-radius: 1.25rem;
+  border: 1px solid $color-border;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: $color-primary-light;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+  }
 
   ion-card-content {
     padding: 1.5rem;
@@ -435,121 +585,242 @@ ion-page {
 
   .input-item {
     --background: transparent;
-    --border-bottom: 1px solid $color-border;
-    margin-bottom: 1rem;
+    --border-bottom: none;
     --padding-start: 0;
     --padding-end: 0;
+    margin-bottom: 1.5rem;
 
     &:last-child {
-      --border-bottom: none;
       margin-bottom: 0;
     }
 
     ion-label {
-      --color: $color-text-dark;
+      --color: $color-text-medium;
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.2px;
     }
 
     ion-input {
       --color: $color-text-dark;
-      --placeholder-color: $color-text-light;
+      --placeholder-color: $color-text-lighter;
+      font-size: 1rem;
+      padding: 0.75rem 0 0.5rem 0;
+      border-bottom: 2px solid $color-border;
+      transition: all 0.2s ease;
+
+      &:focus {
+        border-bottom-color: $color-primary;
+      }
     }
 
     &.password-item {
-      display: flex;
-      align-items: center;
       position: relative;
 
+      ion-input {
+        padding-right: 2.5rem;
+      }
+
       .password-toggle {
-        font-size: 1.25rem;
+        position: absolute;
+        right: 0;
+        bottom: 0.75rem;
+        font-size: 1.3rem;
         color: $color-primary;
         cursor: pointer;
-        transition: color 0.3s ease;
+        transition: all 0.2s ease;
 
         &:active {
           color: $color-primary-dark;
+          transform: scale(0.95);
         }
       }
     }
   }
 }
 
-// ===== PASSWORD HINT =====
-.password-hint {
-  background: #fef3c7;
-  border: 1px solid #fcd34d;
-  border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.5rem
+// ============================================================
+// FIELD DIVIDER
+// ============================================================
+.field-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, $color-border, transparent);
+  margin: 1rem 0;
+}
 
-;
-  font-size: 0.85rem;
-  color: #92400e;
+// ============================================================
+// INFO HELPER
+// ============================================================
+.info-helper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 0.875rem;
+  font-size: 0.9rem;
+  color: $color-text-medium;
+  margin-top: 1.5rem;
+  animation: fadeIn 0.4s ease;
 
-  small {
-    display: block;
+  ion-icon {
+    color: $color-primary;
+    font-size: 1.25rem;
+    flex-shrink: 0;
   }
 }
 
-// ===== FORM ACTIONS =====
+// ============================================================
+// PASSWORD REQUIREMENTS
+// ============================================================
+.password-requirements {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.04) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+
+  h4 {
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #6b21a8;
+  }
+
+  .requirements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: $color-text-medium;
+
+      .requirement-check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        background: rgba(168, 85, 247, 0.15);
+        border-radius: 50%;
+        color: #7c3aed;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// ============================================================
+// FORM ACTIONS
+// ============================================================
 .form-actions {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 
   ion-button {
-    --border-radius: 0.5rem;
-    font-weight: 600;
+    --border-radius: 0.875rem;
+    font-weight: 700;
     text-transform: none;
-    height: 48px;
+    height: 52px;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &.btn-save {
       --background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       --background-activated: #047857;
       --color: $color-white;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
-      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
 
-      &:hover {
-        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
-        transform: translateY(-2px);
+      &:hover:not(:disabled) {
+        box-shadow: 0 10px 32px rgba(16, 185, 129, 0.45);
+        transform: translateY(-3px);
       }
 
       &:disabled {
-        opacity: 0.6;
+        opacity: 0.65;
       }
 
       ion-icon {
-        margin-right: 0.75rem;
+        margin-right: 0.5rem;
+        font-size: 1.25rem;
+      }
+    }
+
+    &.password-btn-save {
+      --background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+      --background-activated: #6d28d9;
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.35);
+
+      &:hover:not(:disabled) {
+        box-shadow: 0 10px 32px rgba(168, 85, 247, 0.45);
+        transform: translateY(-3px);
       }
     }
 
     &.btn-cancel {
-      --border-width: 2px;
-      --border-color: #e5e7eb;
-      --color: $color-text-dark;
-      background-color: transparent;
+      --background: transparent !important;
+      --background-activated: #ef4444 !important;
+      --background-hover: #ef4444 !important;
+      --border-color: #ef4444 !important;
+      --border-width: 2px !important;
+      --border-style: solid !important;
+      --color: #ef4444 !important;
+      --color-activated: #ffffff !important;
+      --color-hover: #ffffff !important;
       transition: all 0.3s ease;
 
       &:hover {
-        --border-color: $color-error;
-        --color: $color-error;
-        background-color: rgba(239, 68, 68, 0.05);
+        --background: #ef4444 !important;
+        --color: #ffffff !important;
+        --border-color: #dc2626 !important;
+        transform: translateY(-2px);
+      }
+
+      &:active {
+        transform: translateY(-1px);
       }
 
       ion-icon {
-        margin-right: 0.75rem;
+        margin-right: 0.5rem;
+        font-size: 1.25rem;
       }
+    }
+
+    ion-icon {
+      transition: all 0.2s ease;
     }
   }
 }
 
-// ===== ANIMACIONES =====
+// ============================================================
+// ANIMATIONS
+// ============================================================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
@@ -557,26 +828,298 @@ ion-page {
   }
 }
 
-// ===== RESPONSIVE =====
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+}
+
+// ============================================================
+// RESPONSIVE DESIGN
+// ============================================================
 @media (max-width: 768px) {
   .perfil-container {
     padding: 1rem;
   }
 
   .profile-header-card {
-    padding: 1.5rem 1rem;
+    padding: 2rem 1rem;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .profile-avatar {
+      width: 75px;
+      height: 75px;
+      font-size: 1.75rem;
+    }
   }
 
-  .modal-backdrop .modal-content {
-    border-radius: 1.5rem 1.5rem 0 0;
-    padding: 1.25rem;
+  .action-buttons ion-button {
+    height: 48px;
+    font-size: 0.95rem;
+  }
+
+  .modal-header {
+    padding: 2rem 1.25rem;
+
+    .header-content h3 {
+      font-size: 1.3rem;
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.25rem;
   }
 
   .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
 
-  .stat-item {
+  .info-card {
+    .card-header {
+      padding: 1rem;
+
+      h4 {
+        font-size: 0.95rem;
+      }
+    }
+
+    .card-body {
+      padding: 1.25rem;
+    }
+  }
+
+  .form-actions ion-button {
+    height: 48px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-header {
+    padding: 1.75rem 1rem;
+
+    .header-content {
+      h3 {
+        font-size: 1.2rem;
+        gap: 0.5rem;
+
+        ion-icon {
+          font-size: 1.5rem;
+        }
+      }
+
+      .header-subtitle {
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 1.25rem 1rem;
+  }
+
+  .modal-footer {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .input-card ion-card-content {
+    padding: 1.25rem;
+  }
+
+  .password-requirements {
+    padding: 1rem;
+
+    h4 {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .requirements-list {
+      gap: 0.5rem;
+
+      li {
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .info-helper {
+    font-size: 0.85rem;
     padding: 0.75rem;
+
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// ============================================================
+// MODAL DETENER ACCESO
+// ============================================================
+.stop-access-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .warning-box {
+    display: flex;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-left: 5px solid #dc2626;
+    border-radius: 1rem;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.3), transparent);
+      border-radius: 1rem;
+      pointer-events: none;
+    }
+
+    ion-icon {
+      color: #dc2626;
+      font-size: 1.5rem;
+      min-width: 28px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .warning-content {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+
+      h4 {
+        color: #7f1d1d;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+
+      p {
+        color: #991b1b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 0.5rem;
+      }
+
+      ul {
+        list-style: none;
+        margin: 0.75rem 0;
+        padding-left: 0;
+
+        li {
+          color: #991b1b;
+          font-size: 0.9rem;
+          padding: 0.35rem 0;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          &:before {
+            content: "●";
+            color: #dc2626;
+            font-weight: bold;
+          }
+        }
+      }
+
+      .warning-note {
+        background-color: rgba(220, 38, 38, 0.1);
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        margin-top: 0.75rem;
+        color: #7f1d1d;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .info-box {
+    display: flex;
+    gap: 1rem;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-left: 5px solid #3b82f6;
+    border-radius: 1rem;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.3), transparent);
+      border-radius: 1rem;
+      pointer-events: none;
+    }
+
+    ion-icon {
+      color: #3b82f6;
+      font-size: 1.5rem;
+      min-width: 28px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .info-content {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+
+      p {
+        color: #1e40af;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0;
+
+        strong {
+          font-weight: 700;
+        }
+      }
+    }
+  }
+}
+
+.stop-access-btn {
+  --background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  --background-activated: #991b1b;
+  --color: $color-white;
+  font-weight: 600;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  ion-icon {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
   }
 }
