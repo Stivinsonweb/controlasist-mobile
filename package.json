@@ -8,6 +8,7 @@
     "start": "ng serve",
     "build": "ng build",
     "generate-icons": "node scripts/generate-icons.js",
+    "deploy-cpanel": "bash scripts/deploy-cpanel.sh",
     "watch": "ng build --watch --configuration development"
   },
   "dependencies": {
