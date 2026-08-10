@@ -1,0 +1,80 @@
+<div class="animate-fade-in">
+
+  <!-- Encabezado de perfil -->
+  <div class="card mb-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-4">
+      <app-avatar *ngIf="!loadingProfile()" [fotoUrl]="docente()?.foto_url" [iniciales]="getIniciales()" colorFondo="var(--accent-from)" shape="square" sizeClass="h-14 w-14 text-lg" />
+      <div *ngIf="loadingProfile()" class="flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">—</div>
+      <div>
+        <p class="text-lg font-bold" style="color: var(--text-primary);">{{ getNombreCompleto() }}</p>
+        <p class="text-sm" style="color: var(--text-muted);">{{ docente()?.email }}</p>
+      </div>
+    </div>
+    <button (click)="crearAsignatura()" class="btn-primary">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+      Nueva asignatura
+    </button>
+  </div>
+
+  <!-- Filtro de periodo -->
+  <div class="mb-5 flex items-center gap-2 overflow-x-auto pb-1">
+    <button (click)="setPeriodo('todos')"
+            class="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+            [ngClass]="periodoSeleccionado() === 'todos' ? '' : 'border'"
+            [style]="periodoSeleccionado() === 'todos' ? 'background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); color: #fff;' : 'background: var(--bg-surface-2); border-color: var(--border-subtle-2); color: var(--text-secondary);'">
+      Todos
+    </button>
+    <button *ngFor="let p of periodos()" (click)="setPeriodo(p)"
+            class="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+            [ngClass]="periodoSeleccionado() === p ? '' : 'border'"
+            [style]="periodoSeleccionado() === p ? 'background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); color: #fff;' : 'background: var(--bg-surface-2); border-color: var(--border-subtle-2); color: var(--text-secondary);'">
+      {{ p }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loadingAsignaturas()" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let i of [1,2,3]" class="card skeleton h-36"></div>
+  </div>
+
+  <!-- Vacío -->
+  <div *ngIf="!loadingAsignaturas() && asignaturasFiltradas().length === 0"
+       class="card relative flex flex-col items-center justify-center overflow-hidden py-16 text-center">
+    <app-edu-background />
+    <svg class="relative z-10 h-12 w-12" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+    <p class="relative z-10 mt-4 text-sm font-semibold" style="color: var(--text-secondary);">Aún no tienes asignaturas</p>
+    <p class="relative z-10 mt-1 text-sm" style="color: var(--text-muted);">Crea tu primera asignatura para empezar a registrar asistencia.</p>
+    <button (click)="crearAsignatura()" class="btn-primary relative z-10 mt-5">Crear asignatura</button>
+  </div>
+
+  <!-- Grid de asignaturas -->
+  <div *ngIf="!loadingAsignaturas() && asignaturasFiltradas().length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <button *ngFor="let a of asignaturasFiltradas(); let idx = index" (click)="verAsignatura(a)"
+            class="subject-card group relative flex flex-col items-start overflow-hidden rounded-2xl p-5 text-left text-white transition-all duration-200 hover:scale-[1.02]"
+            [style]="gradientStyle(a.color)"
+            [style.box-shadow]="shadowStyle(a.color)['box-shadow']"
+            [class.opacity-60]="!a.activa">
+      <svg class="pointer-events-none absolute -right-4 -top-4 h-28 w-28 opacity-15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+
+      <div class="relative z-10 flex w-full items-center justify-between">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
+          <app-subject-icon [icono]="a.icono" sizeClass="h-5 w-5" />
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span *ngIf="!a.activa" class="rounded-full bg-black/20 px-2.5 py-1 text-xs font-semibold">Archivada</span>
+          <span class="rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold backdrop-blur">{{ a.grupo }}</span>
+        </div>
+      </div>
+      <p class="relative z-10 mt-3 line-clamp-2 text-base font-bold">{{ a.nombre }}</p>
+      <p class="relative z-10 mt-1 text-xs font-medium text-white/80">{{ a.codigo }} · {{ a.periodo }}</p>
+
+      <div class="relative z-10 mt-4 flex w-full items-center justify-between border-t border-white/20 pt-3 text-xs text-white/90">
+        <span class="inline-flex items-center gap-1">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+          {{ a.creditos }} créditos
+        </span>
+        <span>{{ a.modalidad }}</span>
+      </div>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,510 @@
+<div class="mx-auto max-w-6xl animate-fade-in" *ngIf="!loading() && asignatura() as a">
+
+  <!-- Hero de la asignatura -->
+  <div class="relative mb-5 overflow-hidden rounded-3xl p-6 text-white" [style]="gradientStyle(a.color)" [style.box-shadow]="shadowStyle(a.color)['box-shadow']">
+    <svg class="pointer-events-none absolute -right-8 -top-10 h-44 w-44 opacity-15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+
+    <div class="relative z-10 flex flex-wrap items-center gap-4">
+      <a routerLink="/home" class="rounded-lg p-2 text-white/80 transition-colors hover:bg-white/15 hover:text-white">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+      </a>
+      <div class="flex items-center gap-3">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur">
+          <app-subject-icon [icono]="a.icono" sizeClass="h-6 w-6" />
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-xl font-bold">{{ a.nombre }}</h1>
+            <span class="rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold backdrop-blur">{{ a.periodo }}</span>
+            <span *ngIf="!a.activa" class="rounded-full bg-black/20 px-2.5 py-1 text-xs font-semibold">Archivada</span>
+          </div>
+          <p class="mt-0.5 text-sm text-white/80">{{ a.codigo }} · Grupo {{ a.grupo }} · {{ a.modalidad }}</p>
+        </div>
+      </div>
+      <div class="ml-auto flex gap-2">
+        <button (click)="irAReportes()" class="rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/25">Reportes</button>
+        <button (click)="irAEditar()" class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-white/90">Editar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-5 p-6">
+    <h3 class="text-base font-bold" style="color: var(--text-primary);">Calendario de clases</h3>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Haz clic en una clase para marcar su estado (realizada, cancelada o aplazada).</p>
+    <div class="mt-4">
+      <app-calendario-clases [horarios]="horarios()" (claseClick)="onClaseClick($event)"></app-calendario-clases>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+    <!-- Info general -->
+    <div class="card p-6 lg:col-span-2">
+      <h3 class="text-base font-bold" style="color: var(--text-primary);">Información general</h3>
+      <dl class="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+        <div class="flex items-center gap-2.5 rounded-xl px-3 py-2.5" style="background: rgba(255,255,255,0.04);">
+          <svg class="h-4 w-4 shrink-0" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347M8.288 14.212A5.25 5.25 0 0117.25 10.5c0-.184-.007-.366-.021-.547m-15.458.547A5.25 5.25 0 0016.25 10.5c0 .184-.007.366-.021.547M12 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489" /></svg>
+          <div><dt class="text-xs" style="color: var(--text-muted);">Nivel</dt><dd class="font-medium" style="color: var(--text-primary);">{{ a.nivel || '—' }}</dd></div>
+        </div>
+        <div class="flex items-center gap-2.5 rounded-xl px-3 py-2.5" style="background: rgba(255,255,255,0.04);">
+          <svg class="h-4 w-4 shrink-0" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+          <div><dt class="text-xs" style="color: var(--text-muted);">Créditos</dt><dd class="font-medium" style="color: var(--text-primary);">{{ a.creditos }}</dd></div>
+        </div>
+        <div class="flex items-center gap-2.5 rounded-xl px-3 py-2.5" style="background: rgba(255,255,255,0.04);">
+          <svg class="h-4 w-4 shrink-0" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" /></svg>
+          <div><dt class="text-xs" style="color: var(--text-muted);">Aula</dt><dd class="font-medium" style="color: var(--text-primary);">{{ a.aula || '—' }}</dd></div>
+        </div>
+        <div class="flex items-center gap-2.5 rounded-xl px-3 py-2.5" style="background: rgba(255,255,255,0.04);">
+          <svg class="h-4 w-4 shrink-0" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" /></svg>
+          <div><dt class="text-xs" style="color: var(--text-muted);">Facultad</dt><dd class="font-medium" style="color: var(--text-primary);">{{ a.facultad || '—' }}</dd></div>
+        </div>
+        <div class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 sm:col-span-2" style="background: rgba(255,255,255,0.04);">
+          <svg class="h-4 w-4 shrink-0" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292" /></svg>
+          <div><dt class="text-xs" style="color: var(--text-muted);">Programa</dt><dd class="font-medium" style="color: var(--text-primary);">{{ a.programa || '—' }}</dd></div>
+        </div>
+      </dl>
+
+      <div class="mt-6 flex items-center justify-between">
+        <h3 class="text-base font-bold" style="color: var(--text-primary);">Horarios de clase</h3>
+        <div class="flex gap-2">
+          <button (click)="abrirAgregarMultiples()" class="btn-outline btn-sm">Agregar varios</button>
+          <button (click)="abrirAgregarHorario()" class="btn-primary btn-sm">+ Horario</button>
+        </div>
+      </div>
+      <div *ngIf="horarios().length === 0" class="mt-3 rounded-xl border border-dashed p-4 text-sm" style="border-color: var(--border-subtle); color: var(--text-muted);">
+        Aún no hay horarios registrados para esta asignatura.
+      </div>
+      <ul *ngIf="horarios().length > 0" class="mt-3 space-y-2">
+        <li *ngFor="let h of horarios()" class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm" style="background: rgba(255,255,255,0.04); color: var(--text-secondary);">
+          <svg class="h-4 w-4 shrink-0 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span class="flex-1">{{ horarioLabel(h) }}</span>
+          <button (click)="pedirEliminarHorario(h)" class="rounded-lg p-1.5 transition-colors hover:bg-red-500/10 hover:text-red-400" style="color: var(--text-muted);" aria-label="Eliminar horario">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Panel lateral -->
+    <div class="space-y-5">
+      <div class="card p-6 text-center">
+        <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Código de acceso</p>
+        <p class="mt-2 font-mono text-2xl font-extrabold tracking-widest" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); -webkit-background-clip: text; background-clip: text; color: transparent;">{{ a.codigo_acceso || '——————' }}</p>
+        <div class="mt-3 grid grid-cols-2 gap-2">
+          <button (click)="copiarCodigo()" class="btn-outline text-xs">Copiar</button>
+          <button (click)="abrirCodigoConfig()" class="btn-outline text-xs">Configurar</button>
+        </div>
+        <p class="mt-2 text-xs" style="color: var(--text-muted);">Compártelo con tus estudiantes para que se inscriban.</p>
+      </div>
+
+      <div class="card p-6">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Estudiantes inscritos</p>
+            <p class="mt-2 text-3xl font-extrabold" style="color: var(--text-primary);">{{ totalEstudiantes() }}</p>
+          </div>
+          <button (click)="abrirCargaMasiva()" class="btn-outline btn-sm shrink-0">Cargar Excel/CSV</button>
+        </div>
+
+        <div *ngIf="roster().length === 0" class="mt-3 text-xs" style="color: var(--text-muted);">Aún no hay estudiantes inscritos.</div>
+        <ul *ngIf="roster().length > 0" class="mt-3 max-h-56 space-y-1.5 overflow-y-auto">
+          <li *ngFor="let item of roster()">
+            <button *ngIf="item.estudiantes as e" (click)="verEstudiante(item)" class="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-white/5" style="color: var(--text-secondary);">
+              <app-avatar [fotoUrl]="e.foto_url" [iniciales]="iniciales(e)" colorFondo="#dbeafe" textColor="#1d4ed8" sizeClass="h-7 w-7 text-[11px]" [ring]="true" />
+              <span class="min-w-0 flex-1 truncate">{{ e.nombres }} {{ e.apellidos }}</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card p-6" style="background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.25);">
+        <p class="text-sm font-semibold text-red-400">Zona de riesgo</p>
+        <p class="mt-1 text-xs" style="color: var(--text-muted);">Desactivar archiva la asignatura sin borrar su historial: seguirá visible en tu inicio filtrando por su periodo, marcada como "Archivada".</p>
+        <button (click)="showConfirmDesactivar = true" class="mt-3 w-full rounded-xl border py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10" style="border-color: rgba(239,68,68,0.3);">
+          Desactivar asignatura
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historial de clases dictadas -->
+  <div class="card mt-5 p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h3 class="text-base font-bold" style="color: var(--text-primary);">Historial de clases dictadas</h3>
+      <select [ngModel]="filtroTipoClaseHistorial()" (ngModelChange)="filtroTipoClaseHistorial.set($event)" class="input-field w-auto py-2 text-sm">
+        <option value="todos">Todos los tipos</option>
+        <option *ngFor="let t of tiposClase" [value]="t.valor">{{ t.label }}</option>
+      </select>
+    </div>
+
+    <div *ngIf="loadingHistorial()" class="mt-3 space-y-2">
+      <div class="skeleton h-12"></div>
+      <div class="skeleton h-12"></div>
+    </div>
+
+    <div *ngIf="!loadingHistorial() && historialFiltrado().length === 0" class="mt-3 rounded-xl border border-dashed p-4 text-center text-sm" style="border-color: var(--border-subtle); color: var(--text-muted);">
+      Aún no hay clases dictadas registradas{{ filtroTipoClaseHistorial() !== 'todos' ? ' para este tipo' : '' }}.
+    </div>
+
+    <ul *ngIf="!loadingHistorial() && historialFiltrado().length > 0" class="mt-3 max-h-96 space-y-1.5 overflow-y-auto">
+      <li *ngFor="let h of historialFiltrado()">
+        <button (click)="abrirDetalleClase(h)" class="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-white/[0.06]" style="background: rgba(255,255,255,0.04);">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ h.fecha }} · {{ h.hora_inicio }} - {{ h.hora_fin }}</p>
+            <p class="mt-0.5 truncate text-xs" style="color: var(--text-muted);">{{ h.temas_tratados || 'Sin temas registrados' }}</p>
+          </div>
+          <span class="badge-neutral shrink-0">{{ tipoClaseLabel(h.tipo_clase) }}</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div *ngIf="loading()" class="flex justify-center py-24">
+  <svg class="h-8 w-8 animate-spin text-primary-600" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+</div>
+
+<!-- Modal confirmar desactivar -->
+<app-dialog [open]="showConfirmDesactivar" (closed)="showConfirmDesactivar = false">
+  <h3 class="text-lg font-bold text-slate-900">¿Desactivar asignatura?</h3>
+  <p class="mt-1 text-sm text-slate-500">Quedará marcada como archivada en tu inicio (filtrando por su periodo) y ya no aparecerá en la búsqueda de estudiantes por código de acceso. Esta acción se puede revertir desde la base de datos.</p>
+  <div class="mt-5 flex gap-2">
+    <button (click)="showConfirmDesactivar = false" class="btn-outline flex-1">Cancelar</button>
+    <button (click)="confirmarDesactivar()" class="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700">Sí, desactivar</button>
+  </div>
+</app-dialog>
+
+<!-- Agregar horario único -->
+<app-dialog [open]="showAgregarHorario" size="md" (closed)="showAgregarHorario = false">
+  <h3 class="text-lg font-bold text-slate-900">Agregar horario</h3>
+  <div class="mt-4 space-y-4">
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Día de la semana</label>
+      <select [(ngModel)]="nuevoHorario.dia_semana" class="input-field">
+        <option *ngFor="let d of [1,2,3,4,5,6,0]" [value]="d">{{ dias[d] }}</option>
+      </select>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Hora inicio</label>
+        <input type="time" [(ngModel)]="nuevoHorario.hora_inicio" class="input-field" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Hora fin</label>
+        <input type="time" [(ngModel)]="nuevoHorario.hora_fin" class="input-field" />
+      </div>
+    </div>
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Aula <span class="text-slate-400 font-normal">(opcional)</span></label>
+      <input [(ngModel)]="nuevoHorario.aula" class="input-field" placeholder="Salón 204" />
+    </div>
+    <div>
+      <div class="mb-1.5 flex items-center justify-between">
+        <label class="block text-sm font-medium text-slate-700">Fecha específica <span class="text-slate-400 font-normal">(opcional)</span></label>
+        <button *ngIf="nuevoHorario.fecha_clase" type="button" (click)="nuevoHorario.fecha_clase = ''" class="text-xs font-semibold text-primary-600 hover:text-primary-700">Limpiar</button>
+      </div>
+      <app-calendario-selector [fechaSeleccionada]="nuevoHorario.fecha_clase" (fechaSeleccionadaChange)="nuevoHorario.fecha_clase = $event"></app-calendario-selector>
+    </div>
+  </div>
+  <div class="mt-5 flex gap-2">
+    <button (click)="showAgregarHorario = false" class="btn-outline flex-1">Cancelar</button>
+    <button (click)="guardarHorario()" [disabled]="savingHorario" class="btn-primary flex-1">{{ savingHorario ? 'Guardando...' : 'Guardar' }}</button>
+  </div>
+</app-dialog>
+
+<!-- Agregar horarios múltiples -->
+<app-dialog [open]="showAgregarMultiples" size="lg" (closed)="showAgregarMultiples = false">
+  <h3 class="text-lg font-bold text-slate-900">Agregar varios horarios</h3>
+  <p class="mt-1 text-sm text-slate-500">Selecciona los días de clase y configura su horario.</p>
+
+  <div class="mt-4 space-y-2">
+    <div *ngFor="let d of diasMultiples" class="rounded-xl border" [ngClass]="d.seleccionado ? 'border-primary-300 bg-primary-50/30' : 'border-slate-200'">
+      <button type="button" (click)="toggleDiaMultiple(d)" class="flex w-full items-center justify-between px-4 py-3">
+        <span class="flex items-center gap-2 text-sm font-semibold" [ngClass]="d.seleccionado ? 'text-primary-700' : 'text-slate-700'">
+          <span class="flex h-5 w-5 items-center justify-center rounded-md border" [ngClass]="d.seleccionado ? 'border-primary-600 bg-primary-600 text-white' : 'border-slate-300'">
+            <svg *ngIf="d.seleccionado" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          </span>
+          {{ d.nombre }}
+        </span>
+        <span *ngIf="d.seleccionado && d.hora_inicio && d.hora_fin" class="text-xs text-slate-500">{{ d.hora_inicio }} - {{ d.hora_fin }}</span>
+      </button>
+
+      <div *ngIf="d.seleccionado && diaExpandido === d.dia" class="space-y-3 border-t border-primary-100 px-4 py-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Hora inicio</label>
+            <input type="time" [(ngModel)]="d.hora_inicio" class="input-field" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-600">Hora fin</label>
+            <input type="time" [(ngModel)]="d.hora_fin" class="input-field" />
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <button *ngFor="let h of horasRapidas" type="button" (click)="seleccionarHoraRapida(d, h)"
+                  class="rounded-lg px-2 py-1 text-xs font-medium transition-colors"
+                  [ngClass]="d.hora_inicio === h ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+            {{ h }}
+          </button>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-medium text-slate-600">Aula (opcional)</label>
+          <input [(ngModel)]="d.aula" class="input-field" placeholder="Salón 204" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-5 flex gap-2">
+    <button (click)="showAgregarMultiples = false" class="btn-outline flex-1">Cancelar</button>
+    <button (click)="guardarMultiples()" [disabled]="savingMultiples" class="btn-primary flex-1">{{ savingMultiples ? 'Guardando...' : 'Guardar horarios' }}</button>
+  </div>
+</app-dialog>
+
+<!-- Confirmar eliminar horario -->
+<app-dialog [open]="!!horarioAEliminar()" (closed)="horarioAEliminar.set(null)">
+  <h3 class="text-lg font-bold text-slate-900">¿Eliminar este horario?</h3>
+  <p class="mt-1 text-sm text-slate-500">{{ horarioAEliminar() ? horarioLabel(horarioAEliminar()!) : '' }}</p>
+  <div class="mt-5 flex gap-2">
+    <button (click)="horarioAEliminar.set(null)" class="btn-outline flex-1">Cancelar</button>
+    <button (click)="confirmarEliminarHorario()" class="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700">Sí, eliminar</button>
+  </div>
+</app-dialog>
+
+<!-- Marcar estado de clase -->
+<app-dialog [open]="!!claseSeleccionada() && !showTomarAsistencia" (closed)="cerrarEstadoClase()">
+  <ng-container *ngIf="claseSeleccionada() as c">
+    <h3 class="text-lg font-bold text-slate-900">Estado de la clase</h3>
+    <p class="mt-1 text-sm text-slate-500">{{ dias[c.horario.dia_semana] }} · {{ c.horario.hora_inicio }} - {{ c.horario.hora_fin }}{{ c.horario.aula ? ' · ' + c.horario.aula : '' }}</p>
+
+    <div class="mt-4 space-y-2">
+      <button
+        type="button"
+        *ngFor="let e of estados"
+        (click)="estadoElegido = e.valor"
+        class="flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors"
+        [style.border-color]="estadoElegido === e.valor ? e.color : '#e2e8f0'"
+      >
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white" [style.backgroundColor]="e.color">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </span>
+        <span class="flex-1">
+          <span class="block text-sm font-semibold" [style.color]="estadoElegido === e.valor ? e.color : '#1e293b'">{{ e.label }}</span>
+          <span class="block text-xs text-slate-400">{{ e.descripcion }}</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="mt-5 flex gap-2">
+      <button (click)="cerrarEstadoClase()" class="btn-outline flex-1">Cancelar</button>
+      <button (click)="guardarEstadoClase()" [disabled]="savingEstado || !estadoElegido" class="flex-1 rounded-xl py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50" [style.backgroundColor]="colorEstado(estadoElegido)">
+        {{ savingEstado ? 'Guardando...' : 'Guardar estado' }}
+      </button>
+    </div>
+
+    <button (click)="abrirTomarAsistencia()" class="btn-ghost btn-sm mt-3 w-full">
+      Tomar asistencia de esta clase
+    </button>
+  </ng-container>
+</app-dialog>
+
+<!-- Tomar asistencia -->
+<app-dialog [open]="showTomarAsistencia" size="lg" (closed)="cerrarTomarAsistencia()">
+  <h3 class="text-lg font-bold text-slate-900">Tomar asistencia</h3>
+  <p *ngIf="asistenciaActual as ac" class="mt-0.5 text-xs text-slate-400">{{ ac.fecha }} · {{ ac.hora_inicio }} - {{ ac.hora_fin }}</p>
+
+  <div *ngIf="loadingAsistencia" class="mt-4 space-y-2">
+    <div class="skeleton h-10"></div>
+    <div class="skeleton h-10"></div>
+    <div class="skeleton h-10"></div>
+  </div>
+
+  <div *ngIf="!loadingAsistencia">
+    <div *ngIf="registrosTrabajo.length === 0" class="mt-4 rounded-xl border border-dashed border-slate-200 p-4 text-center text-sm text-slate-400">
+      No hay estudiantes inscritos en esta asignatura.
+    </div>
+
+    <ng-container *ngIf="registrosTrabajo.length > 0">
+      <div class="mt-3 flex items-center justify-between">
+        <p class="text-sm text-slate-500">{{ registrosTrabajo.length }} estudiante(s)</p>
+        <button (click)="marcarTodosPresentes()" class="text-xs font-semibold text-primary-600 hover:text-primary-700">Marcar todos presentes</button>
+      </div>
+
+      <ul class="mt-2 max-h-80 space-y-1.5 overflow-y-auto">
+        <li *ngFor="let r of registrosTrabajo" class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2">
+          <span class="min-w-0 flex-1 truncate text-sm font-medium text-slate-700">{{ r.nombres }} {{ r.apellidos }}</span>
+          <div class="flex shrink-0 gap-1">
+            <button
+              *ngFor="let e of estadosAsistencia"
+              type="button"
+              (click)="r.estado = e.valor"
+              [title]="e.label"
+              class="flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold transition-colors"
+              [class.check-pop]="r.estado === e.valor"
+              [style.backgroundColor]="r.estado === e.valor ? e.color : '#e2e8f0'"
+              [style.color]="r.estado === e.valor ? '#ffffff' : '#64748b'"
+            >
+              {{ e.label.charAt(0) }}
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <div class="mt-4 space-y-3 border-t border-slate-100 pt-4">
+        <div>
+          <label class="mb-1.5 block text-xs font-medium text-slate-600">Tipo de clase <span class="text-red-500">*</span></label>
+          <select [(ngModel)]="tipoClaseSeleccionada" class="input-field" [class.has-error]="tipoClaseInvalid">
+            <option value="" disabled>Selecciona un tipo</option>
+            <option *ngFor="let t of tiposClase" [value]="t.valor">{{ t.label }}</option>
+          </select>
+          <p *ngIf="tipoClaseInvalid" class="mt-1 text-xs font-medium text-red-600">Selecciona el tipo de clase antes de guardar.</p>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-xs font-medium text-slate-600">Temas tratados <span class="text-red-500">*</span></label>
+          <textarea [(ngModel)]="temasTratados" rows="2" class="input-field" [class.has-error]="temasTratadosInvalid" placeholder="¿Qué se vio en esta clase?"></textarea>
+          <p *ngIf="temasTratadosInvalid" class="mt-1 text-xs font-medium text-red-600">Indica qué se vio en esta clase antes de guardar.</p>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-xs font-medium text-slate-600">Observaciones de la clase <span class="text-slate-400 font-normal">(opcional)</span></label>
+          <textarea [(ngModel)]="observacionesClase" rows="2" class="input-field" placeholder="Notas generales sobre la sesión"></textarea>
+        </div>
+      </div>
+
+      <div class="mt-5 flex gap-2">
+        <button (click)="cerrarTomarAsistencia()" class="btn-outline flex-1">Cancelar</button>
+        <button (click)="guardarAsistencia()" [disabled]="savingAsistencia" class="btn-primary flex-1">{{ savingAsistencia ? 'Guardando...' : 'Guardar asistencia' }}</button>
+      </div>
+    </ng-container>
+  </div>
+</app-dialog>
+
+<!-- Configurar código de acceso -->
+<app-dialog [open]="showCodigoConfig" (closed)="showCodigoConfig = false">
+  <ng-container *ngIf="asignatura() as a">
+    <h3 class="text-lg font-bold text-slate-900">Código de acceso</h3>
+    <p class="mt-2 text-center font-mono text-2xl font-extrabold tracking-widest text-primary-700">{{ a.codigo_acceso || '——————' }}</p>
+
+    <div class="mt-4 grid grid-cols-2 gap-2">
+      <button (click)="copiarCodigo()" class="btn-outline text-xs">Copiar</button>
+      <button (click)="compartirCodigo()" class="btn-outline text-xs">Compartir</button>
+    </div>
+    <button (click)="regenerarCodigo()" [disabled]="regenerandoCodigo" class="btn-ghost btn-sm mt-2 w-full">
+      {{ regenerandoCodigo ? 'Generando...' : 'Regenerar código' }}
+    </button>
+
+    <div class="mt-5 border-t border-slate-100 pt-4">
+      <label class="flex items-center justify-between text-sm font-medium text-slate-700">
+        Establecer fecha de expiración
+        <input type="checkbox" [(ngModel)]="tieneExpiracion" class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+      </label>
+      <input *ngIf="tieneExpiracion" type="date" [(ngModel)]="fechaExpiracion" class="input-field mt-3" />
+    </div>
+
+    <div class="mt-5 flex gap-2">
+      <button (click)="showCodigoConfig = false" class="btn-outline flex-1">Cerrar</button>
+      <button (click)="guardarExpiracion()" [disabled]="savingExpiracion" class="btn-primary flex-1">{{ savingExpiracion ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </ng-container>
+</app-dialog>
+
+<!-- Info de estudiante -->
+<app-dialog [open]="!!estudianteSeleccionado()" (closed)="cerrarEstudiante()">
+  <ng-container *ngIf="estudianteSeleccionado() as e">
+    <div class="flex items-center gap-3">
+      <app-avatar [fotoUrl]="e.foto_url" [iniciales]="iniciales(e)" colorFondo="#dbeafe" textColor="#1d4ed8" sizeClass="h-12 w-12 text-base" />
+      <div>
+        <h3 class="text-lg font-bold text-slate-900">{{ e.nombres }} {{ e.apellidos }}</h3>
+        <p class="text-sm text-slate-500">{{ e.email || 'Sin correo registrado' }}</p>
+      </div>
+    </div>
+
+    <dl class="mt-5 grid grid-cols-2 gap-y-3 text-sm">
+      <div><dt class="text-slate-400">Cédula</dt><dd class="font-medium text-slate-800">{{ e.cedula || '—' }}</dd></div>
+      <div><dt class="text-slate-400">Teléfono</dt><dd class="font-medium text-slate-800">{{ e.telefono || '—' }}</dd></div>
+    </dl>
+
+    <div class="mt-5 border-t border-slate-100 pt-4">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-semibold text-slate-700">Observaciones</p>
+        <button *ngIf="!editandoObservaciones" (click)="editandoObservaciones = true" class="text-xs font-semibold text-primary-600 hover:text-primary-700">Editar</button>
+      </div>
+
+      <p *ngIf="!editandoObservaciones" class="mt-2 whitespace-pre-line text-sm text-slate-600">
+        {{ observacionesEdit || 'Sin observaciones registradas.' }}
+      </p>
+
+      <ng-container *ngIf="editandoObservaciones">
+        <textarea [(ngModel)]="observacionesEdit" rows="4" class="input-field mt-2" placeholder="Escribe una nota sobre este estudiante..."></textarea>
+        <div class="mt-2 flex gap-2">
+          <button (click)="cancelarEdicionObservaciones()" class="btn-outline flex-1 text-xs">Cancelar</button>
+          <button (click)="guardarObservaciones()" [disabled]="savingObservaciones" class="btn-primary flex-1 text-xs">{{ savingObservaciones ? 'Guardando...' : 'Guardar' }}</button>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+</app-dialog>
+
+<!-- Carga masiva de estudiantes -->
+<app-dialog [open]="showCargaMasiva" size="lg" (closed)="cerrarCargaMasiva()">
+  <h3 class="text-lg font-bold text-slate-900">Cargar estudiantes por Excel/CSV</h3>
+  <p class="mt-1 text-sm text-slate-500">Sube un archivo con las columnas nombres, apellidos, cedula, email, contraseña, telefono y programa. Con el correo y la contraseña se crea la cuenta del estudiante (ya podrá iniciar sesión). Si un estudiante ya existe (por cédula o correo), solo se matriculará en esta asignatura.</p>
+
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    <button (click)="descargarPlantilla()" class="btn-outline btn-sm">Descargar plantilla</button>
+    <label class="btn-primary btn-sm cursor-pointer">
+      Seleccionar archivo
+      <input type="file" accept=".xlsx,.xls,.csv" (change)="onArchivoSeleccionado($event)" class="hidden" />
+    </label>
+    <span *ngIf="nombreArchivoCarga" class="text-xs text-slate-500">{{ nombreArchivoCarga }}</span>
+  </div>
+
+  <div *ngIf="cargandoArchivo" class="mt-4 skeleton h-24"></div>
+
+  <div *ngIf="!cargandoArchivo && filasCarga.length > 0 && !resultadosCarga" class="mt-4">
+    <p class="text-sm font-semibold text-slate-700">{{ filasValidasCount }} de {{ filasCarga.length }} fila(s) listas para matricular</p>
+    <ul class="mt-2 max-h-64 space-y-1.5 overflow-y-auto">
+      <li *ngFor="let f of filasCarga" class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm" [ngClass]="f.valido ? 'bg-slate-50' : 'bg-red-50'">
+        <div class="min-w-0">
+          <p class="truncate font-medium" [ngClass]="f.valido ? 'text-slate-700' : 'text-red-700'">{{ f.nombres }} {{ f.apellidos }}</p>
+          <p class="truncate text-xs" [ngClass]="f.valido ? 'text-slate-400' : 'text-red-500'">{{ f.valido ? (f.cedula || f.email) : f.motivo }}</p>
+        </div>
+        <span *ngIf="!f.valido" class="badge-danger shrink-0">Error</span>
+      </li>
+    </ul>
+
+    <div class="mt-4 flex gap-2">
+      <button (click)="cerrarCargaMasiva()" class="btn-outline flex-1">Cancelar</button>
+      <button (click)="confirmarCargaMasiva()" [disabled]="matriculando || filasValidasCount === 0" class="btn-primary flex-1">
+        {{ matriculando ? 'Matriculando...' : 'Confirmar carga (' + filasValidasCount + ')' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="resultadosCarga" class="mt-4">
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div class="rounded-xl bg-emerald-50 p-3 text-center">
+        <p class="text-lg font-extrabold text-emerald-700">{{ contarResultado('matriculado') }}</p>
+        <p class="text-[11px] font-medium text-emerald-600">Nuevos</p>
+      </div>
+      <div class="rounded-xl bg-blue-50 p-3 text-center">
+        <p class="text-lg font-extrabold text-blue-700">{{ contarResultado('reactivado') }}</p>
+        <p class="text-[11px] font-medium text-blue-600">Reactivados</p>
+      </div>
+      <div class="rounded-xl bg-slate-100 p-3 text-center">
+        <p class="text-lg font-extrabold text-slate-600">{{ contarResultado('ya-matriculado') }}</p>
+        <p class="text-[11px] font-medium text-slate-500">Ya inscritos</p>
+      </div>
+      <div class="rounded-xl bg-red-50 p-3 text-center">
+        <p class="text-lg font-extrabold text-red-700">{{ contarResultado('error') }}</p>
+        <p class="text-[11px] font-medium text-red-600">Errores</p>
+      </div>
+    </div>
+
+    <ul *ngIf="contarResultado('error') > 0" class="mt-3 max-h-40 space-y-1 overflow-y-auto">
+      <li *ngFor="let r of resultadosCarga" class="text-xs text-red-600">
+        <ng-container *ngIf="r.resultado === 'error'">Fila {{ r.fila }} ({{ r.nombres }}): {{ r.detalle }}</ng-container>
+      </li>
+    </ul>
+
+    <button (click)="cerrarCargaMasiva()" class="btn-primary mt-4 w-full">Cerrar</button>
+  </div>
+</app-dialog>

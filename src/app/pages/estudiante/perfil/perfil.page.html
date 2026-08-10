@@ -1,0 +1,135 @@
+<div class="mx-auto max-w-2xl animate-fade-in">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: var(--text-primary);">Mi perfil</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Actualiza tus datos personales y tu contraseña.</p>
+  </div>
+
+  <div *ngIf="loading" class="space-y-4">
+    <div class="skeleton h-64"></div>
+  </div>
+
+  <div *ngIf="!loading" class="space-y-6">
+    <div class="card flex items-center gap-4 p-6">
+      <app-avatar [fotoUrl]="fotoUrl" [iniciales]="iniciales" colorFondo="var(--accent-from)" shape="square" sizeClass="h-16 w-16 text-xl" [ring]="true" />
+      <div>
+        <p class="text-sm font-semibold" style="color: var(--text-secondary);">Foto de perfil</p>
+        <button (click)="abrirAvatarPicker()" class="btn-outline btn-sm mt-1.5">Cambiar foto</button>
+      </div>
+    </div>
+
+    <div class="card p-6">
+      <h3 class="text-base font-bold" style="color: var(--text-primary);">Datos personales</h3>
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="mt-4 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Nombres</label>
+            <input formControlName="nombres" class="input-field" [class.has-error]="f['nombres'].invalid && f['nombres'].touched" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Apellidos</label>
+            <input formControlName="apellidos" class="input-field" [class.has-error]="f['apellidos'].invalid && f['apellidos'].touched" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Tipo de documento</label>
+            <select formControlName="tipo_documento" class="input-field">
+              <option value="CC">Cédula de ciudadanía</option>
+              <option value="TI">Tarjeta de identidad</option>
+              <option value="CE">Cédula de extranjería</option>
+              <option value="PP">Pasaporte</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Número de documento</label>
+            <input formControlName="cedula" class="input-field" placeholder="1234567890" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Teléfono</label>
+            <input formControlName="telefono" class="input-field" placeholder="3001234567" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Programa</label>
+            <input formControlName="programa" class="input-field" placeholder="Ingeniería de sistemas" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Fecha de nacimiento</label>
+            <input type="date" formControlName="fecha_nacimiento" class="input-field" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Ciudad</label>
+            <input formControlName="ciudad" class="input-field" />
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Dirección</label>
+          <input formControlName="direccion" class="input-field" />
+        </div>
+
+        <button type="submit" [disabled]="isSaving" class="btn-primary w-full sm:w-auto">
+          {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </form>
+    </div>
+
+    <div class="card p-6">
+      <h3 class="text-base font-bold" style="color: var(--text-primary);">Cambiar contraseña</h3>
+      <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()" class="mt-4 space-y-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Nueva contraseña</label>
+            <div class="relative">
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="input-field pr-11" [class.has-error]="pf['password'].invalid && pf['password'].touched" placeholder="Mínimo 8 caracteres" />
+              <button type="button" (click)="togglePassword()" class="absolute right-3.5 top-1/2 -translate-y-1/2" style="color: var(--text-muted);">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Confirmar contraseña</label>
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword" class="input-field" [class.has-error]="(pf['confirmPassword'].touched && pf['confirmPassword'].invalid) || (passwordForm.hasError('passwordMismatch') && pf['confirmPassword'].touched)" />
+          </div>
+        </div>
+        <p *ngIf="passwordForm.hasError('passwordMismatch') && pf['confirmPassword'].touched" class="text-xs font-medium text-red-600">
+          Las contraseñas no coinciden
+        </p>
+        <button type="submit" [disabled]="isChangingPassword" class="btn-outline w-full sm:w-auto">
+          {{ isChangingPassword ? 'Actualizando...' : 'Actualizar contraseña' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<app-dialog [open]="showAvatarPicker" (closed)="showAvatarPicker = false">
+  <h3 class="text-lg font-bold text-slate-900">Elige tu foto de perfil</h3>
+
+  <div *ngIf="cargandoAvatares" class="mt-4 grid grid-cols-4 gap-2">
+    <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="skeleton aspect-square"></div>
+  </div>
+
+  <div *ngIf="!cargandoAvatares && avataresDisponibles().length > 0" class="mt-4 grid grid-cols-4 gap-2">
+    <button *ngFor="let url of avataresDisponibles()" (click)="seleccionarAvatarPreset(url)" class="aspect-square overflow-hidden rounded-xl border-2 border-transparent hover:border-primary-500">
+      <img [src]="url" class="h-full w-full object-cover" alt="Avatar" />
+    </button>
+  </div>
+
+  <div *ngIf="!cargandoAvatares && avataresDisponibles().length === 0" class="mt-4 text-sm text-slate-400">
+    No hay avatares prediseñados disponibles.
+  </div>
+
+  <div class="mt-5 border-t border-slate-100 pt-4">
+    <label class="btn-outline btn-sm w-full cursor-pointer text-center">
+      {{ subiendoAvatar ? 'Subiendo...' : 'Subir tu propia foto' }}
+      <input type="file" accept="image/*" (change)="subirAvatarPropio($event)" [disabled]="subiendoAvatar" class="hidden" />
+    </label>
+  </div>
+</app-dialog>

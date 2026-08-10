@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>ControlAsist | Control de Asistencia Académica</title>
+  <meta name="description" content="Sistema web de control de asistencia académica para docentes y estudiantes." />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <!-- PWA -->
+  <!-- Rutas ABSOLUTAS (con "/" inicial): el router de Angular navega a /auth/login vía pushState
+       apenas arranca (redirectTo de la ruta ''), y un href relativo aquí se re-resuelve contra esa
+       URL nueva (p.ej. quedaría buscando /auth/manifest.webmanifest, un 404) — eso rompía la
+       detección de instalabilidad de Chrome y por eso nunca disparaba beforeinstallprompt. -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#10b981" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="ControlAsist" />
+
+  <link rel="icon" type="image/svg+xml" href="/icons/logo.svg" />
+  <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+</head>
+<body style="background-color: #0a0e17;">
+  <app-root></app-root>
+</body>
+</html>

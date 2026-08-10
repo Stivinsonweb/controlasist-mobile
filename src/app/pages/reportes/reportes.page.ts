@@ -1,0 +1,421 @@
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { AsignaturasService, Asignatura } from '../../core/services/asignaturas.service';
+import { ReportesService, ResumenEstudiante, ResumenGeneral } from '../../core/services/reportes.service';
+import { Asistencia } from '../../core/services/asistencias.service';
+import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/services/auth.service';
+import { AdminService } from '../../core/services/admin.service';
+import { LogoService } from '../../core/services/logo.service';
+import { addPdfHeader, addPdfFooter, brandTableOptions } from '../../shared/utils/pdf-report.util';
+import { XLSX, styleHeaderRow, autofitColumns, formatPercentColumn, applyZebraStripes } from '../../shared/utils/excel-report.util';
+
+@Component({
+  selector: 'app-reportes',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './reportes.page.html',
+})
+export class ReportesPage implements OnInit {
+  asignaturaId = '';
+  asignatura = signal<Asignatura | null>(null);
+  loading = signal(true);
+
+  anios = signal<number[]>([]);
+  anioSeleccionado = signal<number | null>(null);
+
+  loadingDatos = signal(true);
+  resumenGeneral = signal<ResumenGeneral | null>(null);
+  resumenEstudiantes = signal<ResumenEstudiante[]>([]);
+  clases = signal<Asistencia[]>([]);
+
+  // ===== Formato institucional (punto 6) =====
+  private docenteId = '';
+  showFormatoConfig = signal(false);
+  guardandoFormato = signal(false);
+  subiendoLogo = signal(false);
+  exportandoInstitucionalPDF = signal(false);
+
+  logoUrl = signal<string | null>(null);
+  formatoCodigo = signal('');
+  formatoVersion = signal('');
+  formatoTitulo = signal('');
+  formatoSegundaFirma = signal('');
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private asignaturasService: AsignaturasService,
+    private reportesService: ReportesService,
+    private toast: ToastService,
+    private authService: AuthService,
+    private adminService: AdminService,
+    private logoService: LogoService
+  ) {}
+
+  async ngOnInit() {
+    this.asignaturaId = this.route.snapshot.paramMap.get('id') || '';
+    this.loading.set(true);
+    try {
+      const [asignatura, anios] = await Promise.all([
+        this.asignaturasService.obtenerPorId(this.asignaturaId),
+        this.reportesService.aniosDisponibles(this.asignaturaId),
+      ]);
+      this.asignatura.set(asignatura);
+      this.anios.set(anios);
+      this.anioSeleccionado.set(anios[0] ?? null);
+    } catch (e: any) {
+      console.error(e);
+      this.toast.error('No se pudo cargar la asignatura');
+      this.router.navigate(['/home']);
+      return;
+    } finally {
+      this.loading.set(false);
+    }
+
+    this.cargarConfigFormato();
+    await this.cargarDatos();
+  }
+
+  async setAnio(anio: string) {
+    this.anioSeleccionado.set(anio === 'todos' ? null : Number(anio));
+    await this.cargarDatos();
+  }
+
+  async cargarDatos() {
+    this.loadingDatos.set(true);
+    try {
+      const anio = this.anioSeleccionado() ?? undefined;
+      const [resumenGeneral, resumenEstudiantes, clases] = await Promise.all([
+        this.reportesService.resumenGeneral(this.asignaturaId, anio),
+        this.reportesService.resumenPorEstudiante(this.asignaturaId, anio),
+        this.reportesService.listarClases(this.asignaturaId, anio),
+      ]);
+      this.resumenGeneral.set(resumenGeneral);
+      this.resumenEstudiantes.set(resumenEstudiantes);
+      this.clases.set(clases);
+    } catch (e: any) {
+      console.error(e);
+      this.toast.error('No se pudieron cargar los datos de asistencia');
+    } finally {
+      this.loadingDatos.set(false);
+    }
+  }
+
+  formatFecha(fecha: string): string {
+    return new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  async exportarPDF() {
+    const a = this.asignatura();
+    if (!a) return;
+    if (this.resumenEstudiantes().length === 0) {
+      this.toast.warning('No hay datos de asistencia para exportar');
+      return;
+    }
+
+    const logoDataUrl = await this.cargarLogoSiHay();
+    const anioTexto = this.anioSeleccionado() ? ` · Año ${this.anioSeleccionado()}` : '';
+
+    const doc = new jsPDF();
+    const startY = addPdfHeader(doc, {
+      title: `Reporte de asistencia — ${a.nombre}`,
+      subtitle: `${a.codigo} · Grupo ${a.grupo} · ${a.periodo}${anioTexto}`,
+      logoDataUrl,
+    });
+
+    autoTable(doc, {
+      ...brandTableOptions(startY),
+      head: [['Estudiante', 'Cédula', 'Presente', 'Tarde', 'Justificado', 'Ausente', '% Asistencia']],
+      body: this.resumenEstudiantes().map((r) => [
+        `${r.nombres} ${r.apellidos}`,
+        r.cedula || '—',
+        r.presente,
+        r.tarde,
+        r.justificado,
+        r.ausente,
+        `${r.porcentajeAsistencia}%`,
+      ]),
+    });
+
+    addPdfFooter(doc, { logoDataUrl });
+    doc.save(`reporte-${a.codigo}.pdf`);
+  }
+
+  exportarExcel() {
+    const a = this.asignatura();
+    if (!a) return;
+    if (this.resumenEstudiantes().length === 0) {
+      this.toast.warning('No hay datos de asistencia para exportar');
+      return;
+    }
+
+    const headers = ['Estudiante', 'Cédula', 'Presente', 'Tarde', 'Justificado', 'Ausente', 'Total clases', '% Asistencia'];
+    const filas = this.resumenEstudiantes().map((r) => [
+      `${r.nombres} ${r.apellidos}`,
+      r.cedula || '',
+      r.presente,
+      r.tarde,
+      r.justificado,
+      r.ausente,
+      r.total,
+      r.porcentajeAsistencia,
+    ]);
+    const aoa = [headers, ...filas];
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    styleHeaderRow(ws, 0, headers.length);
+    applyZebraStripes(ws, 1, aoa.length - 1, headers.length);
+    formatPercentColumn(ws, headers.length - 1, 1, aoa.length - 1);
+    autofitColumns(ws, aoa);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Resumen');
+    XLSX.writeFile(wb, `reporte-${a.codigo}.xlsx`);
+  }
+
+  // ===== Formato institucional (punto 6) =====
+
+  private cargarConfigFormato() {
+    const perfil = this.authService.currentProfileValue;
+    if (!perfil) return;
+    this.docenteId = perfil.id;
+    this.logoUrl.set(perfil.logo_institucional_url || null);
+    this.formatoCodigo.set(perfil.formato_reporte_codigo || '');
+    this.formatoVersion.set(perfil.formato_reporte_version || '');
+    this.formatoTitulo.set(perfil.formato_reporte_titulo || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
+    this.formatoSegundaFirma.set(perfil.formato_reporte_segunda_firma || '');
+  }
+
+  toggleFormatoConfig() {
+    this.showFormatoConfig.set(!this.showFormatoConfig());
+  }
+
+  async subirLogoInstitucional(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || !this.docenteId) return;
+    this.subiendoLogo.set(true);
+    try {
+      const url = await this.logoService.subirLogo(file, this.docenteId);
+      await this.adminService.actualizarLogoInstitucional(this.docenteId, url);
+      this.logoUrl.set(url);
+      this.toast.success('Logo institucional actualizado');
+    } catch (e: any) {
+      console.error(e);
+      this.toast.error(e.message || 'No se pudo subir el logo');
+    } finally {
+      this.subiendoLogo.set(false);
+      input.value = '';
+    }
+  }
+
+  async guardarConfigFormato() {
+    if (!this.docenteId) return;
+    this.guardandoFormato.set(true);
+    try {
+      await this.adminService.actualizarFormatoReporte(this.docenteId, {
+        formato_reporte_codigo: this.formatoCodigo() || undefined,
+        formato_reporte_version: this.formatoVersion() || undefined,
+        formato_reporte_titulo: this.formatoTitulo() || undefined,
+        formato_reporte_segunda_firma: this.formatoSegundaFirma() || undefined,
+      });
+      this.toast.success('Configuración del formato guardada');
+    } catch (e: any) {
+      console.error(e);
+      this.toast.error(e.message || 'No se pudo guardar la configuración');
+    } finally {
+      this.guardandoFormato.set(false);
+    }
+  }
+
+  private calcularHoras(inicio: string, fin: string): number {
+    const [hi, mi] = inicio.split(':').map(Number);
+    const [hf, mf] = fin.split(':').map(Number);
+    const minutos = hf * 60 + mf - (hi * 60 + mi);
+    return Math.round((minutos / 60) * 100) / 100;
+  }
+
+  /** Convierte la URL pública del logo (Storage) a data URL para poder incrustarla con jsPDF `addImage`. */
+  private async cargarImagenComoDataUrl(url: string): Promise<string> {
+    const respuesta = await fetch(url);
+    const blob = await respuesta.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  private clasesOrdenadasParaExportar(): Asistencia[] {
+    return [...this.clases()].sort((x, y) => x.fecha.localeCompare(y.fecha) || x.hora_inicio.localeCompare(y.hora_inicio));
+  }
+
+  /** Carga el logo institucional del docente como data URL para incrustarlo en un PDF; null si no hay logo o falla la descarga. */
+  private async cargarLogoSiHay(): Promise<string | null> {
+    if (!this.logoUrl()) return null;
+    try {
+      return await this.cargarImagenComoDataUrl(this.logoUrl()!);
+    } catch (e) {
+      console.error('No se pudo cargar el logo institucional para el PDF:', e);
+      return null;
+    }
+  }
+
+  async exportarHistorialInstitucionalPDF() {
+    const a = this.asignatura();
+    const perfil = this.authService.currentProfileValue;
+    if (!a || !perfil) return;
+    const clases = this.clasesOrdenadasParaExportar();
+    if (clases.length === 0) {
+      this.toast.warning('No hay clases registradas para exportar');
+      return;
+    }
+
+    this.exportandoInstitucionalPDF.set(true);
+    try {
+      const logoDataUrl = await this.cargarLogoSiHay();
+
+      const titulo = this.formatoTitulo() || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE';
+      const codigo = this.formatoCodigo();
+      const version = this.formatoVersion();
+      const anioTexto = this.anioSeleccionado() ? String(this.anioSeleccionado()) : 'Todos';
+
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      if (logoDataUrl) {
+        try {
+          doc.addImage(logoDataUrl, 'PNG', 14, 8, 20, 20);
+        } catch (e) {
+          console.error('No se pudo incrustar el logo en el PDF:', e);
+        }
+      }
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(20);
+      doc.text(titulo, pageWidth / 2, 14, { align: 'center', maxWidth: pageWidth - 90 });
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(90);
+      doc.text(`Código: ${codigo || '—'}`, pageWidth - 14, 11, { align: 'right' });
+      doc.text(`Versión: ${version || '—'}`, pageWidth - 14, 16, { align: 'right' });
+
+      doc.setDrawColor(210);
+      doc.line(14, 32, pageWidth - 14, 32);
+
+      doc.setFontSize(9);
+      doc.setTextColor(40);
+      doc.text(`Docente: ${perfil.nombres} ${perfil.apellidos}`, 14, 39);
+      doc.text(`Programa: ${a.programa || perfil.programa || '—'}`, pageWidth / 2 + 5, 39);
+      doc.text(`Asignatura: ${a.nombre} (${a.codigo})`, 14, 45);
+      doc.text(`Año: ${anioTexto}    Periodo: ${a.periodo}`, pageWidth / 2 + 5, 45);
+
+      autoTable(doc, {
+        startY: 51,
+        head: [['No.', 'Fecha', 'Hora inicio', 'Hora final', 'Tema', 'Total horas', 'Firma docente']],
+        body: clases.map((c, i) => [
+          i + 1,
+          this.formatFecha(c.fecha),
+          c.hora_inicio,
+          c.hora_fin,
+          c.temas_tratados || '—',
+          this.calcularHoras(c.hora_inicio, c.hora_fin),
+          '',
+        ]),
+        styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
+        headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8.5 },
+        alternateRowStyles: { fillColor: [243, 244, 246] },
+        columnStyles: { 0: { cellWidth: 10 }, 4: { cellWidth: 58 }, 6: { cellWidth: 28 } },
+        margin: { top: 51, bottom: 22 },
+      });
+
+      // Bloque de firmas: docente + segunda firma configurable.
+      const finalY = (doc as any).lastAutoTable?.finalY ?? 60;
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let firmaY = finalY + 22;
+      if (firmaY > pageHeight - 30) {
+        doc.addPage();
+        firmaY = 40;
+      }
+      doc.setDrawColor(120);
+      doc.line(20, firmaY, 90, firmaY);
+      doc.line(pageWidth - 90, firmaY, pageWidth - 20, firmaY);
+      doc.setFontSize(9);
+      doc.setTextColor(60);
+      doc.text('Firma docente', 55, firmaY + 5, { align: 'center' });
+      doc.text(this.formatoSegundaFirma() || 'Segunda firma', pageWidth - 55, firmaY + 5, { align: 'center' });
+
+      // Pie de página consistente en todas las páginas: logo pequeño, fecha de generación y número de página.
+      addPdfFooter(doc, { logoDataUrl });
+
+      doc.save(`historial-clases-${a.codigo}.pdf`);
+    } catch (e: any) {
+      console.error(e);
+      this.toast.error('No se pudo generar el PDF institucional');
+    } finally {
+      this.exportandoInstitucionalPDF.set(false);
+    }
+  }
+
+  exportarHistorialInstitucionalExcel() {
+    const a = this.asignatura();
+    const perfil = this.authService.currentProfileValue;
+    if (!a || !perfil) return;
+    const clases = this.clasesOrdenadasParaExportar();
+    if (clases.length === 0) {
+      this.toast.warning('No hay clases registradas para exportar');
+      return;
+    }
+
+    const titulo = this.formatoTitulo() || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE';
+    const anioTexto = this.anioSeleccionado() ? String(this.anioSeleccionado()) : 'Todos';
+
+    const filas: any[][] = [
+      [titulo, '', '', '', '', 'Código:', this.formatoCodigo() || '—'],
+      ['', '', '', '', '', 'Versión:', this.formatoVersion() || '—'],
+      [],
+      [`Docente: ${perfil.nombres} ${perfil.apellidos}`, '', '', `Programa: ${a.programa || perfil.programa || '—'}`],
+      [`Asignatura: ${a.nombre} (${a.codigo})`, '', '', `Año: ${anioTexto}`, '', `Periodo: ${a.periodo}`],
+      [],
+      ['No.', 'Fecha', 'Hora inicio', 'Hora final', 'Tema', 'Total horas', 'Firma docente'],
+      ...clases.map((c, i) => [
+        i + 1,
+        this.formatFecha(c.fecha),
+        c.hora_inicio,
+        c.hora_fin,
+        c.temas_tratados || '',
+        this.calcularHoras(c.hora_inicio, c.hora_fin),
+        '',
+      ]),
+      [],
+      ['Firma docente:', '', '', this.formatoSegundaFirma() ? `${this.formatoSegundaFirma()}:` : 'Segunda firma:'],
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(filas);
+    ws['!cols'] = [{ wch: 6 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 42 }, { wch: 12 }, { wch: 20 }];
+
+    // Fila 0: título del formato en negrita. Fila 6: encabezados de columna de la tabla.
+    const HEADER_ROW = 6;
+    const bodyStart = HEADER_ROW + 1;
+    const bodyEnd = bodyStart + clases.length - 1;
+    if (ws['A1']) ws['A1'].s = { font: { bold: true, sz: 12 } };
+    styleHeaderRow(ws, HEADER_ROW, 7);
+    applyZebraStripes(ws, bodyStart, bodyEnd, 7);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Historial de clases');
+    XLSX.writeFile(wb, `historial-clases-${a.codigo}.xlsx`);
+
+    if (this.logoUrl()) {
+      this.toast.info('El logo institucional no se incluye en el Excel (la librería xlsx no soporta imágenes); sí aparece en el PDF.');
+    }
+  }
+}

@@ -1,0 +1,57 @@
+<div class="mx-auto max-w-lg animate-fade-in">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: var(--text-primary);">Confirmar inscripción</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Revisa la asignatura y completa tus datos para finalizar.</p>
+  </div>
+
+  <div *ngIf="loading()" class="skeleton h-72"></div>
+
+  <div *ngIf="!loading() && asignatura() as a" class="space-y-5">
+    <div class="card p-5">
+      <div class="flex items-center gap-3">
+        <span class="h-3.5 w-3.5 rounded-full" [style.backgroundColor]="a.color"></span>
+        <div>
+          <p class="text-base font-bold" style="color: var(--text-primary);">{{ a.nombre }}</p>
+          <p class="text-sm" style="color: var(--text-muted);">{{ a.codigo }} · Grupo {{ a.grupo }} · {{ a.periodo }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="necesitaDatos()" class="card p-6">
+      <h3 class="text-base font-bold" style="color: var(--text-primary);">Completa tus datos</h3>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">Necesitamos estos datos antes de inscribirte por primera vez.</p>
+
+      <form [formGroup]="form" class="mt-4 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Tipo de documento</label>
+            <select formControlName="tipo_documento" class="input-field">
+              <option value="CC">Cédula de ciudadanía</option>
+              <option value="TI">Tarjeta de identidad</option>
+              <option value="CE">Cédula de extranjería</option>
+              <option value="PP">Pasaporte</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Número de documento</label>
+            <input formControlName="cedula" class="input-field" [class.has-error]="f['cedula'].invalid && f['cedula'].touched" placeholder="1234567890" />
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Teléfono</label>
+          <input formControlName="telefono" class="input-field" [class.has-error]="f['telefono'].invalid && f['telefono'].touched" placeholder="3001234567" />
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Programa</label>
+          <input formControlName="programa" class="input-field" [class.has-error]="f['programa'].invalid && f['programa'].touched" placeholder="Ingeniería de sistemas" />
+        </div>
+      </form>
+    </div>
+
+    <button (click)="confirmar()" [disabled]="isSaving" class="btn-primary w-full">
+      {{ isSaving ? 'Procesando...' : 'Confirmar inscripción' }}
+    </button>
+  </div>
+</div>

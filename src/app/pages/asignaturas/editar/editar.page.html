@@ -1,0 +1,116 @@
+<div class="mx-auto max-w-3xl animate-fade-in">
+  <div class="mb-6 flex items-center gap-3">
+    <a [routerLink]="['/asignaturas/detalle', asignaturaId]" class="rounded-lg p-2 transition-colors hover:bg-white/5" style="color: var(--text-muted);">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+    </a>
+    <div>
+      <h1 class="text-xl font-bold" style="color: var(--text-primary);">Editar asignatura</h1>
+      <p class="text-sm" style="color: var(--text-muted);">Actualiza la información de tu asignatura.</p>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="flex justify-center py-24">
+    <svg class="h-8 w-8 animate-spin text-primary-600" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+  </div>
+
+  <form *ngIf="!isLoading" [formGroup]="form" (ngSubmit)="submit()" class="card space-y-6 p-6">
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Nombre de la asignatura</label>
+        <input formControlName="nombre" class="input-field" [class.has-error]="f['nombre'].invalid && f['nombre'].touched" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Código</label>
+        <input formControlName="codigo" class="input-field" [class.has-error]="f['codigo'].invalid && f['codigo'].touched" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Grupo</label>
+        <input formControlName="grupo" class="input-field" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Nivel</label>
+        <input formControlName="nivel" class="input-field" [class.has-error]="f['nivel'].invalid && f['nivel'].touched" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Periodo académico</label>
+        <input formControlName="periodo" class="input-field" [class.has-error]="f['periodo'].invalid && f['periodo'].touched" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Facultad <span class="font-normal" style="color: var(--text-muted);">(opcional)</span></label>
+        <input formControlName="facultad" class="input-field" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Programa <span class="font-normal" style="color: var(--text-muted);">(opcional)</span></label>
+        <input formControlName="programa" class="input-field" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Créditos</label>
+        <input type="number" formControlName="creditos" class="input-field" min="1" max="10" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Modalidad</label>
+        <select formControlName="modalidad" class="input-field">
+          <option>Presencial</option>
+          <option>Virtual</option>
+          <option>Híbrida</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Aula <span class="font-normal" style="color: var(--text-muted);">(opcional)</span></label>
+        <input formControlName="aula" class="input-field" />
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Código CDS <span class="font-normal" style="color: var(--text-muted);">(opcional)</span></label>
+      <input formControlName="cds" class="input-field" />
+    </div>
+
+    <div>
+      <label class="mb-2 block text-sm font-medium" style="color: var(--text-secondary);">Color de la asignatura</label>
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let c of colores" type="button" (click)="setColor(c)"
+                class="h-9 w-9 rounded-full ring-offset-2 transition-all"
+                [style.backgroundColor]="c"
+                [class.ring-2]="f['color'].value === c"
+                [style.--tw-ring-color]="c"></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-2 block text-sm font-medium" style="color: var(--text-secondary);">Ícono de la asignatura</label>
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let i of iconos" type="button" (click)="form.patchValue({ icono: i.id })"
+                [attr.aria-label]="i.label" [title]="i.label"
+                class="flex h-10 w-10 items-center justify-center rounded-xl border transition-all"
+                [class.border-primary-500]="f['icono'].value === i.id"
+                [class.bg-primary-500]="f['icono'].value === i.id"
+                [class.bg-opacity-15]="f['icono'].value === i.id"
+                [class.text-primary-400]="f['icono'].value === i.id"
+                [style.border-color]="f['icono'].value !== i.id ? 'var(--border-subtle-2)' : ''"
+                [style.color]="f['icono'].value !== i.id ? 'var(--text-muted)' : ''">
+          <app-subject-icon [icono]="i.id" sizeClass="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input type="checkbox" formControlName="activa" id="activa" class="h-4 w-4 rounded text-primary-600 focus:ring-primary-500" style="border-color: var(--border-subtle-2);" />
+      <label for="activa" class="text-sm" style="color: var(--text-secondary);">Asignatura activa</label>
+    </div>
+
+    <div class="flex justify-end gap-3 border-t pt-5" style="border-color: var(--border-subtle);">
+      <a [routerLink]="['/asignaturas/detalle', asignaturaId]" class="btn-outline">Cancelar</a>
+      <button type="submit" [disabled]="isSaving" class="btn-primary">
+        {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </form>
+</div>

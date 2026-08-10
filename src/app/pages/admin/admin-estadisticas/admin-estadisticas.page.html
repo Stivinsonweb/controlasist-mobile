@@ -1,0 +1,50 @@
+<div class="animate-fade-in">
+  <div class="mb-6">
+    <h1 class="text-xl font-bold" style="color: var(--text-primary);">Estadísticas</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Panorama general del sistema ControlAsist.</p>
+  </div>
+
+  <div *ngIf="loading()" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div *ngFor="let i of [1,2,3,4]" class="skeleton h-24"></div>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+    <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div class="card p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Docentes</p>
+        <p class="mt-1 text-2xl font-extrabold" style="color: var(--text-primary);">{{ resumen().docentes }}</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Estudiantes</p>
+        <p class="mt-1 text-2xl font-extrabold" style="color: var(--text-primary);">{{ resumen().estudiantes }}</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Asignaturas activas</p>
+        <p class="mt-1 text-2xl font-extrabold" style="color: var(--text-primary);">{{ resumen().asignaturas }}</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Administradores</p>
+        <p class="mt-1 text-2xl font-extrabold" style="color: var(--text-primary);">{{ resumen().administradores }}</p>
+      </div>
+    </div>
+
+    <div class="card mt-6 p-6">
+      <h3 class="text-base font-bold" style="color: var(--text-primary);">Estudiantes por programa</h3>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">Programas académicos con más estudiantes registrados.</p>
+
+      <div *ngIf="programas().length === 0" class="mt-6 text-sm" style="color: var(--text-muted);">No hay datos de programas todavía.</div>
+
+      <div class="mt-6 space-y-4">
+        <div *ngFor="let p of programas()">
+          <div class="mb-1 flex items-center justify-between text-sm">
+            <span class="font-medium" style="color: var(--text-secondary);">{{ p.programa }}</span>
+            <span style="color: var(--text-muted);">{{ p.total }}</span>
+          </div>
+          <div class="h-2.5 w-full overflow-hidden rounded-full" style="background: var(--bg-surface-3);">
+            <div class="h-full rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 transition-all" [style.width]="barWidth(p.total)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

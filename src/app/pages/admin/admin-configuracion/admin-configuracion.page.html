@@ -1,0 +1,113 @@
+<div class="animate-fade-in">
+  <div class="mb-6">
+    <h1 class="text-xl font-bold" style="color: var(--text-primary);">Configuración del sistema</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Controla el acceso global a ControlAsist y el mensaje de actualización que ven los usuarios.</p>
+  </div>
+
+  <div *ngIf="loading()" class="space-y-4">
+    <div class="skeleton h-40"></div>
+    <div class="skeleton h-40"></div>
+  </div>
+
+  <div *ngIf="!loading() && !config()" class="card p-6 text-sm" style="color: var(--text-muted);">
+    No se encontró la fila de configuración global (tabla <code>configuracion_app</code>).
+  </div>
+
+  <div *ngIf="!loading() && config()" class="space-y-5">
+
+    <!-- Mantenimiento / cerrar app -->
+    <div class="card p-6" [class.opacity-50]="!puedeCerrarApp">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold" style="color: var(--text-primary);">Acceso y mantenimiento</h3>
+        <span *ngIf="!puedeCerrarApp" class="badge-neutral">Sin permiso</span>
+      </div>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">Equivalente web de "cerrar la app": desactiva el acceso para todos los usuarios mientras haces mantenimiento.</p>
+
+      <div class="mt-4 space-y-3">
+        <label class="flex items-center justify-between rounded-xl px-4 py-3" style="background: rgba(255, 255, 255, 0.04);">
+          <span class="text-sm font-medium" style="color: var(--text-secondary);">App activa</span>
+          <input type="checkbox" [(ngModel)]="mantenimiento.app_activa" [disabled]="!puedeCerrarApp" class="h-5 w-5 rounded text-primary-600 focus:ring-primary-500" style="border-color: var(--border-subtle-2);" />
+        </label>
+        <label class="flex items-center justify-between rounded-xl px-4 py-3" style="background: rgba(255, 255, 255, 0.04);">
+          <span class="text-sm font-medium" style="color: var(--text-secondary);">Permitir inicio de sesión</span>
+          <input type="checkbox" [(ngModel)]="mantenimiento.permitir_login" [disabled]="!puedeCerrarApp" class="h-5 w-5 rounded text-primary-600 focus:ring-primary-500" style="border-color: var(--border-subtle-2);" />
+        </label>
+        <label class="flex items-center justify-between rounded-xl px-4 py-3" style="background: rgba(255, 255, 255, 0.04);">
+          <span class="text-sm font-medium" style="color: var(--text-secondary);">Mostrar mensaje a los usuarios</span>
+          <input type="checkbox" [(ngModel)]="mantenimiento.mostrar_mensaje" [disabled]="!puedeCerrarApp" class="h-5 w-5 rounded text-primary-600 focus:ring-primary-500" style="border-color: var(--border-subtle-2);" />
+        </label>
+        <div *ngIf="mantenimiento.mostrar_mensaje">
+          <input [(ngModel)]="mantenimiento.titulo_mensaje" [disabled]="!puedeCerrarApp" placeholder="Título del mensaje" class="input-field" />
+          <textarea [(ngModel)]="mantenimiento.mensaje" [disabled]="!puedeCerrarApp" rows="2" placeholder="Mensaje para los usuarios" class="input-field mt-2"></textarea>
+        </div>
+      </div>
+
+      <button *ngIf="puedeCerrarApp" (click)="guardarMantenimiento()" [disabled]="savingMantenimiento" class="btn-primary mt-4">
+        {{ savingMantenimiento ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+
+    <!-- Forzar actualización -->
+    <div class="card p-6" [class.opacity-50]="!puedeForzarActualizacion">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold" style="color: var(--text-primary);">Forzar actualización</h3>
+        <span *ngIf="!puedeForzarActualizacion" class="badge-neutral">Sin permiso</span>
+      </div>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">Al activarlo, la app invalida el service worker/PWA para que todos reciban la última versión en su próxima visita.</p>
+
+      <div class="mt-4 space-y-3">
+        <label class="flex items-center justify-between rounded-xl px-4 py-3" style="background: rgba(255, 255, 255, 0.04);">
+          <span class="text-sm font-medium" style="color: var(--text-secondary);">Requiere actualización</span>
+          <input type="checkbox" [(ngModel)]="actualizacion.requiere_actualizacion" [disabled]="!puedeForzarActualizacion" class="h-5 w-5 rounded text-primary-600 focus:ring-primary-500" style="border-color: var(--border-subtle-2);" />
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-muted);">Versión actual</label>
+            <input [(ngModel)]="actualizacion.version_actual" [disabled]="!puedeForzarActualizacion" placeholder="1.0.0" class="input-field" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-muted);">Versión mínima requerida</label>
+            <input [(ngModel)]="actualizacion.version_minima_requerida" [disabled]="!puedeForzarActualizacion" placeholder="1.0.0" class="input-field" />
+          </div>
+        </div>
+      </div>
+
+      <button *ngIf="puedeForzarActualizacion" (click)="guardarActualizacion()" [disabled]="savingActualizacion" class="btn-primary mt-4">
+        {{ savingActualizacion ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+
+    <!-- General -->
+    <div class="card p-6" [class.opacity-50]="!puedeModificarConfig">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold" style="color: var(--text-primary);">General</h3>
+        <span *ngIf="!puedeModificarConfig" class="badge-neutral">Sin permiso</span>
+      </div>
+
+      <div class="mt-4 space-y-3">
+        <label class="flex items-center justify-between rounded-xl px-4 py-3" style="background: rgba(255, 255, 255, 0.04);">
+          <span class="text-sm font-medium" style="color: var(--text-secondary);">Permitir registro de nuevas cuentas</span>
+          <input type="checkbox" [(ngModel)]="general.permitir_registro" [disabled]="!puedeModificarConfig" class="h-5 w-5 rounded text-primary-600 focus:ring-primary-500" style="border-color: var(--border-subtle-2);" />
+        </label>
+        <label class="flex items-center justify-between rounded-xl px-4 py-3" style="background: rgba(255, 255, 255, 0.04);">
+          <span class="text-sm font-medium" style="color: var(--text-secondary);">Permitir tomar asistencia</span>
+          <input type="checkbox" [(ngModel)]="general.permitir_tomar_asistencia" [disabled]="!puedeModificarConfig" class="h-5 w-5 rounded text-primary-600 focus:ring-primary-500" style="border-color: var(--border-subtle-2);" />
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-muted);">URL de soporte</label>
+            <input [(ngModel)]="general.url_soporte" [disabled]="!puedeModificarConfig" placeholder="https://..." class="input-field" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-muted);">URL de documentación</label>
+            <input [(ngModel)]="general.url_documentacion" [disabled]="!puedeModificarConfig" placeholder="https://..." class="input-field" />
+          </div>
+        </div>
+      </div>
+
+      <button *ngIf="puedeModificarConfig" (click)="guardarGeneral()" [disabled]="savingGeneral" class="btn-primary mt-4">
+        {{ savingGeneral ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/*
+ * Sistema de diseño "dark vibrant SaaS": fondo navy casi negro como base de toda la
+ * app, con tarjetas y acentos en degradados vibrantes derivados de la marca (verde
+ * primary #10b981 / azul secondary #3b82f6). Las páginas de auth (login/register/
+ * reset-password) son la única excepción: mantienen un panel de formulario claro
+ * (`.auth-card`) flotando sobre el mismo fondo oscuro, por legibilidad de inputs.
+ */
+:root {
+  --bg-app: #0a0e17;
+  --bg-app-2: #0d1220;
+  --bg-surface: #0f1626;
+  --bg-surface-2: #141c30;
+  --bg-surface-3: #1a2338;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-subtle-2: rgba(255, 255, 255, 0.14);
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  /* Tema de acento activo (personalizable por perfil vía CSS custom properties). */
+  --accent-from: #10b981;
+  --accent-to: #3b82f6;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+}
+
+* { box-sizing: border-box; }
+
+a, button, [tabindex]:not([tabindex="-1"]) {
+  &:focus-visible {
+    outline: 2px solid rgba(16, 185, 129, 0.6);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-surface-3); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3550; }
+
+/*
+ * Estas clases usan @apply con utilidades de Tailwind (padding, color, etc.) que a veces se
+ * combinan en el HTML con otras utilidades para sobrescribir un valor puntual (ej. "input-field
+ * pl-11", "badge-neutral bg-slate-200"). @layer components asegura que Tailwind coloque estas
+ * reglas ANTES del bloque de utilidades en el CSS final, para que esas utilidades sueltas del
+ * HTML siempre puedan ganarles en la cascada (misma especificidad, gana quien aparece último).
+ * Sin este @layer, quedaban después de @tailwind utilities y el padding/color de la clase base
+ * terminaba ganándole a la utilidad puntual (ej. el ícono de los inputs tapaba el placeholder).
+ */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-dark-soft transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition-all active:scale-[0.98];
+    border-color: var(--border-subtle-2);
+    background: var(--bg-surface-2);
+    color: var(--text-secondary);
+    &:hover { background: var(--bg-surface-3); color: var(--text-primary); }
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-dark-soft transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    color: var(--text-secondary);
+    &:hover { background: var(--bg-surface-3); color: var(--text-primary); }
+  }
+  /* Modificador de tamaño compacto — debe declararse después de los .btn-* base para ganar en cascada (misma especificidad, gana el orden de aparición dentro del mismo layer). */
+  .btn-sm { @apply px-3 py-1.5 text-xs; }
+
+  .input-field {
+    @apply w-full rounded-xl border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-4;
+    background: var(--bg-surface-2);
+    border-color: var(--border-subtle-2);
+    color: var(--text-primary);
+    &::placeholder { color: var(--text-muted); }
+    &:focus { border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
+  }
+  .input-field.has-error { @apply border-red-400; &:focus { border-color: #f87171; box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.15); } }
+
+  .card {
+    @apply rounded-2xl border shadow-dark-soft;
+    background: var(--bg-surface-2);
+    border-color: var(--border-subtle);
+  }
+
+  .badge { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold; }
+  .badge-success { @apply inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-300; }
+  .badge-danger { @apply inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/15 px-2.5 py-1 text-xs font-semibold text-red-300; }
+  .badge-warning { @apply inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-300; }
+  .badge-info { @apply inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300; }
+  .badge-neutral { @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold; border-color: var(--border-subtle-2); background: var(--bg-surface-3); color: var(--text-secondary); }
+
+  /*
+   * Isla clara dentro del fondo oscuro global: usada solo en login/register/reset-password
+   * para mantener el formulario con máximo contraste. Todo lo que viva dentro de un
+   * `.auth-card` recupera automáticamente el look claro original sin tener que tocar
+   * cada input/label/botón individualmente en esas 3 plantillas.
+   */
+  .auth-card {
+    @apply rounded-3xl border border-slate-200/80 bg-white shadow-2xl;
+
+    .input-field {
+      background: #fff;
+      border-color: #cbd5e1;
+      color: #0f172a;
+      &::placeholder { color: #94a3b8; }
+      &:focus { border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+    }
+    .input-field.has-error { border-color: #f87171; }
+    .btn-outline {
+      background: #fff;
+      border-color: #cbd5e1;
+      color: #334155;
+      &:hover { background: #f8fafc; color: #0f172a; }
+    }
+    .btn-ghost { color: #475569; &:hover { background: #f1f5f9; color: #0f172a; } }
+    label { color: #334155; }
+    h1, h2, h3 { color: #0f172a; }
+    p { color: #64748b; }
+  }
+}
+
+/* Texto con degradado de marca para palabras clave dentro de títulos grandes. */
+.text-gradient-brand {
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(90deg, var(--accent-from), var(--accent-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Formas orgánicas decorativas de fondo (login, dashboard, estados vacíos). */
+.decor-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.35;
+  animation-name: blob-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+.decor-blob-primary { background: radial-gradient(circle at 30% 30%, #10b981, transparent 70%); }
+.decor-blob-secondary { background: radial-gradient(circle at 30% 30%, #3b82f6, transparent 70%); }
+
+/*
+ * Flotación ambiental sutil para elementos decorativos de fondo (íconos educativos, blobs).
+ * translateY con recorrido corto y duración larga para que se sienta "vivo" sin distraer del
+ * formulario en primer plano. animation-delay/duration se varían por instancia desde el
+ * componente (inline style) para que no se muevan todos sincronizados.
+ */
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.float-icon {
+  animation-name: float-icon;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(12px, -16px); }
+}
+
+/*
+ * Anillo de progreso del logo: rota continuamente y despacio para dar sensación de "sistema
+ * activo", sin rotar el resto del ícono (las siluetas de personas quedan fijas).
+ * IMPORTANTE: el arco es un trazo PARCIAL (no un círculo completo), así que su propio bounding
+ * box (fill-box) NO está centrado en el círculo real — usar `fill-box` + `center` lo hace rotar
+ * alrededor del centro de ese cuadro torcido, no del anillo, y se ve "errático". Con
+ * `transform-box: view-box` el origen se mide en coordenadas del viewBox del SVG (160x160), así
+ * que `80px 80px` es el centro exacto y real del círculo — la única forma confiable de que un
+ * arco parcial gire limpio alrededor de su circunferencia.
+ */
+@keyframes logo-spin {
+  to { transform: rotate(360deg); }
+}
+.logo-arc {
+  transform-box: view-box;
+  transform-origin: 80px 80px;
+  animation: logo-spin 6s infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, var(--bg-surface-2) 25%, var(--bg-surface-3) 37%, var(--bg-surface-2) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.card-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  &:hover { transform: translateY(-4px) scale(1.01); }
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.check-pop { animation: checkPop 250ms ease-out; }
+
+@keyframes modalEnter {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.modal-enter { animation: modalEnter 200ms ease-out; }

@@ -1,0 +1,177 @@
+<div class="mx-auto max-w-5xl animate-fade-in" *ngIf="!loading() && asignatura() as a">
+
+  <div class="mb-6 flex flex-wrap items-center gap-3">
+    <a [routerLink]="['/asignaturas/detalle', asignaturaId]" class="rounded-lg p-2 transition-colors hover:bg-white/5" style="color: var(--text-muted);">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+    </a>
+    <div>
+      <h1 class="text-xl font-bold" style="color: var(--text-primary);">Reportes de asistencia</h1>
+      <p class="text-sm" style="color: var(--text-muted);">{{ a.nombre }} · {{ a.codigo }} · Grupo {{ a.grupo }}</p>
+    </div>
+
+    <div class="ml-auto flex items-center gap-2">
+      <select [ngModel]="anioSeleccionado() ?? 'todos'" (ngModelChange)="setAnio($event)" class="input-field w-auto py-2">
+        <option value="todos">Todos los años</option>
+        <option *ngFor="let anio of anios()" [value]="anio">{{ anio }}</option>
+      </select>
+      <button (click)="exportarExcel()" class="btn-outline">Excel</button>
+      <button (click)="exportarPDF()" class="btn-primary">PDF</button>
+    </div>
+  </div>
+
+  <!-- Formato institucional (punto 6) -->
+  <div class="card mt-5 overflow-hidden">
+    <button (click)="toggleFormatoConfig()" class="flex w-full items-center justify-between gap-3 p-5 text-left transition-colors hover:bg-white/5">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-dark-soft" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+        </div>
+        <div>
+          <p class="text-sm font-bold" style="color: var(--text-primary);">Historial de clases — formato institucional</p>
+          <p class="text-xs" style="color: var(--text-muted);">Configura el logo, código, versión y segunda firma para exportar el historial en el formato oficial de tu institución.</p>
+        </div>
+      </div>
+      <svg class="h-5 w-5 shrink-0 transition-transform" style="color: var(--text-muted);" [class.rotate-180]="showFormatoConfig()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+    </button>
+
+    <div *ngIf="showFormatoConfig()" class="modal-enter border-t p-5" style="border-color: var(--border-subtle);">
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr]">
+        <div class="flex flex-col items-center gap-2">
+          <div class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border border-dashed" style="border-color: var(--border-subtle-2); background: var(--bg-surface-3);">
+            <img *ngIf="logoUrl()" [src]="logoUrl()" alt="Logo institucional" class="h-full w-full object-contain" />
+            <svg *ngIf="!logoUrl()" class="h-8 w-8" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 8.25a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 8.25v9a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 17.25v-9z" /></svg>
+          </div>
+          <label class="btn-outline btn-sm cursor-pointer">
+            {{ subiendoLogo() ? 'Subiendo...' : 'Subir logo' }}
+            <input type="file" accept="image/*" class="hidden" [disabled]="subiendoLogo()" (change)="subirLogoInstitucional($event)" />
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-xs font-semibold" style="color: var(--text-muted);">Título del formato</label>
+            <input type="text" [ngModel]="formatoTitulo()" (ngModelChange)="formatoTitulo.set($event)" class="input-field" placeholder="FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="mb-1 block text-xs font-semibold" style="color: var(--text-muted);">Código</label>
+              <input type="text" [ngModel]="formatoCodigo()" (ngModelChange)="formatoCodigo.set($event)" class="input-field" placeholder="D-FO-005" />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-semibold" style="color: var(--text-muted);">Versión</label>
+              <input type="text" [ngModel]="formatoVersion()" (ngModelChange)="formatoVersion.set($event)" class="input-field" placeholder="01" />
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="mb-1 block text-xs font-semibold" style="color: var(--text-muted);">Título de la segunda firma</label>
+            <input type="text" [ngModel]="formatoSegundaFirma()" (ngModelChange)="formatoSegundaFirma.set($event)" class="input-field" placeholder="Ej: Coordinador Académico" />
+          </div>
+          <div class="sm:col-span-2 flex justify-end">
+            <button (click)="guardarConfigFormato()" [disabled]="guardandoFormato()" class="btn-primary btn-sm">
+              {{ guardandoFormato() ? 'Guardando...' : 'Guardar configuración' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loadingDatos()" class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-5">
+    <div *ngFor="let i of [1,2,3,4,5]" class="card skeleton h-24"></div>
+  </div>
+
+  <ng-container *ngIf="!loadingDatos() && resumenGeneral() as g">
+    <!-- Stat cards: cada una con su propio degradado vibrante -->
+    <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-5">
+      <div class="rounded-2xl p-4 text-center text-white shadow-dark-soft" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">
+        <p class="text-2xl font-extrabold">{{ g.totalClases }}</p>
+        <p class="mt-1 text-xs font-medium text-white/80">Clases dictadas</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center text-white shadow-dark-soft" style="background: linear-gradient(135deg, #10b981, #0d9488); box-shadow: 0 10px 28px -10px rgba(16,185,129,0.45);">
+        <p class="text-2xl font-extrabold">{{ g.presente }}</p>
+        <p class="mt-1 text-xs font-medium text-white/80">Presentes</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center text-white shadow-dark-soft" style="background: linear-gradient(135deg, #f59e0b, #f97316); box-shadow: 0 10px 28px -10px rgba(245,158,11,0.45);">
+        <p class="text-2xl font-extrabold">{{ g.tarde }}</p>
+        <p class="mt-1 text-xs font-medium text-white/80">Tarde</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center text-white shadow-dark-soft" style="background: linear-gradient(135deg, #3b82f6, #6366f1); box-shadow: 0 10px 28px -10px rgba(59,130,246,0.45);">
+        <p class="text-2xl font-extrabold">{{ g.justificado }}</p>
+        <p class="mt-1 text-xs font-medium text-white/80">Justificados</p>
+      </div>
+      <div class="rounded-2xl p-4 text-center text-white shadow-dark-soft" style="background: linear-gradient(135deg, #ef4444, #f43f5e); box-shadow: 0 10px 28px -10px rgba(239,68,68,0.45);">
+        <p class="text-2xl font-extrabold">{{ g.ausente }}</p>
+        <p class="mt-1 text-xs font-medium text-white/80">Ausentes</p>
+      </div>
+    </div>
+
+    <!-- Vacío -->
+    <div *ngIf="g.totalClases === 0" class="card relative mt-6 flex flex-col items-center justify-center overflow-hidden border border-dashed py-16 text-center" style="border-color: var(--border-subtle-2);">
+      <svg class="h-12 w-12" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <p class="mt-4 text-sm font-semibold" style="color: var(--text-secondary);">Aún no hay asistencia registrada</p>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">Toma asistencia desde el detalle de la asignatura para ver reportes aquí.</p>
+    </div>
+
+    <ng-container *ngIf="g.totalClases > 0">
+      <!-- Resumen por estudiante -->
+      <div class="card mt-6 overflow-hidden">
+        <div class="p-6 pb-0">
+          <h3 class="text-base font-bold" style="color: var(--text-primary);">Resumen por estudiante</h3>
+        </div>
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-t text-xs uppercase tracking-wide" style="border-color: var(--border-subtle); color: var(--text-muted); background: var(--bg-surface-3);">
+                <th class="px-6 py-2.5 font-semibold">Estudiante</th>
+                <th class="px-3 py-2.5 font-semibold text-center">Presente</th>
+                <th class="px-3 py-2.5 font-semibold text-center">Tarde</th>
+                <th class="px-3 py-2.5 font-semibold text-center">Justificado</th>
+                <th class="px-3 py-2.5 font-semibold text-center">Ausente</th>
+                <th class="px-6 py-2.5 font-semibold text-right">% Asistencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of resumenEstudiantes(); let odd = odd" class="border-t" [style.background]="odd ? 'rgba(255,255,255,0.02)' : 'transparent'" style="border-color: var(--border-subtle);">
+                <td class="px-6 py-2.5 font-medium" style="color: var(--text-secondary);">{{ r.nombres }} {{ r.apellidos }}</td>
+                <td class="px-3 py-2.5 text-center text-emerald-400">{{ r.presente }}</td>
+                <td class="px-3 py-2.5 text-center text-amber-400">{{ r.tarde }}</td>
+                <td class="px-3 py-2.5 text-center text-blue-400">{{ r.justificado }}</td>
+                <td class="px-3 py-2.5 text-center text-red-400">{{ r.ausente }}</td>
+                <td class="px-6 py-2.5 text-right font-semibold" style="color: var(--text-primary);">{{ r.porcentajeAsistencia }}%</td>
+              </tr>
+              <tr *ngIf="resumenEstudiantes().length === 0">
+                <td colspan="6" class="px-6 py-6 text-center text-sm" style="color: var(--text-muted);">Sin registros de estudiantes en este periodo.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="h-2"></div>
+      </div>
+
+      <!-- Historial de clases -->
+      <div class="card mt-5 p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="text-base font-bold" style="color: var(--text-primary);">Historial de clases</h3>
+          <div class="flex items-center gap-2">
+            <button (click)="exportarHistorialInstitucionalExcel()" class="btn-outline btn-sm">Excel institucional</button>
+            <button (click)="exportarHistorialInstitucionalPDF()" [disabled]="exportandoInstitucionalPDF()" class="btn-primary btn-sm">
+              {{ exportandoInstitucionalPDF() ? 'Generando...' : 'PDF institucional' }}
+            </button>
+          </div>
+        </div>
+        <ul class="mt-3">
+          <li *ngFor="let c of clases()" class="flex items-center justify-between gap-3 border-b py-2.5 text-sm last:border-b-0" style="border-color: var(--border-subtle);">
+            <div class="min-w-0">
+              <p class="font-medium" style="color: var(--text-secondary);">{{ formatFecha(c.fecha) }} · {{ c.hora_inicio }} - {{ c.hora_fin }}</p>
+              <p *ngIf="c.temas_tratados" class="truncate text-xs" style="color: var(--text-muted);">{{ c.temas_tratados }}</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+
+<div *ngIf="loading()" class="flex justify-center py-24">
+  <svg class="h-8 w-8 animate-spin text-primary-600" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+</div>

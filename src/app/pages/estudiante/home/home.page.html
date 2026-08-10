@@ -1,0 +1,113 @@
+<div class="animate-fade-in">
+
+  <!-- Encabezado de perfil -->
+  <div class="card mb-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-4">
+      <app-avatar *ngIf="!loading()" [fotoUrl]="perfil()?.foto_url" [iniciales]="getIniciales()" colorFondo="var(--accent-from)" shape="square" sizeClass="h-14 w-14 text-lg" />
+      <div *ngIf="loading()" class="flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">—</div>
+      <div>
+        <p class="text-lg font-bold" style="color: var(--text-primary);">{{ getNombreCompleto() }}</p>
+        <p class="text-sm" style="color: var(--text-muted);">{{ perfil()?.email }}</p>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button (click)="irAPerfil()" class="btn-outline">Mi perfil</button>
+      <button (click)="irAInscribir()" class="btn-primary">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        Inscribirme
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let i of [1,2,3]" class="card skeleton h-36"></div>
+  </div>
+
+  <!-- Vacío -->
+  <div *ngIf="!loading() && asignaturas().length === 0"
+       class="card relative flex flex-col items-center justify-center overflow-hidden py-16 text-center">
+    <app-edu-background />
+    <svg class="relative z-10 h-12 w-12" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+    <p class="relative z-10 mt-4 text-sm font-semibold" style="color: var(--text-secondary);">Aún no estás inscrito en ninguna asignatura</p>
+    <p class="relative z-10 mt-1 text-sm" style="color: var(--text-muted);">Usa el código de acceso que te compartió tu docente para inscribirte.</p>
+    <button (click)="irAInscribir()" class="btn-primary relative z-10 mt-5">Inscribirme con código</button>
+  </div>
+
+  <!-- Grid de asignaturas -->
+  <div *ngIf="!loading() && asignaturas().length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <button *ngFor="let a of asignaturas()" (click)="verAsignatura(a)"
+            class="subject-card group relative flex flex-col items-start overflow-hidden rounded-2xl p-5 text-left text-white transition-all duration-200 hover:scale-[1.02]"
+            [style]="gradientStyle(a.color)"
+            [style.box-shadow]="shadowStyle(a.color)['box-shadow']">
+      <svg class="pointer-events-none absolute -right-4 -top-4 h-28 w-28 opacity-15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+
+      <div class="relative z-10 flex w-full items-center justify-between">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
+          <app-subject-icon [icono]="a.icono" sizeClass="h-5 w-5" />
+        </div>
+        <span class="rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold backdrop-blur">{{ a.grupo }}</span>
+      </div>
+      <p class="relative z-10 mt-3 line-clamp-2 text-base font-bold">{{ a.nombre }}</p>
+      <p class="relative z-10 mt-1 text-xs font-medium text-white/80">{{ a.codigo }} · {{ a.periodo }}</p>
+
+      <div class="relative z-10 mt-4 flex w-full items-center justify-between border-t border-white/20 pt-3 text-xs text-white/90">
+        <span class="inline-flex items-center gap-1">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          {{ a.docente ? (a.docente.nombres + ' ' + a.docente.apellidos) : 'Sin docente' }}
+        </span>
+        <span>{{ a.modalidad }}</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+<!-- Detalle de asignatura -->
+<app-dialog [open]="!!seleccionada()" size="md" (closed)="cerrarDetalle()">
+  <ng-container *ngIf="seleccionada() as a">
+    <div class="flex items-center gap-3">
+      <span class="h-3.5 w-3.5 rounded-full" [style.backgroundColor]="a.color"></span>
+      <div>
+        <h3 class="text-lg font-bold text-slate-900">{{ a.nombre }}</h3>
+        <p class="text-sm text-slate-500">{{ a.codigo }} · Grupo {{ a.grupo }} · {{ a.periodo }}</p>
+      </div>
+    </div>
+
+    <dl class="mt-5 grid grid-cols-2 gap-y-3 text-sm">
+      <div><dt class="text-slate-400">Docente</dt><dd class="font-medium text-slate-800">{{ a.docente ? (a.docente.nombres + ' ' + a.docente.apellidos) : '—' }}</dd></div>
+      <div><dt class="text-slate-400">Modalidad</dt><dd class="font-medium text-slate-800">{{ a.modalidad }}</dd></div>
+      <div><dt class="text-slate-400">Créditos</dt><dd class="font-medium text-slate-800">{{ a.creditos }}</dd></div>
+      <div><dt class="text-slate-400">Aula</dt><dd class="font-medium text-slate-800">{{ a.aula || '—' }}</dd></div>
+    </dl>
+
+    <h4 class="mt-5 text-sm font-bold text-slate-900">Horarios de clase</h4>
+    <div *ngIf="loadingDetalle()" class="mt-2 space-y-2">
+      <div class="skeleton h-9"></div>
+      <div class="skeleton h-9"></div>
+    </div>
+    <div *ngIf="!loadingDetalle() && horariosSeleccionada().length === 0" class="mt-2 rounded-xl border border-dashed border-slate-200 p-3 text-sm text-slate-400">
+      Aún no hay horarios registrados.
+    </div>
+    <ul *ngIf="!loadingDetalle() && horariosSeleccionada().length > 0" class="mt-2 space-y-2">
+      <li *ngFor="let h of horariosSeleccionada()" class="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5 text-sm text-slate-700">
+        <svg class="h-4 w-4 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        {{ horarioLabel(h) }}
+      </li>
+    </ul>
+
+    <div class="mt-6 border-t border-slate-100 pt-4" *ngIf="!showConfirmDesinscribir">
+      <button (click)="showConfirmDesinscribir = true" class="w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50">
+        Desinscribirme de esta asignatura
+      </button>
+    </div>
+
+    <div class="mt-6 border-t border-slate-100 pt-4" *ngIf="showConfirmDesinscribir">
+      <p class="text-sm font-semibold text-slate-700">¿Seguro que quieres desinscribirte?</p>
+      <p class="mt-1 text-xs text-slate-500">Podrás volver a inscribirte con el mismo código de acceso.</p>
+      <div class="mt-3 flex gap-2">
+        <button (click)="showConfirmDesinscribir = false" class="btn-outline flex-1">Cancelar</button>
+        <button (click)="confirmarDesinscripcion()" class="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700">Sí, desinscribirme</button>
+      </div>
+    </div>
+  </ng-container>
+</app-dialog>
