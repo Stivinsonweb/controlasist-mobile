@@ -1,0 +1,71 @@
+<div class="relative min-h-screen w-full overflow-hidden px-4 py-10 sm:px-8" style="background: var(--bg-app);">
+  <app-decor-blobs />
+
+  <div class="relative z-10 mx-auto flex max-w-2xl flex-col items-center">
+    <div class="flex items-center gap-2">
+      <app-logo sizeClass="h-12 w-12 rounded-2xl shadow-dark-soft" />
+      <span class="text-lg font-bold" style="color: var(--text-primary);">ControlAsist</span>
+    </div>
+
+    <a routerLink="/auth/login" class="mt-4 text-xs font-semibold text-primary-400 hover:text-primary-300">&larr; Volver</a>
+
+    <h1 class="mt-6 text-center text-2xl font-extrabold" style="color: var(--text-primary);">¿Cómo funciona ControlAsist?</h1>
+    <p class="mt-2 max-w-md text-center text-sm" style="color: var(--text-muted);">
+      Elige tu rol y recorre cada función paso a paso.
+    </p>
+
+    <!-- Selector de rol -->
+    <div class="mt-6 grid w-full max-w-xs grid-cols-2 gap-2 rounded-xl p-1" style="background: var(--bg-surface-2);">
+      <button type="button" (click)="setRol('docente')"
+              class="flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all"
+              [ngClass]="rol() === 'docente' ? 'text-white' : ''"
+              [style.background]="rol() === 'docente' ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'transparent'"
+              [style.color]="rol() === 'docente' ? '#fff' : 'var(--text-muted)'">
+        Docente
+      </button>
+      <button type="button" (click)="setRol('estudiante')"
+              class="flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all"
+              [style.background]="rol() === 'estudiante' ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'transparent'"
+              [style.color]="rol() === 'estudiante' ? '#fff' : 'var(--text-muted)'">
+        Estudiante
+      </button>
+    </div>
+
+    <!-- Fila de temas -->
+    <div class="mt-6 flex w-full flex-wrap items-center justify-center gap-2">
+      <button *ngFor="let tema of temas(); let i = index" type="button" (click)="irATema(i)"
+              class="rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all"
+              [style.border-color]="i === activo() ? 'transparent' : 'var(--border-subtle-2)'"
+              [style.background]="i === activo() ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
+              [style.color]="i === activo() ? '#fff' : 'var(--text-secondary)'">
+        {{ tema.titulo }}
+      </button>
+    </div>
+
+    <!-- Panel central: escena ilustrada del tema activo -->
+    <div class="card mt-6 w-full max-w-md p-8">
+      <app-illustrated-scene
+        theme="dark"
+        [variant]="temaActivo().variant"
+        [title]="temaActivo().titulo"
+        [description]="temaActivo().descripcion" />
+
+      <div class="mt-5 flex items-center justify-center gap-1.5">
+        <span *ngFor="let tema of temas(); let i = index"
+              class="h-1.5 rounded-full transition-all"
+              [class.w-5]="i === activo()" [class.w-1.5]="i !== activo()"
+              [style.background]="i === activo() ? 'var(--accent-from)' : 'var(--border-subtle-2)'"></span>
+      </div>
+
+      <div class="mt-5 flex w-full gap-2">
+        <button type="button" (click)="anterior()" [disabled]="activo() === 0" class="btn-outline btn-sm flex-1 disabled:opacity-40">Anterior</button>
+        <button type="button" (click)="siguiente()" [disabled]="activo() === temas().length - 1" class="btn-primary btn-sm flex-1 disabled:opacity-40">Siguiente</button>
+      </div>
+    </div>
+
+    <p class="mt-8 text-center text-xs" style="color: var(--text-muted);">
+      ¿No encontraste lo que buscabas?
+      <a routerLink="/soporte" class="font-semibold text-primary-400 hover:text-primary-300">Contactar soporte</a>
+    </p>
+  </div>
+</div>

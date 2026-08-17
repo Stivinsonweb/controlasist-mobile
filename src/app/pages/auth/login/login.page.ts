@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -16,7 +16,7 @@ import { InstallPwaButtonComponent } from '../../../shared/components/install-pw
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, DialogComponent, EduBackgroundComponent, DecorBlobsComponent, LogoComponent, InstallPwaButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, DialogComponent, EduBackgroundComponent, DecorBlobsComponent, LogoComponent, InstallPwaButtonComponent],
   templateUrl: './login.page.html',
 })
 export class LoginPage implements OnInit {

@@ -6,6 +6,12 @@
   <meta name="description" content="Sistema web de control de asistencia académica para docentes y estudiantes." />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
+  <!-- Angular emite las URLs de sus propios bundles (styles-*.css, main-*.js) como RELATIVAS.
+       Sin este <base>, al entrar directo a una ruta anidada (ej. /auth/login) el navegador las
+       resuelve contra esa URL (/auth/styles-*.css → 404), aunque el .htaccess ya haya servido
+       este index.html correctamente — la app cargaba en blanco. -->
+  <base href="/" />
+
   <!-- PWA -->
   <!-- Rutas ABSOLUTAS (con "/" inicial): el router de Angular navega a /auth/login vía pushState
        apenas arranca (redirectTo de la ruta ''), y un href relativo aquí se re-resuelve contra esa
@@ -21,6 +27,24 @@
   <link rel="icon" type="image/svg+xml" href="/icons/logo.svg" />
   <link rel="icon" type="image/png" href="/icons/icon-192.png" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
+
+  <!-- Open Graph / vista previa al compartir el link (WhatsApp, Facebook, LinkedIn).
+       og:image debe ser una URL ABSOLUTA con dominio completo — WhatsApp ignora
+       rutas relativas al armar la tarjeta de vista previa. -->
+  <meta property="og:title" content="ControlAsist | Control de Asistencia Académica" />
+  <meta property="og:description" content="Sistema web de control de asistencia académica para docentes y estudiantes." />
+  <meta property="og:image" content="https://controlasistencia.co/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://controlasistencia.co" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_CO" />
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ControlAsist | Control de Asistencia Académica" />
+  <meta name="twitter:description" content="Sistema web de control de asistencia académica para docentes y estudiantes." />
+  <meta name="twitter:image" content="https://controlasistencia.co/og-image.png" />
 </head>
 <body style="background-color: #0a0e17;">
   <app-root></app-root>

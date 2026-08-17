@@ -25,6 +25,16 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/auth/reset-password/reset-password.page').then((m) => m.ResetPasswordPage),
   },
 
+  // ===== Accesibles con o sin sesión (fuera del layout con sidebar) =====
+  {
+    path: 'guia',
+    loadComponent: () => import('./pages/guia/guia.page').then((m) => m.GuiaPage),
+  },
+  {
+    path: 'soporte',
+    loadComponent: () => import('./pages/soporte/soporte.page').then((m) => m.SoportePage),
+  },
+
   // ===== ÁREA PROTEGIDA (con layout / sidebar) =====
   {
     path: '',

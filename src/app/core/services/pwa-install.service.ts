@@ -10,6 +10,8 @@ export class PwaInstallService {
   isInstalled = signal(this.detectStandalone());
   /** true en Safari/iOS, donde no existe beforeinstallprompt y hay que guiar manualmente. */
   isIOS = signal(this.detectIOS());
+  /** true en Android — permite elegir el set de pasos manuales correcto cuando no hay prompt nativo. */
+  isAndroid = signal(/Android/.test(window.navigator.userAgent));
 
   constructor() {
     window.addEventListener('beforeinstallprompt', (event: any) => {
