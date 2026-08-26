@@ -132,6 +132,20 @@ a, button, [tabindex]:not([tabindex="-1"]) {
    * `.auth-card` recupera automáticamente el look claro original sin tener que tocar
    * cada input/label/botón individualmente en esas 3 plantillas.
    */
+  /*
+   * Panel de marca de las pantallas de auth (login, registro docente, registro estudiante):
+   * hero con blobs animados, texto en gradiente y tarjetas translúcidas — diseñado por completo
+   * para fondo oscuro (texto blanco, bordes white/10, etc.). Antes usaba `var(--bg-surface)`
+   * para el fondo, así que en modo claro el fondo se volvía blanco pero el texto seguía siendo
+   * blanco/slate-300 fijo → quedaba ilegible (blanco sobre blanco) y el logo (siempre oscuro)
+   * parecía flotar sin contexto. Igual que `.auth-card` es una isla SIEMPRE clara, este panel es
+   * una isla SIEMPRE oscura — no sigue el toggle de tema a propósito, es contenido de marca, no
+   * contenido de la app.
+   */
+  .auth-hero {
+    background: #0f1626;
+  }
+
   .auth-card {
     @apply rounded-3xl border border-slate-200/80 bg-white shadow-2xl;
 

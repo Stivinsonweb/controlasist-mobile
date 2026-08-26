@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
 const MAX_INTENTOS = 5;
-const BLOQUEO_MINUTOS = 15;
+const BLOQUEO_MINUTOS = 5;
 
 export interface EstadoBloqueo {
   bloqueado: boolean;
