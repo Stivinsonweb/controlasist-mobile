@@ -6,7 +6,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { DecorBlobsComponent } from '../../../shared/components/decor-blobs/decor-blobs.component';
-import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { BrandHeaderComponent } from '../../../shared/components/brand-header/brand-header.component';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -19,7 +19,7 @@ type RecoveryState = 'checking' | 'ready' | 'invalid';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DecorBlobsComponent, LogoComponent],
+  imports: [CommonModule, ReactiveFormsModule, DecorBlobsComponent, BrandHeaderComponent],
   templateUrl: './reset-password.page.html',
 })
 export class ResetPasswordPage implements OnInit, OnDestroy {

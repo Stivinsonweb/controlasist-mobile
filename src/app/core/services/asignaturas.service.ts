@@ -94,7 +94,7 @@ export class AsignaturasService {
   }
 
   async desactivar(id: string) {
-    const { error } = await this.supabase.from('asignaturas').update({ activa: false }).eq('id', id);
+    const { error } = await this.supabase.rpc('desactivar_asignatura', { asignatura_id: id });
     if (error) throw error;
   }
 

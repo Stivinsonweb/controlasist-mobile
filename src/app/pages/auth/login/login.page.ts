@@ -10,13 +10,13 @@ import { LoginAttemptsService } from '../../../core/services/login-attempts.serv
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { EduBackgroundComponent } from '../../../shared/components/edu-background/edu-background.component';
 import { DecorBlobsComponent } from '../../../shared/components/decor-blobs/decor-blobs.component';
-import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { BrandHeaderComponent } from '../../../shared/components/brand-header/brand-header.component';
 import { InstallPwaButtonComponent } from '../../../shared/components/install-pwa-button/install-pwa-button.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, DialogComponent, EduBackgroundComponent, DecorBlobsComponent, LogoComponent, InstallPwaButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, DialogComponent, EduBackgroundComponent, DecorBlobsComponent, BrandHeaderComponent, InstallPwaButtonComponent],
   templateUrl: './login.page.html',
 })
 export class LoginPage implements OnInit {

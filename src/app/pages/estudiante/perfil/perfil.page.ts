@@ -8,6 +8,7 @@ import { AvatarService } from '../../../core/services/avatar.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { NotificacionesPushToggleComponent } from '../../../shared/components/notificaciones-push-toggle/notificaciones-push-toggle.component';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -18,7 +19,7 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-estudiante-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DialogComponent, AvatarComponent],
+  imports: [CommonModule, ReactiveFormsModule, DialogComponent, AvatarComponent, NotificacionesPushToggleComponent],
   templateUrl: './perfil.page.html',
 })
 export class EstudiantePerfilPage implements OnInit {
@@ -31,7 +32,7 @@ export class EstudiantePerfilPage implements OnInit {
   fotoUrl: string | null = null;
   nombres = '';
   apellidos = '';
-  private estudianteId = '';
+  estudianteId = '';
 
   showAvatarPicker = false;
   avataresDisponibles = signal<string[]>([]);
@@ -143,7 +144,7 @@ export class EstudiantePerfilPage implements OnInit {
     if (this.avataresDisponibles().length === 0) {
       this.cargandoAvatares = true;
       try {
-        this.avataresDisponibles.set(await this.avatarService.getDefaultAvatars());
+        this.avataresDisponibles.set(await this.avatarService.getDefaultAvatars('estudiante'));
       } catch (e) {
         console.error('Error cargando galería de avatares:', e);
       } finally {

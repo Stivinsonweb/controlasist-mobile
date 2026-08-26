@@ -102,6 +102,10 @@
             <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-muted);">URL de documentación</label>
             <input [(ngModel)]="general.url_documentacion" [disabled]="!puedeModificarConfig" placeholder="https://..." class="input-field" />
           </div>
+          <div>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-muted);">Recordatorio de clase — minutos de anticipación</label>
+            <input type="number" min="5" [(ngModel)]="general.recordatorio_clase_minutos_antes" [disabled]="!puedeModificarConfig" placeholder="15" class="input-field" />
+          </div>
         </div>
       </div>
 

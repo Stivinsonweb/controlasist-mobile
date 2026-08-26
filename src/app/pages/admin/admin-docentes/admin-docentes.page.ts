@@ -4,16 +4,21 @@ import { FormsModule } from '@angular/forms';
 import { AdminService, Docente } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { VerificadoBadgeComponent } from '../../../shared/components/verificado-badge/verificado-badge.component';
+import { VerificacionDocenteService, SolicitudVerificacion } from '../../../core/services/verificacion-docente.service';
 
 @Component({
   selector: 'app-admin-docentes',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvatarComponent],
+  imports: [CommonModule, FormsModule, AvatarComponent, VerificadoBadgeComponent],
   templateUrl: './admin-docentes.page.html',
 })
 export class AdminDocentesPage implements OnInit {
   loading = signal(true);
   docentes = signal<Docente[]>([]);
+  solicitudesVerificacion = signal<SolicitudVerificacion[]>([]);
+  procesandoVerificacionId = signal<string | null>(null);
+  notaRechazoVerificacion: Record<string, string> = {};
   searchText = signal('');
   programaFiltro = signal('');
   expandedId = signal<string | null>(null);
@@ -40,7 +45,7 @@ export class AdminDocentesPage implements OnInit {
     return this.filtrados().slice(start, start + this.itemsPerPage);
   });
 
-  constructor(private adminService: AdminService, private toast: ToastService) {}
+  constructor(private adminService: AdminService, private toast: ToastService, private verificacionService: VerificacionDocenteService) {}
 
   async ngOnInit() {
     await this.load();
@@ -49,8 +54,9 @@ export class AdminDocentesPage implements OnInit {
   async load() {
     this.loading.set(true);
     try {
-      const data = await this.adminService.listarDocentes();
+      const [data, solicitudes] = await Promise.all([this.adminService.listarDocentes(), this.verificacionService.pendientes()]);
       this.docentes.set(data);
+      this.solicitudesVerificacion.set(solicitudes);
     } catch (e) {
       console.error(e);
       this.toast.error('Error al cargar los docentes');
@@ -80,5 +86,44 @@ export class AdminDocentesPage implements OnInit {
 
   iniciales(d: Docente) {
     return `${(d.nombres?.[0] ?? '').toUpperCase()}${(d.apellidos?.[0] ?? '').toUpperCase()}`;
+  }
+
+  async aprobarVerificacion(s: SolicitudVerificacion) {
+    this.procesandoVerificacionId.set(s.id);
+    try {
+      await this.verificacionService.aprobar(s.id);
+      this.toast.success('Cuenta verificada');
+      await this.load();
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo aprobar la verificación');
+    } finally {
+      this.procesandoVerificacionId.set(null);
+    }
+  }
+
+  async rechazarVerificacion(s: SolicitudVerificacion) {
+    this.procesandoVerificacionId.set(s.id);
+    try {
+      await this.verificacionService.rechazar(s.id, this.notaRechazoVerificacion[s.id] || '');
+      this.toast.success('Solicitud de verificación rechazada');
+      await this.load();
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo rechazar la solicitud');
+    } finally {
+      this.procesandoVerificacionId.set(null);
+    }
+  }
+
+  async revocarVerificacion(d: Docente) {
+    this.procesandoVerificacionId.set(d.id);
+    try {
+      await this.verificacionService.revocar(d.id);
+      this.toast.success(`Verificación revocada a ${d.nombres}`);
+      await this.load();
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo revocar la verificación');
+    } finally {
+      this.procesandoVerificacionId.set(null);
+    }
   }
 }

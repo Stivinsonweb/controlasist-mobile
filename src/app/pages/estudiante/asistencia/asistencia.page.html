@@ -1,0 +1,67 @@
+<div class="animate-fade-in">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: var(--text-primary);">Mi asistencia</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Revisa tu historial de asistencia en cada una de tus asignaturas.</p>
+  </div>
+
+  <div *ngIf="loading()" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let i of [1,2,3]" class="card skeleton h-40"></div>
+  </div>
+
+  <div *ngIf="!loading() && resumenes().length === 0" class="card flex flex-col items-center justify-center py-16 text-center">
+    <svg class="h-12 w-12" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <p class="mt-4 text-sm font-semibold" style="color: var(--text-secondary);">Aún no estás inscrito en ninguna asignatura</p>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Cuando te inscribas y tu docente registre clases, verás tu asistencia aquí.</p>
+  </div>
+
+  <div *ngIf="!loading() && resumenes().length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <button *ngFor="let r of resumenes()" (click)="abrir(r)"
+            class="subject-card group relative flex flex-col items-start overflow-hidden rounded-2xl p-5 text-left text-white transition-all duration-200 hover:scale-[1.02]"
+            [style]="gradientStyle(r.asignatura.color)"
+            [style.box-shadow]="shadowStyle(r.asignatura.color)['box-shadow']">
+      <div class="relative z-10 flex w-full items-center justify-between">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
+          <app-subject-icon [icono]="r.asignatura.icono" sizeClass="h-5 w-5" />
+        </div>
+        <span class="text-2xl font-extrabold">{{ r.porcentajePresente }}%</span>
+      </div>
+      <p class="relative z-10 mt-3 line-clamp-2 text-base font-bold">{{ r.asignatura.nombre }}</p>
+      <p class="relative z-10 mt-1 text-xs font-medium text-white/80">{{ r.total }} {{ r.total === 1 ? 'clase registrada' : 'clases registradas' }}</p>
+
+      <div class="relative z-10 mt-4 flex w-full flex-wrap gap-1.5 border-t border-white/20 pt-3 text-[11px] font-semibold">
+        <span *ngFor="let e of estados" class="rounded-full bg-white/20 px-2 py-0.5 backdrop-blur">{{ e.label }}: {{ r.porEstado[e.valor] || 0 }}</span>
+      </div>
+    </button>
+  </div>
+</div>
+
+<app-dialog [open]="!!seleccionado()" size="md" (closed)="cerrar()">
+  <ng-container *ngIf="seleccionado() as r">
+    <div class="flex items-center gap-3">
+      <span class="h-3.5 w-3.5 rounded-full" [style.backgroundColor]="r.asignatura.color"></span>
+      <div>
+        <h3 class="text-lg font-bold text-slate-900">{{ r.asignatura.nombre }}</h3>
+        <p class="text-sm text-slate-500">{{ r.asignatura.codigo }} · Grupo {{ r.asignatura.grupo }} · {{ r.asignatura.periodo }}</p>
+      </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div *ngFor="let e of estados" class="rounded-xl bg-slate-50 p-3 text-center">
+        <p class="text-lg font-extrabold" [style.color]="e.color">{{ r.porEstado[e.valor] || 0 }}</p>
+        <p class="text-[11px] font-medium text-slate-500">{{ e.label }}</p>
+      </div>
+    </div>
+
+    <h4 class="mt-5 text-sm font-bold text-slate-700">Detalle por clase</h4>
+    <ul *ngIf="r.clases.length > 0" class="mt-2 max-h-72 space-y-1.5 overflow-y-auto">
+      <li *ngFor="let c of r.clases" class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-slate-700">{{ c.fecha }}</p>
+          <p class="text-xs text-slate-400">{{ labelTipo(c.tipo_clase) }}</p>
+        </div>
+        <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold text-white" [style.backgroundColor]="colorEstado(c.estado)">{{ labelEstado(c.estado) }}</span>
+      </li>
+    </ul>
+    <p *ngIf="r.clases.length === 0" class="mt-2 text-sm text-slate-400">Aún no hay clases registradas para esta asignatura.</p>
+  </ng-container>
+</app-dialog>

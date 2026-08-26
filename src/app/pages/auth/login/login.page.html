@@ -5,9 +5,8 @@
     <app-decor-blobs />
     <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 20%, white 1px, transparent 1px); background-size: 28px 28px;"></div>
 
-    <div class="relative z-10 flex w-full items-center justify-center gap-3 text-center">
-      <app-logo sizeClass="h-20 w-20 rounded-2xl shadow-dark-soft" />
-      <span class="text-lg font-bold text-white">ControlAsist</span>
+    <div class="relative z-10">
+      <app-brand-header logoSizeClass="h-20 w-20 rounded-2xl shadow-dark-soft" gapClass="gap-3" />
     </div>
 
     <div class="relative z-10 max-w-md">
@@ -39,9 +38,8 @@
     <app-edu-background />
     <div class="relative z-10 mx-auto w-full max-w-sm animate-fade-in">
 
-      <div class="mb-8 flex w-full items-center justify-center gap-2 text-center lg:hidden">
-        <app-logo sizeClass="h-16 w-16 rounded-2xl shadow-dark-soft" />
-        <span class="text-lg font-bold text-white">ControlAsist</span>
+      <div class="mb-8 lg:hidden">
+        <app-brand-header logoSizeClass="h-16 w-16 rounded-2xl shadow-dark-soft" />
       </div>
 
       <div *ngIf="mantenimiento() as m" class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-center">

@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { SupabaseService } from './supabase.service';
 import type { User } from '@supabase/supabase-js';
+import { PlantillaReporte } from './plantilla-reporte.model';
 
 export interface LoginData {
   email: string;
@@ -48,6 +49,11 @@ export interface UserProfile {
   formato_reporte_version?: string;
   formato_reporte_titulo?: string;
   formato_reporte_segunda_firma?: string;
+  /** Config del editor de plantillas Premium (Parte 1) — null si el docente nunca lo ha usado. */
+  plantilla_reporte?: PlantillaReporte | null;
+  /** Verificación de cuenta — solo se modifica vía funciones SECURITY DEFINER. */
+  verificado?: boolean;
+  verificado_en?: string | null;
   // Solo presentes cuando rol === 'administrador'.
   puede_cerrar_app?: boolean;
   puede_forzar_actualizacion?: boolean;

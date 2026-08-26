@@ -49,6 +49,7 @@ export const routes: Routes = [
       { path: 'admin/perfil', canActivate: [roleGuard('administrador')], loadComponent: () => import('./pages/admin/admin-perfil/admin-perfil.page').then((m) => m.AdminPerfilPage) },
       { path: 'admin/estadisticas', canActivate: [roleGuard('administrador'), permissionGuard('puede_ver_reportes')], loadComponent: () => import('./pages/admin/admin-estadisticas/admin-estadisticas.page').then((m) => m.AdminEstadisticasPage) },
       { path: 'admin/docentes', canActivate: [roleGuard('administrador'), permissionGuard('puede_gestionar_docentes')], loadComponent: () => import('./pages/admin/admin-docentes/admin-docentes.page').then((m) => m.AdminDocentesPage) },
+      { path: 'admin/premium', canActivate: [roleGuard('administrador'), permissionGuard('puede_gestionar_docentes')], loadComponent: () => import('./pages/admin/admin-premium/admin-premium.page').then((m) => m.AdminPremiumPage) },
       { path: 'admin/estudiantes', canActivate: [roleGuard('administrador')], loadComponent: () => import('./pages/admin/admin-estudiantes/admin-estudiantes.page').then((m) => m.AdminEstudiantesPage) },
       { path: 'admin/configuracion', canActivate: [roleGuard('administrador'), anyPermissionGuard('puede_modificar_config', 'puede_cerrar_app', 'puede_forzar_actualizacion')], loadComponent: () => import('./pages/admin/admin-configuracion/admin-configuracion.page').then((m) => m.AdminConfiguracionPage) },
 
@@ -60,12 +61,14 @@ export const routes: Routes = [
 
       // Estudiante
       { path: 'estudiante/home', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/home/home.page').then((m) => m.EstudianteHomePage) },
+      { path: 'estudiante/asistencia', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/asistencia/asistencia.page').then((m) => m.EstudianteAsistenciaPage) },
       { path: 'estudiante/perfil', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/perfil/perfil.page').then((m) => m.EstudiantePerfilPage) },
       { path: 'estudiante/inscribir', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/inscribir/inscribir.page').then((m) => m.InscribirPage) },
       { path: 'estudiante/datos-inscripcion', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/datos-inscripcion/datos-inscripcion.page').then((m) => m.DatosInscripcionPage) },
 
-      // Premium (placeholder deshabilitado — ver core/config/premium.config.ts)
-      { path: 'premium', loadComponent: () => import('./pages/premium/premium.page').then((m) => m.PremiumPage) },
+      // Premium — editor de plantillas de reportes (Parte 1). TEMPORAL: abierto a todos los
+      // docentes hasta conectar Wompi (ver PARTE 2 del contexto y el comentario en layout.component.ts).
+      { path: 'premium', canActivate: [roleGuard('docente')], loadComponent: () => import('./pages/premium/premium.page').then((m) => m.PremiumPage) },
     ],
   },
 

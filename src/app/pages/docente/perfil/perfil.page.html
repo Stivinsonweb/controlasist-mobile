@@ -81,6 +81,33 @@
     </div>
 
     <div class="card p-6">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h3 class="flex items-center gap-1.5 text-base font-bold" style="color: var(--text-primary);">
+            Verificación de cuenta
+            <app-verificado-badge [mostrar]="verificado()" />
+          </h3>
+          <p class="mt-1 text-sm" style="color: var(--text-muted);">
+            Tus estudiantes verán la insignia de verificado junto a tu nombre al inscribirse y en su lista de asignaturas.
+          </p>
+        </div>
+        <button
+          *ngIf="!verificado() && !solicitudVerificacion()"
+          type="button"
+          (click)="solicitarVerificacion()"
+          [disabled]="enviandoSolicitudVerificacion()"
+          class="btn-outline btn-sm shrink-0">
+          {{ enviandoSolicitudVerificacion() ? 'Enviando...' : 'Solicitar verificación' }}
+        </button>
+      </div>
+      <p *ngIf="solicitudVerificacion()" class="mt-3 text-xs font-medium" style="color: var(--accent-from);">
+        Tu solicitud está en revisión — te avisaremos aquí cuando se apruebe.
+      </p>
+    </div>
+
+    <app-notificaciones-push-toggle *ngIf="authUserId" [usuarioId]="authUserId" rol="docente" />
+
+    <div class="card p-6">
       <h3 class="text-base font-bold" style="color: var(--text-primary);">Cambiar contraseña</h3>
       <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()" class="mt-4 space-y-4">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

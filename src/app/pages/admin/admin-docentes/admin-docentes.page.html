@@ -4,6 +4,24 @@
     <p class="mt-1 text-sm" style="color: var(--text-muted);">{{ filtrados().length }} docente(s) registrados en el sistema.</p>
   </div>
 
+  <!-- Solicitudes de verificación pendientes -->
+  <div *ngIf="solicitudesVerificacion().length > 0" class="mb-6">
+    <h3 class="mb-2 text-sm font-bold" style="color: var(--text-primary);">Solicitudes de verificación</h3>
+    <div *ngFor="let s of solicitudesVerificacion()" class="card mb-2 p-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ s.docentes?.nombres }} {{ s.docentes?.apellidos }}</p>
+          <p class="text-xs" style="color: var(--text-muted);">{{ s.docentes?.email }} · {{ s.created_at | date:'d MMM yyyy, h:mm a' }}</p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" (click)="rechazarVerificacion(s)" [disabled]="procesandoVerificacionId() === s.id" class="btn-outline btn-sm">Rechazar</button>
+          <button type="button" (click)="aprobarVerificacion(s)" [disabled]="procesandoVerificacionId() === s.id" class="btn-primary btn-sm">Aprobar</button>
+        </div>
+      </div>
+      <input [(ngModel)]="notaRechazoVerificacion[s.id]" placeholder="Nota (solo si vas a rechazar)" class="input-field mt-2 text-xs" />
+    </div>
+  </div>
+
   <!-- Filtros -->
   <div class="mb-5 flex flex-col gap-3 sm:flex-row">
     <div class="relative flex-1">
@@ -29,7 +47,10 @@
       <button (click)="toggleExpand(d.id)" class="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-white/5">
         <app-avatar [fotoUrl]="d.foto_url" [iniciales]="iniciales(d)" colorFondo="#e0e7ff" textColor="#4338ca" sizeClass="h-11 w-11 text-sm" [ring]="true" />
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-semibold" style="color: var(--text-primary);">{{ d.nombres }} {{ d.apellidos }}</p>
+          <p class="flex items-center gap-1 truncate text-sm font-semibold" style="color: var(--text-primary);">
+            {{ d.nombres }} {{ d.apellidos }}
+            <app-verificado-badge [mostrar]="!!d.verificado" />
+          </p>
           <p class="truncate text-xs" style="color: var(--text-muted);">{{ d.email }}</p>
         </div>
         <span *ngIf="d.programa" class="badge-info hidden shrink-0 sm:inline-block">{{ d.programa }}</span>
@@ -41,6 +62,9 @@
         <div><span style="color: var(--text-muted);">Entidad:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.entidad || '—' }}</span></div>
         <div><span style="color: var(--text-muted);">Programa:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.programa || '—' }}</span></div>
         <div><span style="color: var(--text-muted);">Área:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.area || '—' }}</span></div>
+        <div *ngIf="d.verificado" class="sm:col-span-2">
+          <button type="button" (click)="revocarVerificacion(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-outline btn-sm">Revocar verificación</button>
+        </div>
       </div>
     </div>
   </div>

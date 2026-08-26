@@ -10,6 +10,9 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { AccentThemeService } from '../../../core/services/accent-theme.service';
 import { ACCENT_PALETTES } from '../../../shared/utils/subject-theme.util';
+import { NotificacionesPushToggleComponent } from '../../../shared/components/notificaciones-push-toggle/notificaciones-push-toggle.component';
+import { VerificadoBadgeComponent } from '../../../shared/components/verificado-badge/verificado-badge.component';
+import { VerificacionDocenteService, SolicitudVerificacion } from '../../../core/services/verificacion-docente.service';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -20,7 +23,7 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-docente-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DialogComponent, AvatarComponent],
+  imports: [CommonModule, ReactiveFormsModule, DialogComponent, AvatarComponent, NotificacionesPushToggleComponent, VerificadoBadgeComponent],
   templateUrl: './perfil.page.html',
 })
 export class DocentePerfilPage implements OnInit {
@@ -35,6 +38,8 @@ export class DocentePerfilPage implements OnInit {
   nombres = '';
   apellidos = '';
   private docenteId = '';
+  /** auth.uid() — distinto de docenteId (la PK de la fila `docentes`). Lo necesita push_subscriptions. */
+  authUserId = '';
 
   showAvatarPicker = false;
   avataresDisponibles = signal<string[]>([]);
@@ -45,6 +50,10 @@ export class DocentePerfilPage implements OnInit {
   temaSeleccionado = signal('emerald-teal');
   guardandoTema = signal(false);
 
+  verificado = signal(false);
+  solicitudVerificacion = signal<SolicitudVerificacion | null>(null);
+  enviandoSolicitudVerificacion = signal(false);
+
   constructor(
     private fb: FormBuilder,
     private supabaseService: SupabaseService,
@@ -52,7 +61,8 @@ export class DocentePerfilPage implements OnInit {
     private adminService: AdminService,
     private avatarService: AvatarService,
     private toast: ToastService,
-    private accentTheme: AccentThemeService
+    private accentTheme: AccentThemeService,
+    private verificacionService: VerificacionDocenteService
   ) {}
 
   async ngOnInit() {
@@ -84,6 +94,12 @@ export class DocentePerfilPage implements OnInit {
       const perfil = await this.authService.resolveProfile(user.id);
       if (!perfil) throw new Error('No se encontró el perfil de docente');
       this.docenteId = perfil.id;
+      this.authUserId = user.id;
+      this.verificado.set(!!perfil.verificado);
+      this.verificacionService
+        .misSolicitudes(perfil.id)
+        .then((solicitudes) => this.solicitudVerificacion.set(solicitudes.find((s) => s.estado === 'pendiente') || null))
+        .catch((e) => console.error('Error cargando solicitud de verificación:', e));
       this.email = perfil.email;
       this.fotoUrl = perfil.foto_url || null;
       this.nombres = perfil.nombres;
@@ -176,7 +192,7 @@ export class DocentePerfilPage implements OnInit {
     if (this.avataresDisponibles().length === 0) {
       this.cargandoAvatares = true;
       try {
-        this.avataresDisponibles.set(await this.avatarService.getDefaultAvatars());
+        this.avataresDisponibles.set(await this.avatarService.getDefaultAvatars('docente'));
       } catch (e) {
         console.error('Error cargando galería de avatares:', e);
       } finally {
@@ -212,6 +228,19 @@ export class DocentePerfilPage implements OnInit {
     } finally {
       this.subiendoAvatar = false;
       input.value = '';
+    }
+  }
+
+  async solicitarVerificacion() {
+    this.enviandoSolicitudVerificacion.set(true);
+    try {
+      await this.verificacionService.solicitar(this.docenteId);
+      this.solicitudVerificacion.set(await this.verificacionService.misSolicitudes(this.docenteId).then((s) => s.find((x) => x.estado === 'pendiente') || null));
+      this.toast.success('Solicitud de verificación enviada. Un administrador la revisará pronto.');
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo enviar la solicitud');
+    } finally {
+      this.enviandoSolicitudVerificacion.set(false);
     }
   }
 }

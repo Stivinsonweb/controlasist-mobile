@@ -25,7 +25,7 @@ export class AdminConfiguracionPage implements OnInit {
   // Copias editables por sección (para no mutar el signal directamente).
   mantenimiento = { app_activa: true, permitir_login: true, mostrar_mensaje: false, titulo_mensaje: '', mensaje: '' };
   actualizacion = { requiere_actualizacion: false, version_actual: '', version_minima_requerida: '' };
-  general = { permitir_registro: true, permitir_tomar_asistencia: true, url_soporte: '', url_documentacion: '' };
+  general = { permitir_registro: true, permitir_tomar_asistencia: true, url_soporte: '', url_documentacion: '', recordatorio_clase_minutos_antes: 15 };
 
   constructor(
     private authService: AuthService,
@@ -61,6 +61,7 @@ export class AdminConfiguracionPage implements OnInit {
           permitir_tomar_asistencia: config.permitir_tomar_asistencia,
           url_soporte: config.url_soporte || '',
           url_documentacion: config.url_documentacion || '',
+          recordatorio_clase_minutos_antes: config.recordatorio_clase_minutos_antes ?? 15,
         };
       }
     } catch (e) {
@@ -115,6 +116,7 @@ export class AdminConfiguracionPage implements OnInit {
         permitir_tomar_asistencia: this.general.permitir_tomar_asistencia,
         url_soporte: this.general.url_soporte || null,
         url_documentacion: this.general.url_documentacion || null,
+        recordatorio_clase_minutos_antes: this.general.recordatorio_clase_minutos_antes || 15,
       });
       this.config.set(actualizado);
       this.toast.success('Configuración general guardada');

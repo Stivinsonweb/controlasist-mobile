@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { PlantillaReporte } from './plantilla-reporte.model';
 
 export interface Docente {
   id: string;
@@ -20,6 +21,19 @@ export interface Docente {
   formato_reporte_version?: string;
   formato_reporte_titulo?: string;
   formato_reporte_segunda_firma?: string;
+  /** Config del editor de plantillas Premium (Parte 1) — null si el docente nunca lo ha usado. */
+  plantilla_reporte?: PlantillaReporte | null;
+  /** Estado de la suscripción Premium (Parte 2/3) — solo se modifica vía funciones SECURITY DEFINER, nunca con un update directo. */
+  premium_activo?: boolean;
+  premium_fuente?: 'prueba' | 'pago' | 'admin' | null;
+  premium_es_prueba?: boolean;
+  premium_prueba_utilizada?: boolean;
+  premium_fecha_inicio?: string | null;
+  premium_fecha_vencimiento?: string | null;
+  premium_precio_personalizado?: number | null;
+  /** Verificación de cuenta — solo se modifica vía funciones SECURITY DEFINER. */
+  verificado?: boolean;
+  verificado_en?: string | null;
   created_at?: string;
 }
 
@@ -94,6 +108,17 @@ export class AdminService {
 
   async actualizarLogoInstitucional(id: string, logo_institucional_url: string) {
     const { data, error } = await this.supabase.from('docentes').update({ logo_institucional_url }).eq('id', id).select().single();
+    if (error) throw error;
+    return data as Docente;
+  }
+
+  /** Autoguardado del editor Premium (Parte 1): título/segunda firma comparten columna con el
+   *  formato institucional de la página de reportes, el resto vive en `plantilla_reporte`. */
+  async actualizarPlantillaPremium(
+    id: string,
+    payload: Pick<Docente, 'formato_reporte_titulo' | 'formato_reporte_segunda_firma' | 'plantilla_reporte'>
+  ) {
+    const { data, error } = await this.supabase.from('docentes').update(payload).eq('id', id).select().single();
     if (error) throw error;
     return data as Docente;
   }

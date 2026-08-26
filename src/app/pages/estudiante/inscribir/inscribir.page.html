@@ -28,6 +28,15 @@
           <p class="text-sm" style="color: var(--text-muted);">{{ a.codigo }} · Grupo {{ a.grupo }} · {{ a.periodo }}</p>
         </div>
       </div>
+
+      <div *ngIf="docenteEncontrado() as d" class="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5" style="background: var(--bg-surface-2);">
+        <app-avatar [fotoUrl]="d.foto_url" [iniciales]="d.nombres.charAt(0) + d.apellidos.charAt(0)" colorFondo="var(--accent-from)" sizeClass="h-9 w-9 text-sm" />
+        <div class="flex items-center gap-1.5">
+          <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ d.nombres }} {{ d.apellidos }}</p>
+          <app-verificado-badge [mostrar]="!!d.verificado" />
+        </div>
+      </div>
+
       <div class="mt-4 flex gap-2">
         <button (click)="cancelar()" class="btn-outline flex-1">Cancelar</button>
         <button (click)="continuar()" class="btn-primary flex-1">Inscribirme</button>

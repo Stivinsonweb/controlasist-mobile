@@ -46,17 +46,32 @@ export interface RegistroAsistencia {
   updated_at?: string;
 }
 
+/** Registro de asistencia del estudiante con la clase (fecha/tipo) embebida. */
+export interface MiRegistroAsistencia {
+  estado: EstadoAsistencia;
+  observaciones: string | null;
+  asistencias: {
+    id: string;
+    asignatura_id: string;
+    fecha: string;
+    hora_inicio: string;
+    tipo_clase: TipoClase | null;
+  };
+}
+
 export interface EstadoAsistenciaOpcion {
   valor: EstadoAsistencia;
   label: string;
   color: string;
+  /** Ícono para el botón compacto de la lista de asistencia — la letra sola no basta para distinguir el estado de un vistazo. */
+  icono: 'check' | 'clock' | 'flag' | 'x';
 }
 
 export const ESTADOS_ASISTENCIA: EstadoAsistenciaOpcion[] = [
-  { valor: 'presente', label: 'Presente', color: '#10b981' },
-  { valor: 'tarde', label: 'Tarde', color: '#f59e0b' },
-  { valor: 'justificado', label: 'Justificado', color: '#3b82f6' },
-  { valor: 'ausente', label: 'Ausente', color: '#ef4444' },
+  { valor: 'presente', label: 'Presente', color: '#10b981', icono: 'check' },
+  { valor: 'tarde', label: 'Tarde', color: '#f59e0b', icono: 'clock' },
+  { valor: 'justificado', label: 'Justificado', color: '#3b82f6', icono: 'flag' },
+  { valor: 'ausente', label: 'Ausente', color: '#ef4444', icono: 'x' },
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -141,5 +156,15 @@ export class AsistenciasService {
       .from('registros_asistencia')
       .insert([{ asistencia_id: asistenciaId, estudiante_id: estudianteId, estado, observaciones: observaciones || null }]);
     if (error) throw error;
+  }
+
+  /** Historial completo de asistencia del estudiante autenticado, con la clase embebida (fecha/tipo). */
+  async misRegistros(estudianteId: string) {
+    const { data, error } = await this.supabase
+      .from('registros_asistencia')
+      .select('estado, observaciones, asistencias!inner(id, asignatura_id, fecha, hora_inicio, tipo_clase)')
+      .eq('estudiante_id', estudianteId);
+    if (error) throw error;
+    return (data || []) as unknown as MiRegistroAsistencia[];
   }
 }

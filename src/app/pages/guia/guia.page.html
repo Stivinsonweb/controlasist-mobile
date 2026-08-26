@@ -57,6 +57,17 @@
               [style.background]="i === activo() ? 'var(--accent-from)' : 'var(--border-subtle-2)'"></span>
       </div>
 
+      <!-- Pasos detallados -->
+      <div class="mt-6 rounded-2xl p-5 text-left" style="background: var(--bg-surface-2);">
+        <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Pasos detallados</p>
+        <ol class="mt-3 space-y-2.5">
+          <li *ngFor="let paso of temaActivo().pasos; let i = index" class="flex items-start gap-3">
+            <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">{{ i + 1 }}</span>
+            <span class="text-sm leading-relaxed" style="color: var(--text-secondary);">{{ paso }}</span>
+          </li>
+        </ol>
+      </div>
+
       <div class="mt-5 flex w-full gap-2">
         <button type="button" (click)="anterior()" [disabled]="activo() === 0" class="btn-outline btn-sm flex-1 disabled:opacity-40">Anterior</button>
         <button type="button" (click)="siguiente()" [disabled]="activo() === temas().length - 1" class="btn-primary btn-sm flex-1 disabled:opacity-40">Siguiente</button>

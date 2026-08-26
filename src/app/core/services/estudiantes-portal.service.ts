@@ -8,6 +8,7 @@ export interface DocenteResumen {
   nombres: string;
   apellidos: string;
   foto_url?: string;
+  verificado?: boolean;
 }
 
 export type AsignaturaConDocente = Asignatura & { docente: DocenteResumen | null };
@@ -62,7 +63,7 @@ export class EstudiantesPortalService {
     if (docenteIds.length > 0) {
       const { data: docentesData, error: docentesError } = await this.supabase
         .from('docentes')
-        .select('id, nombres, apellidos, foto_url')
+        .select('id, nombres, apellidos, foto_url, verificado')
         .in('id', docenteIds);
       if (docentesError) throw docentesError;
       docentes = (docentesData || []) as DocenteResumen[];
@@ -92,11 +93,22 @@ export class EstudiantesPortalService {
       .eq('activa', true)
       .maybeSingle();
     if (error) throw error;
-    if (!data) return { asignatura: null, expirado: false };
+    if (!data) return { asignatura: null, docente: null, expirado: false };
 
     const asignatura = data as Asignatura & { codigo_expira?: string | null };
     const expirado = !!asignatura.codigo_expira && new Date(asignatura.codigo_expira) < new Date();
-    return { asignatura: asignatura as Asignatura, expirado };
+
+    let docente: DocenteResumen | null = null;
+    if (asignatura.docente_id) {
+      const { data: docenteData } = await this.supabase
+        .from('docentes')
+        .select('id, nombres, apellidos, foto_url, verificado')
+        .eq('id', asignatura.docente_id)
+        .maybeSingle();
+      docente = (docenteData as DocenteResumen) || null;
+    }
+
+    return { asignatura: asignatura as Asignatura, docente, expirado };
   }
 
   verificarDatosCompletos(estudiante: Estudiante): boolean {

@@ -11,8 +11,9 @@ import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminService } from '../../core/services/admin.service';
 import { LogoService } from '../../core/services/logo.service';
-import { addPdfHeader, addPdfFooter, brandTableOptions } from '../../shared/utils/pdf-report.util';
+import { addPdfHeader, addPdfFooter, addPdfSectionTitle, brandTableOptions } from '../../shared/utils/pdf-report.util';
 import { XLSX, styleHeaderRow, autofitColumns, formatPercentColumn, applyZebraStripes } from '../../shared/utils/excel-report.util';
+import { LOGO_TAMANO_MM, PlantillaReporte, defaultPlantillaReporte, seccionActiva } from '../../core/services/plantilla-reporte.model';
 
 @Component({
   selector: 'app-reportes',
@@ -45,6 +46,8 @@ export class ReportesPage implements OnInit {
   formatoVersion = signal('');
   formatoTitulo = signal('');
   formatoSegundaFirma = signal('');
+  /** Premium (Parte 1): plantilla del docente si la ha configurado, o el default de siempre si no. */
+  plantillaReporte = signal<PlantillaReporte>(defaultPlantillaReporte());
 
   constructor(
     private route: ActivatedRoute,
@@ -189,6 +192,9 @@ export class ReportesPage implements OnInit {
     this.formatoVersion.set(perfil.formato_reporte_version || '');
     this.formatoTitulo.set(perfil.formato_reporte_titulo || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
     this.formatoSegundaFirma.set(perfil.formato_reporte_segunda_firma || '');
+    // TEMPORAL: se aplica en cuanto exista una plantilla guardada, sin chequear premium_activo
+    // — ver PARTE 2 del contexto. Cuando Wompi esté conectado, añadir aquí `&& perfil.premium_activo`.
+    this.plantillaReporte.set(perfil.plantilla_reporte ? { ...defaultPlantillaReporte(), ...perfil.plantilla_reporte } : defaultPlantillaReporte());
   }
 
   toggleFormatoConfig() {
@@ -280,6 +286,7 @@ export class ReportesPage implements OnInit {
     this.exportandoInstitucionalPDF.set(true);
     try {
       const logoDataUrl = await this.cargarLogoSiHay();
+      const plantilla = this.plantillaReporte();
 
       const titulo = this.formatoTitulo() || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE';
       const codigo = this.formatoCodigo();
@@ -288,10 +295,19 @@ export class ReportesPage implements OnInit {
 
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
 
+      // ===== Encabezado: logo en la posición/tamaño de la plantilla (Premium, Parte 1) =====
+      const logoSize = LOGO_TAMANO_MM[plantilla.logo_tamano] ?? LOGO_TAMANO_MM.mediano;
+      let logoX = 14;
+      if (plantilla.logo_posicion === 'centro') logoX = pageWidth / 2 - logoSize / 2;
+      if (plantilla.logo_posicion === 'derecha') logoX = pageWidth - 14 - logoSize;
+
+      let cursorY = 14;
       if (logoDataUrl) {
         try {
-          doc.addImage(logoDataUrl, 'PNG', 14, 8, 20, 20);
+          doc.addImage(logoDataUrl, 'PNG', logoX, 8, logoSize, logoSize);
+          if (plantilla.logo_posicion === 'centro') cursorY = 8 + logoSize + 6;
         } catch (e) {
           console.error('No se pudo incrustar el logo en el PDF:', e);
         }
@@ -300,7 +316,16 @@ export class ReportesPage implements OnInit {
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(20);
-      doc.text(titulo, pageWidth / 2, 14, { align: 'center', maxWidth: pageWidth - 90 });
+      doc.text(titulo, pageWidth / 2, cursorY, { align: 'center', maxWidth: pageWidth - 90 });
+      cursorY += 5;
+
+      if (plantilla.subtitulo_formato) {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(90);
+        doc.text(plantilla.subtitulo_formato, pageWidth / 2, cursorY, { align: 'center', maxWidth: pageWidth - 90 });
+        cursorY += 5;
+      }
 
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
@@ -308,50 +333,78 @@ export class ReportesPage implements OnInit {
       doc.text(`Código: ${codigo || '—'}`, pageWidth - 14, 11, { align: 'right' });
       doc.text(`Versión: ${version || '—'}`, pageWidth - 14, 16, { align: 'right' });
 
+      const lineY = Math.max(cursorY + 3, 8 + logoSize + 4);
       doc.setDrawColor(210);
-      doc.line(14, 32, pageWidth - 14, 32);
+      doc.line(14, lineY, pageWidth - 14, lineY);
 
-      doc.setFontSize(9);
-      doc.setTextColor(40);
-      doc.text(`Docente: ${perfil.nombres} ${perfil.apellidos}`, 14, 39);
-      doc.text(`Programa: ${a.programa || perfil.programa || '—'}`, pageWidth / 2 + 5, 39);
-      doc.text(`Asignatura: ${a.nombre} (${a.codigo})`, 14, 45);
-      doc.text(`Año: ${anioTexto}    Periodo: ${a.periodo}`, pageWidth / 2 + 5, 45);
+      // ===== Secciones, en el orden y con la activación configurados en la plantilla =====
+      let y = lineY + 7;
+      for (const seccionId of plantilla.orden_secciones) {
+        if (!seccionActiva(plantilla, seccionId)) continue;
 
-      autoTable(doc, {
-        startY: 51,
-        head: [['No.', 'Fecha', 'Hora inicio', 'Hora final', 'Tema', 'Total horas', 'Firma docente']],
-        body: clases.map((c, i) => [
-          i + 1,
-          this.formatFecha(c.fecha),
-          c.hora_inicio,
-          c.hora_fin,
-          c.temas_tratados || '—',
-          this.calcularHoras(c.hora_inicio, c.hora_fin),
-          '',
-        ]),
-        styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
-        headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8.5 },
-        alternateRowStyles: { fillColor: [243, 244, 246] },
-        columnStyles: { 0: { cellWidth: 10 }, 4: { cellWidth: 58 }, 6: { cellWidth: 28 } },
-        margin: { top: 51, bottom: 22 },
-      });
-
-      // Bloque de firmas: docente + segunda firma configurable.
-      const finalY = (doc as any).lastAutoTable?.finalY ?? 60;
-      const pageHeight = doc.internal.pageSize.getHeight();
-      let firmaY = finalY + 22;
-      if (firmaY > pageHeight - 30) {
-        doc.addPage();
-        firmaY = 40;
+        if (seccionId === 'info_general') {
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(40);
+          doc.text(`Docente: ${perfil.nombres} ${perfil.apellidos}`, 14, y);
+          doc.text(`Programa: ${a.programa || perfil.programa || '—'}`, pageWidth / 2 + 5, y);
+          y += 6;
+          doc.text(`Asignatura: ${a.nombre} (${a.codigo})`, 14, y);
+          doc.text(`Año: ${anioTexto}    Periodo: ${a.periodo}`, pageWidth / 2 + 5, y);
+          y += 8;
+        } else if (seccionId === 'tabla_asistencia') {
+          autoTable(doc, {
+            startY: y,
+            head: [['No.', 'Fecha', 'Hora inicio', 'Hora final', 'Tema', 'Total horas', 'Firma docente']],
+            body: clases.map((c, i) => [
+              i + 1,
+              this.formatFecha(c.fecha),
+              c.hora_inicio,
+              c.hora_fin,
+              c.temas_tratados || '—',
+              this.calcularHoras(c.hora_inicio, c.hora_fin),
+              '',
+            ]),
+            styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
+            headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8.5 },
+            alternateRowStyles: { fillColor: [243, 244, 246] },
+            columnStyles: { 0: { cellWidth: 10 }, 4: { cellWidth: 58 }, 6: { cellWidth: 28 } },
+            margin: { top: y, bottom: 22 },
+          });
+          y = ((doc as any).lastAutoTable?.finalY ?? y + 40) + 10;
+        } else if (seccionId === 'estadisticas_resumen') {
+          if (y > pageHeight - 40) { doc.addPage(); y = 20; }
+          y = addPdfSectionTitle(doc, 'Estadísticas resumen del periodo', y);
+          const g = this.resumenGeneral();
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(60);
+          const linea = g
+            ? `Clases dictadas: ${g.totalClases}    Presentes: ${g.presente}    Tarde: ${g.tarde}    Justificados: ${g.justificado}    Ausentes: ${g.ausente}`
+            : 'Sin datos disponibles para este periodo.';
+          doc.text(linea, 14, y, { maxWidth: pageWidth - 28 });
+          y += 10;
+        } else if (seccionId === 'observaciones') {
+          if (y > pageHeight - 40) { doc.addPage(); y = 20; }
+          y = addPdfSectionTitle(doc, 'Observaciones generales', y);
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(60);
+          const lineas = doc.splitTextToSize(plantilla.observaciones_texto || 'Sin observaciones registradas.', pageWidth - 28);
+          doc.text(lineas, 14, y);
+          y += lineas.length * 4.5 + 6;
+        } else if (seccionId === 'firmas') {
+          if (y > pageHeight - 30) { doc.addPage(); y = 30; }
+          doc.setDrawColor(120);
+          doc.line(20, y, 90, y);
+          doc.line(pageWidth - 90, y, pageWidth - 20, y);
+          doc.setFontSize(9);
+          doc.setTextColor(60);
+          doc.text('Firma docente', 55, y + 5, { align: 'center' });
+          doc.text(this.formatoSegundaFirma() || 'Segunda firma', pageWidth - 55, y + 5, { align: 'center' });
+          y += 15;
+        }
       }
-      doc.setDrawColor(120);
-      doc.line(20, firmaY, 90, firmaY);
-      doc.line(pageWidth - 90, firmaY, pageWidth - 20, firmaY);
-      doc.setFontSize(9);
-      doc.setTextColor(60);
-      doc.text('Firma docente', 55, firmaY + 5, { align: 'center' });
-      doc.text(this.formatoSegundaFirma() || 'Segunda firma', pageWidth - 55, firmaY + 5, { align: 'center' });
 
       // Pie de página consistente en todas las páginas: logo pequeño, fecha de generación y número de página.
       addPdfFooter(doc, { logoDataUrl });

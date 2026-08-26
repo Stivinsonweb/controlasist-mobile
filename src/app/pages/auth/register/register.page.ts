@@ -8,7 +8,7 @@ import { ConfiguracionAppService } from '../../../core/services/configuracion-ap
 import { AvatarService } from '../../../core/services/avatar.service';
 import { EduBackgroundComponent } from '../../../shared/components/edu-background/edu-background.component';
 import { DecorBlobsComponent } from '../../../shared/components/decor-blobs/decor-blobs.component';
-import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { BrandHeaderComponent } from '../../../shared/components/brand-header/brand-header.component';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -19,7 +19,7 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, EduBackgroundComponent, DecorBlobsComponent, LogoComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, EduBackgroundComponent, DecorBlobsComponent, BrandHeaderComponent],
   templateUrl: './register.page.html',
 })
 export class RegisterPage implements OnInit {
@@ -66,7 +66,7 @@ export class RegisterPage implements OnInit {
   private async cargarAvatares() {
     this.cargandoAvatares = true;
     try {
-      this.avataresDisponibles.set(await this.avatarService.getDefaultAvatars());
+      this.avataresDisponibles.set(await this.avatarService.getDefaultAvatars('docente'));
     } catch (e) {
       console.error('Error cargando galería de avatares:', e);
     } finally {

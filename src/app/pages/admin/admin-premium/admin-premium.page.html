@@ -1,0 +1,138 @@
+<div class="animate-fade-in">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: var(--text-primary);">Premium</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Solicitudes de prueba gratis, comprobantes de pago y otorgamiento manual.</p>
+  </div>
+
+  <div class="mb-5 flex gap-1.5 overflow-x-auto">
+    <button *ngFor="let t of tabs"
+            (click)="cambiarTab(t[0])"
+            class="shrink-0 rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors"
+            [style.background]="tab() === t[0] ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
+            [style.color]="tab() === t[0] ? '#fff' : 'var(--text-secondary)'">
+      {{ t[1] }}
+      <span *ngIf="t[0] === 'pendientes' && (solicitudesPendientes().length + pagosPendientes().length) > 0"
+            class="ml-1.5 rounded-full bg-white/25 px-1.5 py-0.5 text-[10px]">{{ solicitudesPendientes().length + pagosPendientes().length }}</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading()" class="space-y-3">
+    <div class="card skeleton h-24" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+
+    <!-- ========================= PENDIENTES ========================= -->
+    <div *ngIf="tab() === 'pendientes'" class="space-y-6">
+      <div>
+        <h3 class="mb-2 text-sm font-bold" style="color: var(--text-primary);">Solicitudes de prueba gratis</h3>
+        <p *ngIf="solicitudesPendientes().length === 0" class="text-sm" style="color: var(--text-muted);">No hay solicitudes pendientes.</p>
+        <div *ngFor="let s of solicitudesPendientes()" class="card mb-2 p-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ s.docentes?.nombres }} {{ s.docentes?.apellidos }}</p>
+              <p class="text-xs" style="color: var(--text-muted);">{{ s.docentes?.email }} · {{ s.created_at | date:'d MMM yyyy, h:mm a' }}</p>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" (click)="rechazarSolicitud(s)" [disabled]="procesandoId() === s.id" class="btn-outline btn-sm">Rechazar</button>
+              <button type="button" (click)="aprobarSolicitud(s)" [disabled]="procesandoId() === s.id" class="btn-primary btn-sm">Aprobar</button>
+            </div>
+          </div>
+          <input [(ngModel)]="notaRechazo[s.id]" placeholder="Nota (solo si vas a rechazar)" class="input-field mt-2 text-xs" />
+        </div>
+      </div>
+
+      <div>
+        <h3 class="mb-2 text-sm font-bold" style="color: var(--text-primary);">Comprobantes de pago</h3>
+        <p *ngIf="pagosPendientes().length === 0" class="text-sm" style="color: var(--text-muted);">No hay comprobantes pendientes.</p>
+        <div *ngFor="let p of pagosPendientes()" class="card mb-2 p-4">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ p.docentes?.nombres }} {{ p.docentes?.apellidos }}</p>
+              <p class="text-xs" style="color: var(--text-muted);">{{ p.docentes?.email }} · {{ p.created_at | date:'d MMM yyyy, h:mm a' }}</p>
+              <p class="mt-1 text-xs" style="color: var(--text-secondary);">
+                Monto declarado: <strong>{{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</strong> ·
+                Fecha del pago: {{ p.fecha_pago_declarada | date:'d MMM yyyy' }} ·
+                Periodo sugerido por el docente: <strong>{{ p.periodo_declarado_por_docente }}</strong>
+              </p>
+            </div>
+            <button type="button" (click)="verComprobante(p)" class="btn-outline btn-sm shrink-0">Ver comprobante</button>
+          </div>
+
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <label class="text-xs font-medium" style="color: var(--text-secondary);">Periodo a aplicar:</label>
+            <select [(ngModel)]="periodoConfirmado[p.id]" class="input-field w-auto text-xs">
+              <option value="mensual">Mensual</option>
+              <option value="anual">Anual</option>
+            </select>
+            <div class="ml-auto flex gap-2">
+              <button type="button" (click)="rechazarPago(p)" [disabled]="procesandoId() === p.id" class="btn-outline btn-sm">Rechazar</button>
+              <button type="button" (click)="aprobarPago(p)" [disabled]="procesandoId() === p.id" class="btn-primary btn-sm">Aprobar</button>
+            </div>
+          </div>
+          <input [(ngModel)]="notaRechazo[p.id]" placeholder="Nota (solo si vas a rechazar)" class="input-field mt-2 text-xs" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================= HISTORIAL ========================= -->
+    <div *ngIf="tab() === 'historial'">
+      <input [ngModel]="filtroHistorial()" (ngModelChange)="filtroHistorial.set($event)" placeholder="Buscar por docente..." class="input-field mb-3 max-w-sm text-sm" />
+      <p *ngIf="historialCombinado().length === 0" class="text-sm" style="color: var(--text-muted);">Aún no hay solicitudes o pagos procesados.</p>
+      <div *ngFor="let r of historialCombinado()" class="card mb-2 flex flex-wrap items-center justify-between gap-2 p-3.5">
+        <div>
+          <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ r.docente?.nombres }} {{ r.docente?.apellidos }}</p>
+          <p class="text-xs" style="color: var(--text-muted);">{{ r.detalle }} · {{ r.fecha | date:'d MMM yyyy, h:mm a' }}</p>
+          <p *ngIf="r.nota_admin" class="mt-1 text-xs italic" style="color: var(--text-muted);">"{{ r.nota_admin }}"</p>
+        </div>
+        <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold"
+              [style.background]="r.estado === 'aprobada' || r.estado === 'aprobado' ? '#10b98122' : '#ef444422'"
+              [style.color]="r.estado === 'aprobada' || r.estado === 'aprobado' ? '#10b981' : '#ef4444'">{{ r.estado }}</span>
+      </div>
+    </div>
+
+    <!-- ========================= DOCENTES (Parte 3 — manual) ========================= -->
+    <div *ngIf="tab() === 'docentes'">
+      <div *ngFor="let d of docentes()" class="card mb-2 flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ d.nombres }} {{ d.apellidos }}</p>
+          <p class="text-xs" style="color: var(--text-muted);">{{ d.email }}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full px-2.5 py-1 text-xs font-bold"
+                [style.background]="d.premium_activo ? '#10b98122' : 'var(--bg-surface-2)'"
+                [style.color]="d.premium_activo ? '#10b981' : 'var(--text-muted)'">
+            {{ d.premium_activo ? ('Activo · ' + d.premium_fuente) : 'Inactivo' }}
+          </span>
+          <input [ngModel]="d.premium_precio_personalizado" (ngModelChange)="precioPersonalizadoEdit[d.id] = $event" placeholder="Precio personalizado" class="input-field w-36 text-xs" type="number" />
+          <button type="button" (click)="guardarPrecioPersonalizado(d)" [disabled]="procesandoId() === d.id" class="btn-outline btn-sm">Guardar precio</button>
+          <button *ngIf="!d.premium_activo" type="button" (click)="otorgarManual(d)" [disabled]="procesandoId() === d.id" class="btn-primary btn-sm">Otorgar</button>
+          <button *ngIf="d.premium_activo && d.premium_fuente === 'admin'" type="button" (click)="revocarManual(d)" [disabled]="procesandoId() === d.id" class="btn-outline btn-sm">Revocar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================= PRECIO ESTÁNDAR ========================= -->
+    <div *ngIf="tab() === 'precio'" class="card max-w-md p-6">
+      <h3 class="text-sm font-bold" style="color: var(--text-primary);">Precio estándar de Premium</h3>
+      <p class="mt-1 text-xs" style="color: var(--text-muted);">Se muestra a todos los docentes, salvo que tengan un precio personalizado (pestaña "Docentes").</p>
+      <div class="mt-4">
+        <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Precio mensual</label>
+        <input #mensual type="number" [ngModel]="config()?.premium_precio_mensual" class="input-field text-sm" placeholder="50000" />
+      </div>
+      <div class="mt-3">
+        <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Precio anual</label>
+        <input #anual type="number" [ngModel]="config()?.premium_precio_anual" class="input-field text-sm" placeholder="500000" />
+      </div>
+      <div class="mt-3">
+        <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Datos para pagar (Nequi, cuenta bancaria, titular...)</label>
+        <textarea #infoPago rows="3" [ngModel]="config()?.premium_info_pago" class="input-field text-sm" placeholder="Ej: Nequi 300 123 4567 a nombre de Juan Pérez"></textarea>
+        <p class="mt-1 text-[11px]" style="color: var(--text-muted);">Se muestra al docente antes de subir su comprobante.</p>
+      </div>
+      <button type="button" (click)="guardarPrecioGlobal(mensual.value, anual.value, infoPago.value)" [disabled]="guardandoPrecioGlobal()" class="btn-primary btn-sm mt-4 w-full">
+        {{ guardandoPrecioGlobal() ? 'Guardando...' : 'Guardar precio estándar' }}
+      </button>
+    </div>
+
+  </ng-container>
+</div>

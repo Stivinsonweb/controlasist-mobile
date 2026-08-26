@@ -17,6 +17,14 @@ export interface ConfiguracionApp {
   url_soporte?: string | null;
   url_documentacion?: string | null;
   actualizado_por?: string | null;
+  /** Precio estándar de Premium (Parte 2), configurable por el admin. */
+  premium_precio_mensual?: number | null;
+  premium_precio_anual?: number | null;
+  /** Cuenta/Nequi/banco a la que el docente debe transferir — texto libre, se muestra antes de subir el comprobante. */
+  premium_info_pago?: string | null;
+  /** Funcionalidad 5 — recordatorios de clase por push. */
+  recordatorio_clase_minutos_antes?: number;
+  vapid_public_key?: string | null;
   updated_at?: string;
 }
 

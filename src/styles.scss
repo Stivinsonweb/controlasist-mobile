@@ -28,6 +28,25 @@
   --accent-to: #3b82f6;
 }
 
+/*
+ * Modo claro (Funcionalidad 6) — mismo sistema de variables, fondo claro en vez del navy oscuro.
+ * ThemeService pone data-theme="light"|"dark" en <html> según la preferencia del usuario
+ * (oscuro/claro/sistema, con localStorage). El resto de la app no necesita cambios porque ya usa
+ * estas variables en vez de colores fijos.
+ */
+:root[data-theme='light'] {
+  --bg-app: #f1f5f9;
+  --bg-app-2: #e2e8f0;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f8fafc;
+  --bg-surface-3: #eef2f7;
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-subtle-2: rgba(15, 23, 42, 0.14);
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+}
+
 html, body {
   height: 100%;
   margin: 0;

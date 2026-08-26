@@ -3,19 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Asignatura } from '../../../core/services/asignaturas.service';
-import { EstudiantesPortalService } from '../../../core/services/estudiantes-portal.service';
+import { EstudiantesPortalService, DocenteResumen } from '../../../core/services/estudiantes-portal.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { VerificadoBadgeComponent } from '../../../shared/components/verificado-badge/verificado-badge.component';
 
 @Component({
   selector: 'app-inscribir',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AvatarComponent, VerificadoBadgeComponent],
   templateUrl: './inscribir.page.html',
 })
 export class InscribirPage {
   codigoAcceso = '';
   buscando = false;
   encontrada = signal<Asignatura | null>(null);
+  docenteEncontrado = signal<DocenteResumen | null>(null);
 
   constructor(private portalService: EstudiantesPortalService, private router: Router, private toast: ToastService) {}
 
@@ -28,8 +31,9 @@ export class InscribirPage {
 
     this.buscando = true;
     this.encontrada.set(null);
+    this.docenteEncontrado.set(null);
     try {
-      const { asignatura, expirado } = await this.portalService.buscarPorCodigoAcceso(codigo);
+      const { asignatura, docente, expirado } = await this.portalService.buscarPorCodigoAcceso(codigo);
       if (!asignatura) {
         this.toast.error('Código no válido o asignatura inactiva');
         return;
@@ -39,6 +43,7 @@ export class InscribirPage {
         return;
       }
       this.encontrada.set(asignatura);
+      this.docenteEncontrado.set(docente);
     } catch (e: any) {
       console.error('Error buscando código de acceso:', e);
       this.toast.error('No se pudo verificar el código, intenta de nuevo');
@@ -55,6 +60,7 @@ export class InscribirPage {
 
   cancelar() {
     this.encontrada.set(null);
+    this.docenteEncontrado.set(null);
     this.codigoAcceso = '';
   }
 }

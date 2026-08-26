@@ -332,18 +332,29 @@
       <ul class="mt-2 max-h-80 space-y-1.5 overflow-y-auto">
         <li *ngFor="let r of registrosTrabajo" class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2">
           <span class="min-w-0 flex-1 truncate text-sm font-medium text-slate-700">{{ r.nombres }} {{ r.apellidos }}</span>
-          <div class="flex shrink-0 gap-1">
+          <div class="flex shrink-0 gap-1.5">
             <button
               *ngFor="let e of estadosAsistencia"
               type="button"
               (click)="r.estado = e.valor"
               [title]="e.label"
-              class="flex h-7 w-7 items-center justify-center rounded-lg text-[11px] font-bold transition-colors"
+              [attr.aria-label]="e.label"
+              [attr.aria-pressed]="r.estado === e.valor"
+              class="relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
               [class.check-pop]="r.estado === e.valor"
               [style.backgroundColor]="r.estado === e.valor ? e.color : '#e2e8f0'"
               [style.color]="r.estado === e.valor ? '#ffffff' : '#64748b'"
+              [style.box-shadow]="r.estado === e.valor ? '0 0 0 2px #ffffff, 0 0 0 4px ' + e.color : 'none'"
             >
-              {{ e.label.charAt(0) }}
+              <ng-container [ngSwitch]="e.icono">
+                <svg *ngSwitchCase="'check'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                <svg *ngSwitchCase="'clock'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 2.5" /></svg>
+                <svg *ngSwitchCase="'flag'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v18M6 4.5h11l-2.5 3.5 2.5 3.5H6" /></svg>
+                <svg *ngSwitchCase="'x'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" /></svg>
+              </ng-container>
+              <span *ngIf="r.estado === e.valor" class="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white" [style.backgroundColor]="e.color">
+                <svg class="h-2 w-2 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+              </span>
             </button>
           </div>
         </li>

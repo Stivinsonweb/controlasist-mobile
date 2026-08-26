@@ -7,7 +7,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ConfiguracionAppService } from '../../../core/services/configuracion-app.service';
 import { EduBackgroundComponent } from '../../../shared/components/edu-background/edu-background.component';
 import { DecorBlobsComponent } from '../../../shared/components/decor-blobs/decor-blobs.component';
-import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { BrandHeaderComponent } from '../../../shared/components/brand-header/brand-header.component';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -18,7 +18,7 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-registro-estudiante',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, EduBackgroundComponent, DecorBlobsComponent, LogoComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, EduBackgroundComponent, DecorBlobsComponent, BrandHeaderComponent],
   templateUrl: './registro-estudiante.page.html',
 })
 export class RegistroEstudiantePage implements OnInit {

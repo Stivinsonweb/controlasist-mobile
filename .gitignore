@@ -26,3 +26,6 @@ Thumbs.db
 # Variables de entorno locales (si se llegan a usar)
 .env
 .env.local
+
+# Estado/caché local del CLI de Supabase
+/supabase/.temp/

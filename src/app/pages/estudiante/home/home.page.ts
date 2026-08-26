@@ -10,12 +10,13 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { EduBackgroundComponent } from '../../../shared/components/edu-background/edu-background.component';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { SubjectIconComponent } from '../../../shared/components/subject-icon/subject-icon.component';
+import { VerificadoBadgeComponent } from '../../../shared/components/verificado-badge/verificado-badge.component';
 import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/subject-theme.util';
 
 @Component({
   selector: 'app-estudiante-home',
   standalone: true,
-  imports: [CommonModule, DialogComponent, EduBackgroundComponent, AvatarComponent, SubjectIconComponent],
+  imports: [CommonModule, DialogComponent, EduBackgroundComponent, AvatarComponent, SubjectIconComponent, VerificadoBadgeComponent],
   templateUrl: './home.page.html',
 })
 export class EstudianteHomePage implements OnInit {
