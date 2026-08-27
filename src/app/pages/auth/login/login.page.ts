@@ -6,7 +6,6 @@ import { AuthService } from '../../../core/services/auth.service';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfiguracionAppService } from '../../../core/services/configuracion-app.service';
-import { LoginAttemptsService } from '../../../core/services/login-attempts.service';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { EduBackgroundComponent } from '../../../shared/components/edu-background/edu-background.component';
 import { DecorBlobsComponent } from '../../../shared/components/decor-blobs/decor-blobs.component';
@@ -36,7 +35,6 @@ export class LoginPage implements OnInit {
     private authService: AuthService,
     private supabase: SupabaseService,
     private configuracionService: ConfiguracionAppService,
-    private loginAttempts: LoginAttemptsService,
     private toast: ToastService
   ) {}
 
@@ -89,22 +87,11 @@ export class LoginPage implements OnInit {
 
     const { email, password } = this.loginForm.value;
 
-    try {
-      const bloqueo = await this.loginAttempts.verificarBloqueo(email);
-      if (bloqueo.bloqueado) {
-        this.toast.error(`Demasiados intentos fallidos. Intenta de nuevo en ${bloqueo.minutosRestantes} minuto(s).`);
-        return;
-      }
-    } catch (e) {
-      console.error('Error verificando bloqueo de login:', e);
-    }
-
     this.isLoading = true;
     try {
       const result = await this.authService.login({ email, password });
 
       if (result.success && result.profile) {
-        await this.loginAttempts.registrarExito(email);
         const nombre = result.profile.nombres || 'Usuario';
         const rol = result.profile.rol;
 
@@ -128,12 +115,7 @@ export class LoginPage implements OnInit {
           this.router.navigate([rol === 'administrador' ? '/admin/dashboard' : '/home']);
         }
       } else {
-        const bloqueo = await this.loginAttempts.registrarFallo(email);
-        if (bloqueo.bloqueado) {
-          this.toast.error(`Demasiados intentos fallidos. Tu acceso se bloqueó por ${bloqueo.minutosRestantes} minutos.`);
-        } else {
-          this.toast.error(result.error || 'Credenciales inválidas');
-        }
+        this.toast.error(result.error || 'Credenciales inválidas');
       }
     } catch (error: any) {
       this.toast.error(error.message || 'Error inesperado al iniciar sesión');

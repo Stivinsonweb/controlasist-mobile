@@ -231,17 +231,6 @@ export class AuthService {
 
   async forgotPassword(email: string) {
     try {
-      const { data: docente } = await this.supabase
-        .from('docentes').select('email, nombres, apellidos').eq('email', email).maybeSingle();
-      const { data: admin } = await this.supabase
-        .from('administradores').select('email, nombres, apellidos').eq('email', email).maybeSingle();
-      const { data: estudiante } = await this.supabase
-        .from('estudiantes').select('email, nombres, apellidos').eq('email', email).maybeSingle();
-
-      if (!docente && !admin && !estudiante) {
-        return { success: false, error: 'El correo electrónico no está registrado en el sistema' };
-      }
-
       const redirectUrl = `${window.location.origin}/auth/reset-password`;
 
       const { error: resetError } = await this.supabase.auth.resetPasswordForEmail(email, {
@@ -249,16 +238,12 @@ export class AuthService {
       });
 
       if (resetError) {
-        if (resetError.message.includes('User not found')) {
-          return { success: false, error: 'No se encontró una cuenta asociada a este correo' };
-        }
         throw resetError;
       }
 
       return {
         success: true,
-        message: `Se ha enviado un correo de recuperación a ${email}. Revisa tu bandeja de entrada.`,
-        profile: docente || admin || estudiante,
+        message: `Si ${email} está registrado, recibirás un correo con instrucciones para recuperar tu contraseña. Revisa también la carpeta de spam.`,
       };
     } catch (error: any) {
       console.error('Error en recuperación de contraseña:', error);

@@ -15,13 +15,21 @@ import { LogoComponent } from '../logo/logo.component';
   template: `
     <div class="flex w-full items-center justify-center text-center" [ngClass]="gapClass">
       <app-logo [sizeClass]="logoSizeClass" />
-      <span class="text-lg font-bold" [ngClass]="variant === 'light' ? 'text-slate-900' : 'text-white'">ControlAsist</span>
+      <span
+        class="text-lg font-bold"
+        [ngClass]="variant === 'light' ? 'text-slate-900' : variant === 'dark' ? 'text-white' : ''"
+        [style.color]="variant === 'auto' ? 'var(--text-primary)' : null"
+      >ControlAsist</span>
     </div>
   `,
 })
 export class BrandHeaderComponent {
   @Input() logoSizeClass = 'h-14 w-14 rounded-2xl shadow-dark-soft';
   @Input() gapClass = 'gap-2';
-  /** 'dark' = texto blanco (fondo oscuro del panel de marca); 'light' = texto oscuro (tarjeta clara). */
-  @Input() variant: 'dark' | 'light' = 'dark';
+  /**
+   * 'dark' = texto blanco (fondo siempre oscuro, ej. panel de marca .auth-hero).
+   * 'light' = texto oscuro (tarjeta siempre clara, ej. .auth-card).
+   * 'auto' = sigue el tema activo vía var(--text-primary) (fondo que cambia con el tema, ej. var(--bg-app)).
+   */
+  @Input() variant: 'dark' | 'light' | 'auto' = 'dark';
 }
