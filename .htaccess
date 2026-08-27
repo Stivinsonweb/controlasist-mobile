@@ -1,0 +1,24 @@
+# ControlAsist — configuración Apache para hosting compartido (cPanel).
+# Sube TODO el contenido de esta carpeta (incluido este archivo) a la raíz del
+# Addon Domain en cPanel.
+
+# Enrutamiento del lado del cliente de Angular: cualquier ruta que no sea un
+# archivo/carpeta real (ej. /home, /admin/dashboard) se sirve con index.html
+# para que el router de Angular la resuelva, en vez de dar 404 de Apache.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Tipos MIME correctos para el Service Worker de Angular y el manifest de la PWA
+# — Apache no siempre reconoce .webmanifest por defecto, y sin el Content-Type
+# correcto el navegador puede rechazar el manifest o el registro del Service Worker.
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType application/javascript .js
+  AddType application/json .json
+</IfModule>

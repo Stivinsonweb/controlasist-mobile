@@ -1,0 +1,1 @@
+import{d as c}from"./chunk-WY54QS3H.js";import{N as n}from"./chunk-TAULE77D.js";var r=class e{apply(o){let t=c(o);document.documentElement.style.setProperty("--accent-from",t.from),document.documentElement.style.setProperty("--accent-to",t.to)}static \u0275fac=function(t){return new(t||e)};static \u0275prov=n({token:e,factory:e.\u0275fac,providedIn:"root"})};export{r as a};
