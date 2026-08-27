@@ -113,6 +113,31 @@
     </div>
 
     <ng-container *ngIf="g.totalClases > 0">
+      <!-- Gráficas -->
+      <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div class="card p-5">
+          <h3 class="text-sm font-bold" style="color: var(--text-primary);">Distribución general</h3>
+          <p class="mt-1 text-xs" style="color: var(--text-muted);">De todos los registros de asistencia del periodo.</p>
+          <div class="mt-4">
+            <app-barra-estados [segmentos]="segmentosDistribucionGeneral()" />
+          </div>
+        </div>
+        <div class="card p-5">
+          <h3 class="text-sm font-bold" style="color: var(--text-primary);">Tendencia de asistencia por clase</h3>
+          <p class="mt-1 text-xs" style="color: var(--text-muted);">% de estudiantes presentes/tarde/justificados en cada clase dictada.</p>
+          <div class="mt-4">
+            <app-tendencia-linea [puntos]="tendenciaAsistencia()" />
+          </div>
+        </div>
+        <div class="card p-5 lg:col-span-2">
+          <h3 class="text-sm font-bold" style="color: var(--text-primary);">Ranking de asistencia por estudiante</h3>
+          <p class="mt-1 text-xs" style="color: var(--text-muted);">Ordenado de mayor a menor — en rojo, quienes están por debajo del 75%.</p>
+          <div class="mt-4">
+            <app-ranking-barras [datos]="rankingEstudiantes()" [umbralAlerta]="75" />
+          </div>
+        </div>
+      </div>
+
       <!-- Resumen por estudiante -->
       <div class="card mt-6 overflow-hidden">
         <div class="p-6 pb-0">
@@ -153,7 +178,9 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <h3 class="text-base font-bold" style="color: var(--text-primary);">Historial de clases</h3>
           <div class="flex items-center gap-2">
-            <button (click)="exportarHistorialInstitucionalExcel()" class="btn-outline btn-sm">Excel institucional</button>
+            <button (click)="exportarHistorialInstitucionalExcel()" [disabled]="exportandoInstitucionalExcel()" class="btn-outline btn-sm">
+              {{ exportandoInstitucionalExcel() ? 'Generando...' : 'Excel institucional' }}
+            </button>
             <button (click)="exportarHistorialInstitucionalPDF()" [disabled]="exportandoInstitucionalPDF()" class="btn-primary btn-sm">
               {{ exportandoInstitucionalPDF() ? 'Generando...' : 'PDF institucional' }}
             </button>

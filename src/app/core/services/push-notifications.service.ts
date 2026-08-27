@@ -34,14 +34,42 @@ export class PushNotificationsService {
     return !!sub;
   }
 
+  /**
+   * En iOS, Safari solo soporta push para una PWA "agregada a inicio" (Add to Home Screen) — desde
+   * una pestaña normal del navegador, `requestSubscription` siempre falla con permiso denegado,
+   * sin importar lo que el usuario elija. Detectarlo de antemano evita mostrar un error genérico.
+   */
+  private iosSinInstalar(): boolean {
+    const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const instalada = (navigator as any).standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    return esIOS && !instalada;
+  }
+
   /** Pide permiso al navegador (si hace falta) y guarda la suscripción en Supabase. */
   async activar(usuarioId: string, rol: 'docente' | 'estudiante'): Promise<void> {
     if (!this.soportado) throw new Error('Este navegador no soporta notificaciones push, o la app no está instalada/en producción');
 
+    if (this.iosSinInstalar()) {
+      throw new Error('En iPhone/iPad, primero instala ControlAsist en tu pantalla de inicio (compartir → "Agregar a inicio") — Safari solo permite notificaciones desde la app instalada.');
+    }
+
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      throw new Error('Tienes las notificaciones bloqueadas para esta app en el navegador. Actívalas manualmente en Configuración → Notificaciones (o el ícono de candado junto a la dirección) y vuelve a intentar.');
+    }
+
     const config = await this.configuracionAppService.obtener();
     if (!config?.vapid_public_key) throw new Error('El servidor aún no tiene configurada la llave pública VAPID');
 
-    const subscription = await this.swPush.requestSubscription({ serverPublicKey: config.vapid_public_key });
+    let subscription;
+    try {
+      subscription = await this.swPush.requestSubscription({ serverPublicKey: config.vapid_public_key });
+    } catch (e: any) {
+      if (e?.name === 'NotAllowedError' || /permission denied/i.test(e?.message || '')) {
+        throw new Error('Bloqueaste el permiso de notificaciones. Actívalo manualmente en la configuración del navegador/app y vuelve a intentar.');
+      }
+      throw e;
+    }
+
     const raw = subscription.toJSON();
     const p256dh = raw.keys?.['p256dh'];
     const authKey = raw.keys?.['auth'];

@@ -12,6 +12,10 @@ import { ToastService } from '../../../core/services/toast.service';
   selector: 'app-notificaciones-push-toggle',
   standalone: true,
   imports: [CommonModule],
+  // Sin esto el host queda `display: inline` (default de los custom elements) y el
+  // `margin-top` que le da `space-y-6` en la página de perfil no tiene ningún efecto —
+  // por eso quedaba pegado a la tarjeta anterior.
+  host: { style: 'display: block;' },
   template: `
     <div class="card p-6">
       <div class="flex items-center justify-between gap-4">

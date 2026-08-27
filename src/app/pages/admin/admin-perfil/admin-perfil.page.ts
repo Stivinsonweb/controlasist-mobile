@@ -27,6 +27,7 @@ export class AdminPerfilPage implements OnInit {
   showPassword = false;
   email = '';
   private adminId = '';
+  private authUserId = '';
 
   constructor(
     private fb: FormBuilder,
@@ -61,6 +62,7 @@ export class AdminPerfilPage implements OnInit {
       const perfil = await this.authService.resolveProfile(user.id);
       if (!perfil) throw new Error('No se encontró el perfil de administrador');
       this.adminId = perfil.id;
+      this.authUserId = user.id;
       this.email = perfil.email;
       this.form.patchValue({ nombres: perfil.nombres, apellidos: perfil.apellidos });
     } catch (e: any) {
@@ -80,6 +82,7 @@ export class AdminPerfilPage implements OnInit {
     this.isSaving = true;
     try {
       await this.adminService.actualizarPerfilAdmin(this.adminId, this.form.value);
+      await this.authService.resolveProfile(this.authUserId);
       this.toast.success('Perfil actualizado exitosamente');
     } catch (e: any) {
       this.toast.error(e.message || 'No se pudo actualizar el perfil');

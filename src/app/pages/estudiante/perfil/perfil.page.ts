@@ -100,6 +100,7 @@ export class EstudiantePerfilPage implements OnInit {
     this.isSaving = true;
     try {
       await this.portalService.actualizarPerfil(this.estudianteId, this.form.value);
+      await this.authService.resolveProfile(this.estudianteId);
       this.toast.success('Perfil actualizado exitosamente');
     } catch (e: any) {
       this.toast.error(e.message || 'No se pudo actualizar el perfil');
@@ -156,6 +157,7 @@ export class EstudiantePerfilPage implements OnInit {
   async seleccionarAvatarPreset(url: string) {
     try {
       await this.portalService.actualizarPerfil(this.estudianteId, { foto_url: url });
+      await this.authService.resolveProfile(this.estudianteId);
       this.fotoUrl = url;
       this.showAvatarPicker = false;
       this.toast.success('Foto de perfil actualizada');
@@ -172,6 +174,7 @@ export class EstudiantePerfilPage implements OnInit {
     try {
       const url = await this.avatarService.subirAvatar(file, this.estudianteId, 'estudiante');
       await this.portalService.actualizarPerfil(this.estudianteId, { foto_url: url });
+      await this.authService.resolveProfile(this.estudianteId);
       this.fotoUrl = url;
       this.showAvatarPicker = false;
       this.toast.success('Foto de perfil actualizada');

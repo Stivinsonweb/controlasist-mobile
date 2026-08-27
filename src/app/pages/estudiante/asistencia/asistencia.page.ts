@@ -8,6 +8,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { SubjectIconComponent } from '../../../shared/components/subject-icon/subject-icon.component';
 import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/subject-theme.util';
+import { BarraEstadosComponent, SegmentoBarra } from '../../../shared/components/charts/barra-estados.component';
 
 interface ResumenAsignatura {
   asignatura: AsignaturaConDocente;
@@ -20,7 +21,7 @@ interface ResumenAsignatura {
 @Component({
   selector: 'app-estudiante-asistencia',
   standalone: true,
-  imports: [CommonModule, DialogComponent, SubjectIconComponent],
+  imports: [CommonModule, DialogComponent, SubjectIconComponent, BarraEstadosComponent],
   templateUrl: './asistencia.page.html',
 })
 export class EstudianteAsistenciaPage implements OnInit {
@@ -105,5 +106,9 @@ export class EstudianteAsistenciaPage implements OnInit {
 
   labelTipo(tipo: string | null): string {
     return this.tipos.find((t) => t.valor === tipo)?.label || '—';
+  }
+
+  segmentosBarra(r: ResumenAsignatura): SegmentoBarra[] {
+    return this.estados.map((e) => ({ label: e.label, valor: r.porEstado[e.valor] || 0, color: e.color }));
   }
 }

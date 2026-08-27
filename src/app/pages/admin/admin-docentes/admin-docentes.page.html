@@ -5,8 +5,11 @@
   </div>
 
   <!-- Solicitudes de verificación pendientes -->
-  <div *ngIf="solicitudesVerificacion().length > 0" class="mb-6">
+  <div class="mb-6">
     <h3 class="mb-2 text-sm font-bold" style="color: var(--text-primary);">Solicitudes de verificación</h3>
+    <p *ngIf="solicitudesVerificacion().length === 0" class="text-sm" style="color: var(--text-muted);">
+      No hay solicitudes pendientes. También puedes verificar a cualquier docente directamente desde su tarjeta abajo, sin esperar una solicitud.
+    </p>
     <div *ngFor="let s of solicitudesVerificacion()" class="card mb-2 p-4">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
@@ -62,8 +65,9 @@
         <div><span style="color: var(--text-muted);">Entidad:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.entidad || '—' }}</span></div>
         <div><span style="color: var(--text-muted);">Programa:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.programa || '—' }}</span></div>
         <div><span style="color: var(--text-muted);">Área:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.area || '—' }}</span></div>
-        <div *ngIf="d.verificado" class="sm:col-span-2">
-          <button type="button" (click)="revocarVerificacion(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-outline btn-sm">Revocar verificación</button>
+        <div class="sm:col-span-2">
+          <button *ngIf="!d.verificado" type="button" (click)="verificarManual(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-primary btn-sm">Verificar cuenta</button>
+          <button *ngIf="d.verificado" type="button" (click)="revocarVerificacion(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-outline btn-sm">Revocar verificación</button>
         </div>
       </div>
     </div>

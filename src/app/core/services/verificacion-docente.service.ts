@@ -62,4 +62,10 @@ export class VerificacionDocenteService {
     const { error } = await this.supabase.rpc('admin_revocar_verificacion_docente', { p_docente_id: docenteId });
     if (error) throw error;
   }
+
+  /** El admin verifica a un docente directamente, sin esperar a que él lo solicite. */
+  async verificarManual(docenteId: string) {
+    const { error } = await this.supabase.rpc('admin_verificar_docente_manual', { p_docente_id: docenteId });
+    if (error) throw error;
+  }
 }

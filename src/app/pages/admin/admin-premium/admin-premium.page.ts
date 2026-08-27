@@ -5,13 +5,16 @@ import { AdminService, Docente } from '../../../core/services/admin.service';
 import { ConfiguracionAppService, ConfiguracionApp } from '../../../core/services/configuracion-app.service';
 import { PremiumSuscripcionService, SolicitudPremium, PagoPremium, PeriodoPremium } from '../../../core/services/premium-suscripcion.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { parsearPesosCOP, formatearPesosCOP } from '../../../shared/utils/moneda-cop.util';
+import { MetodoPagoConfig, MetodoPagoTipo, METODOS_PAGO_CATALOGO, normalizarMetodosPago, catalogoMetodo } from '../../../shared/utils/metodos-pago.util';
+import { MetodoPagoIconComponent } from '../../../shared/components/metodo-pago-icon/metodo-pago-icon.component';
 
 type Tab = 'pendientes' | 'historial' | 'docentes' | 'precio';
 
 @Component({
   selector: 'app-admin-premium',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MetodoPagoIconComponent],
   templateUrl: './admin-premium.page.html',
 })
 export class AdminPremiumPage implements OnInit {
@@ -63,6 +66,19 @@ export class AdminPremiumPage implements OnInit {
   precioPersonalizadoEdit: Record<string, string> = {};
   guardandoPrecioGlobal = signal(false);
 
+  metodosPago = signal<MetodoPagoConfig[]>(normalizarMetodosPago(null));
+  catalogoMetodosPago = METODOS_PAGO_CATALOGO;
+
+  formatearPesos = formatearPesosCOP;
+
+  labelMetodo(tipo: MetodoPagoTipo): string {
+    return catalogoMetodo(tipo).label;
+  }
+
+  placeholderMetodo(tipo: MetodoPagoTipo): string {
+    return catalogoMetodo(tipo).placeholder;
+  }
+
   constructor(
     private adminService: AdminService,
     private configuracionAppService: ConfiguracionAppService,
@@ -91,6 +107,7 @@ export class AdminPremiumPage implements OnInit {
       this.historialPagos.set(historialPag);
       this.docentes.set(docentes);
       this.config.set(config);
+      this.metodosPago.set(normalizarMetodosPago(config?.metodos_pago_premium));
 
       for (const p of pagos) this.periodoConfirmado[p.id] = p.periodo_declarado_por_docente;
     } catch (e) {
@@ -193,9 +210,17 @@ export class AdminPremiumPage implements OnInit {
     }
   }
 
+  toggleMetodoPago(tipo: MetodoPagoTipo) {
+    this.metodosPago.update((lista) => lista.map((m) => (m.tipo === tipo ? { ...m, activo: !m.activo } : m)));
+  }
+
+  onDatoMetodoPagoChange(tipo: MetodoPagoTipo, dato: string) {
+    this.metodosPago.update((lista) => lista.map((m) => (m.tipo === tipo ? { ...m, dato } : m)));
+  }
+
   async guardarPrecioPersonalizado(d: Docente) {
     const raw = this.precioPersonalizadoEdit[d.id];
-    const precio = raw === '' || raw === undefined ? null : Number(raw);
+    const precio = raw === '' || raw === undefined ? null : parsearPesosCOP(raw);
     this.procesandoId.set(d.id);
     try {
       await this.premiumService.actualizarPrecioPersonalizado(d.id, precio);
@@ -214,9 +239,10 @@ export class AdminPremiumPage implements OnInit {
     this.guardandoPrecioGlobal.set(true);
     try {
       const actualizado = await this.configuracionAppService.actualizar(cfg.id, {
-        premium_precio_mensual: mensual === '' ? null : Number(mensual),
-        premium_precio_anual: anual === '' ? null : Number(anual),
+        premium_precio_mensual: parsearPesosCOP(mensual),
+        premium_precio_anual: parsearPesosCOP(anual),
         premium_info_pago: infoPago || null,
+        metodos_pago_premium: this.metodosPago(),
       });
       this.config.set(actualizado);
       this.toast.success('Precio estándar actualizado');

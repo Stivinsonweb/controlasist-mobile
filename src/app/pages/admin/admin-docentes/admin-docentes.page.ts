@@ -114,6 +114,19 @@ export class AdminDocentesPage implements OnInit {
     }
   }
 
+  async verificarManual(d: Docente) {
+    this.procesandoVerificacionId.set(d.id);
+    try {
+      await this.verificacionService.verificarManual(d.id);
+      this.toast.success(`${d.nombres} quedó verificado`);
+      await this.load();
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo verificar al docente');
+    } finally {
+      this.procesandoVerificacionId.set(null);
+    }
+  }
+
   async revocarVerificacion(d: Docente) {
     this.procesandoVerificacionId.set(d.id);
     try {

@@ -70,6 +70,7 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     pasos: [
       'Desde el detalle de la asignatura, presiona "Reportes".',
       'Filtra por año si necesitas acotar el periodo y revisa las tarjetas de resumen (clases dictadas, presentes, tarde, justificados, ausentes).',
+      'Revisa las gráficas: distribución general por estado, ranking de asistencia por estudiante (en rojo quienes están por debajo del 75%) y la tendencia de asistencia clase por clase.',
       'Consulta la tabla "Resumen por estudiante" para ver el porcentaje de asistencia individual de cada uno.',
       'Exporta el resumen general en Excel o PDF con los botones de la parte superior.',
       'Para el historial con el formato institucional, configura logo, código, versión y segunda firma una vez, y exporta el "Excel institucional" o "PDF institucional".',
@@ -91,12 +92,15 @@ const TEMAS_DOCENTE: GuiaTema[] = [
   {
     variant: 'reportes',
     titulo: 'Premium: personaliza tus reportes',
-    descripcion: 'Activa Premium (prueba gratis o pago) y personaliza el logo, encabezado y secciones de tus reportes.',
+    descripcion: 'Activa Premium (prueba gratis o pago) y personaliza a fondo el formato de tus reportes: tipo de tabla, columnas, colores y más.',
     pasos: [
       'Entra a "Premium" desde el menú lateral.',
-      'Si nunca has usado Premium, presiona "Solicitar prueba gratis de 1 mes" — queda pendiente hasta que un administrador la apruebe.',
-      'Si ya usaste tu prueba, presiona "Activar Premium" y sube tu comprobante de pago (monto, fecha y el periodo que pagaste); un administrador lo revisa y activa tu acceso.',
-      'Con Premium activo, personaliza la posición y tamaño del logo, los títulos del encabezado, y el orden/activación de las secciones del reporte arrastrándolas.',
+      'Si nunca has usado Premium, presiona "Solicitar prueba gratis de 1 mes" — se activa al instante, sin esperar aprobación.',
+      'Si ya usaste tu prueba, presiona "Activar Premium": verás los métodos de pago disponibles (Nequi, Bancolombia, etc. con su ícono) y subes tu comprobante (monto, fecha y el periodo que pagaste) — un administrador lo revisa y activa tu acceso.',
+      'Con Premium ya activo, puedes renovar o cambiar de plan (mensual/anual) cuando quieras desde el botón "Renovar / cambiar plan" arriba del editor — no hace falta esperar a que venza.',
+      'Elige el "Tipo de institución" (Universidad o Escolar) — cambia la terminología del formato (Docente/Profesor, Asignatura/Área, Nivel/Grado...).',
+      'En "Tabla de asistencia", elige entre "Historial de clases" (una fila por sesión) o "Matriz de estudiantes" (estudiantes en filas, fechas en columnas, el formato clásico de lista de asistencia) — cada una con sus propias columnas configurables, leyenda, tamaño de letra y color.',
+      'Personaliza también la posición y tamaño del logo, los títulos del encabezado, y el orden/activación de las demás secciones del reporte arrastrándolas.',
       'Los cambios se guardan solos — no hay botón de "Guardar". Revisa la vista previa a la derecha para confirmar cómo se verá el reporte final.',
     ],
   },
@@ -121,7 +125,7 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
     pasos: [
       'Entra a "Inscribirme" desde tu inicio.',
       'Escribe el código de acceso que te compartió tu docente (formato tipo XXXX-XXXX) y presiona "Buscar".',
-      'Verifica que la asignatura encontrada sea la correcta (nombre, grupo y periodo).',
+      'Verifica que la asignatura encontrada sea la correcta (nombre, grupo y periodo) — verás la foto del docente y, si tiene la cuenta verificada, una insignia azul junto a su nombre.',
       'Presiona "Inscribirme" para confirmar — quedará agregada a tu lista de asignaturas.',
     ],
   },
@@ -131,7 +135,7 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
     descripcion: 'Desde "Inicio" consulta todas tus asignaturas inscritas y el horario de cada una.',
     pasos: [
       'Desde "Inicio" verás una tarjeta por cada asignatura en la que estás inscrito, con su docente y modalidad.',
-      'Haz clic en una tarjeta para ver su detalle: horarios de clase, aula, créditos y docente asignado.',
+      'Haz clic en una tarjeta para ver su detalle: la foto y el nombre del docente (con insignia si está verificado), horarios de clase, aula y créditos.',
       'Si ya no quieres seguir inscrito, puedes desinscribirte desde ese mismo detalle — podrás volver a inscribirte con el mismo código más adelante.',
     ],
   },
@@ -142,7 +146,7 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
     pasos: [
       'Entra a "Mi asistencia" desde el menú lateral.',
       'Verás una tarjeta por cada asignatura en la que estás inscrito, con tu porcentaje de clases presentes y un resumen por estado (presente, tarde, justificado, ausente).',
-      'Haz clic en una tarjeta para abrir el detalle: la lista completa de tus clases con la fecha, el tipo de clase y el estado que te registraron en cada una.',
+      'Haz clic en una tarjeta para abrir el detalle: una gráfica de barra con tu asistencia por estado, y la lista completa de tus clases con la fecha, el tipo de clase y el estado que te registraron en cada una.',
     ],
   },
   {

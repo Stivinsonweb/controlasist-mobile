@@ -45,6 +45,10 @@
       </div>
     </div>
 
+    <div class="mt-4">
+      <app-barra-estados [segmentos]="segmentosBarra(r)" [fijoClaro]="true" />
+    </div>
+
     <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
       <div *ngFor="let e of estados" class="rounded-xl bg-slate-50 p-3 text-center">
         <p class="text-lg font-extrabold" [style.color]="e.color">{{ r.porEstado[e.valor] || 0 }}</p>

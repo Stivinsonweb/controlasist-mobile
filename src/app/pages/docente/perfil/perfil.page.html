@@ -10,7 +10,12 @@
 
   <div *ngIf="!loading" class="space-y-6">
     <div class="card flex items-center gap-4 p-6">
-      <app-avatar [fotoUrl]="fotoUrl" [iniciales]="iniciales" colorFondo="var(--accent-from)" shape="square" sizeClass="h-16 w-16 text-xl" [ring]="true" />
+      <div class="relative shrink-0">
+        <app-avatar [fotoUrl]="fotoUrl" [iniciales]="iniciales" colorFondo="var(--accent-from)" shape="square" sizeClass="h-16 w-16 text-xl" [ring]="true" />
+        <span *ngIf="verificado()" class="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-dark-soft">
+          <app-verificado-badge [mostrar]="true" sizeClass="h-5 w-5" />
+        </span>
+      </div>
       <div>
         <p class="text-sm font-semibold" style="color: var(--text-secondary);">Foto de perfil</p>
         <button (click)="abrirAvatarPicker()" class="btn-outline btn-sm mt-1.5">Cambiar foto</button>

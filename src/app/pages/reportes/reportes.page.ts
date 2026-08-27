@@ -13,12 +13,17 @@ import { AdminService } from '../../core/services/admin.service';
 import { LogoService } from '../../core/services/logo.service';
 import { addPdfHeader, addPdfFooter, addPdfSectionTitle, brandTableOptions } from '../../shared/utils/pdf-report.util';
 import { XLSX, styleHeaderRow, autofitColumns, formatPercentColumn, applyZebraStripes } from '../../shared/utils/excel-report.util';
-import { LOGO_TAMANO_MM, PlantillaReporte, defaultPlantillaReporte, seccionActiva } from '../../core/services/plantilla-reporte.model';
+import { LOGO_TAMANO_MM, TAMANO_FUENTE_PT, PlantillaReporte, LABELS_INSTITUCION, defaultPlantillaReporte, normalizarPlantilla, seccionActiva, hexToRgb } from '../../core/services/plantilla-reporte.model';
+import { getAccentPalette } from '../../shared/utils/subject-theme.util';
+import { ESTADOS_ASISTENCIA } from '../../core/services/asistencias.service';
+import { BarraEstadosComponent, SegmentoBarra } from '../../shared/components/charts/barra-estados.component';
+import { RankingBarrasComponent, BarraRanking } from '../../shared/components/charts/ranking-barras.component';
+import { TendenciaLineaComponent, PuntoTendencia } from '../../shared/components/charts/tendencia-linea.component';
 
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, BarraEstadosComponent, RankingBarrasComponent, TendenciaLineaComponent],
   templateUrl: './reportes.page.html',
 })
 export class ReportesPage implements OnInit {
@@ -33,6 +38,7 @@ export class ReportesPage implements OnInit {
   resumenGeneral = signal<ResumenGeneral | null>(null);
   resumenEstudiantes = signal<ResumenEstudiante[]>([]);
   clases = signal<Asistencia[]>([]);
+  tendencia = signal<{ fecha: string; porcentaje: number }[]>([]);
 
   // ===== Formato institucional (punto 6) =====
   private docenteId = '';
@@ -40,6 +46,7 @@ export class ReportesPage implements OnInit {
   guardandoFormato = signal(false);
   subiendoLogo = signal(false);
   exportandoInstitucionalPDF = signal(false);
+  exportandoInstitucionalExcel = signal(false);
 
   logoUrl = signal<string | null>(null);
   formatoCodigo = signal('');
@@ -93,20 +100,38 @@ export class ReportesPage implements OnInit {
     this.loadingDatos.set(true);
     try {
       const anio = this.anioSeleccionado() ?? undefined;
-      const [resumenGeneral, resumenEstudiantes, clases] = await Promise.all([
+      const [resumenGeneral, resumenEstudiantes, clases, tendencia] = await Promise.all([
         this.reportesService.resumenGeneral(this.asignaturaId, anio),
         this.reportesService.resumenPorEstudiante(this.asignaturaId, anio),
         this.reportesService.listarClases(this.asignaturaId, anio),
+        this.reportesService.porcentajePorClase(this.asignaturaId, anio),
       ]);
       this.resumenGeneral.set(resumenGeneral);
       this.resumenEstudiantes.set(resumenEstudiantes);
       this.clases.set(clases);
+      this.tendencia.set(tendencia);
     } catch (e: any) {
       console.error(e);
       this.toast.error('No se pudieron cargar los datos de asistencia');
     } finally {
       this.loadingDatos.set(false);
     }
+  }
+
+  segmentosDistribucionGeneral(): SegmentoBarra[] {
+    const g = this.resumenGeneral();
+    if (!g) return [];
+    return ESTADOS_ASISTENCIA.map((e) => ({ label: e.label, valor: g[e.valor], color: e.color }));
+  }
+
+  tendenciaAsistencia(): PuntoTendencia[] {
+    return this.tendencia().map((p) => ({ fecha: this.formatFecha(p.fecha), valor: p.porcentaje }));
+  }
+
+  rankingEstudiantes(): BarraRanking[] {
+    return [...this.resumenEstudiantes()]
+      .sort((a, b) => b.porcentajeAsistencia - a.porcentajeAsistencia)
+      .map((r) => ({ label: `${r.nombres} ${r.apellidos}`, valor: r.porcentajeAsistencia }));
   }
 
   formatFecha(fecha: string): string {
@@ -194,7 +219,7 @@ export class ReportesPage implements OnInit {
     this.formatoSegundaFirma.set(perfil.formato_reporte_segunda_firma || '');
     // TEMPORAL: se aplica en cuanto exista una plantilla guardada, sin chequear premium_activo
     // — ver PARTE 2 del contexto. Cuando Wompi esté conectado, añadir aquí `&& perfil.premium_activo`.
-    this.plantillaReporte.set(perfil.plantilla_reporte ? { ...defaultPlantillaReporte(), ...perfil.plantilla_reporte } : defaultPlantillaReporte());
+    this.plantillaReporte.set(normalizarPlantilla(perfil.plantilla_reporte));
   }
 
   toggleFormatoConfig() {
@@ -237,6 +262,12 @@ export class ReportesPage implements OnInit {
     } finally {
       this.guardandoFormato.set(false);
     }
+  }
+
+  private abreviaturaEstado(estado: string | undefined): string {
+    if (!estado) return '—';
+    const mapa: Record<string, string> = { presente: 'P', tarde: 'T', justificado: 'J', ausente: 'A' };
+    return mapa[estado] || '—';
   }
 
   private calcularHoras(inicio: string, fin: string): number {
@@ -288,10 +319,21 @@ export class ReportesPage implements OnInit {
       const logoDataUrl = await this.cargarLogoSiHay();
       const plantilla = this.plantillaReporte();
 
+      const necesitaMatriz = plantilla.tipo_tabla_asistencia === 'matriz_estudiantes' && seccionActiva(plantilla, 'tabla_asistencia');
+      const necesitaListado = seccionActiva(plantilla, 'listado_estudiantes');
+      const [matriz, estudiantesInscritos] = await Promise.all([
+        necesitaMatriz ? this.reportesService.matrizAsistencia(this.asignaturaId, this.anioSeleccionado() ?? undefined) : Promise.resolve(null),
+        necesitaListado ? this.asignaturasService.listarEstudiantesInscritos(this.asignaturaId) : Promise.resolve([]),
+      ]);
+
+      const colorHex = plantilla.color_tabla_modo === 'personalizado' ? plantilla.color_tabla_hex : getAccentPalette(perfil.tema_acento).from;
+      const colorTabla = hexToRgb(colorHex);
+      const fontSize = TAMANO_FUENTE_PT[plantilla.tamano_fuente];
+
       const titulo = this.formatoTitulo() || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE';
       const codigo = this.formatoCodigo();
       const version = this.formatoVersion();
-      const anioTexto = this.anioSeleccionado() ? String(this.anioSeleccionado()) : 'Todos';
+      const labels = LABELS_INSTITUCION[plantilla.tipo_institucion];
 
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -346,29 +388,85 @@ export class ReportesPage implements OnInit {
           doc.setFontSize(9);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(40);
-          doc.text(`Docente: ${perfil.nombres} ${perfil.apellidos}`, 14, y);
-          doc.text(`Programa: ${a.programa || perfil.programa || '—'}`, pageWidth / 2 + 5, y);
+          doc.text(`${labels.docente}: ${perfil.nombres} ${perfil.apellidos}`, 14, y);
+          doc.text(`${labels.segundoCampo}: ${a.programa || perfil.programa || '—'}`, pageWidth / 2 + 5, y);
           y += 6;
-          doc.text(`Asignatura: ${a.nombre} (${a.codigo})`, 14, y);
-          doc.text(`Año: ${anioTexto}    Periodo: ${a.periodo}`, pageWidth / 2 + 5, y);
+          doc.text(`${labels.asignatura}: ${a.nombre} (${a.codigo})`, 14, y);
+          doc.text(`${labels.nivel}: ${a.nivel}    Periodo: ${a.periodo}`, pageWidth / 2 + 5, y);
           y += 8;
-        } else if (seccionId === 'tabla_asistencia') {
+        } else if (seccionId === 'tabla_asistencia' && plantilla.tipo_tabla_asistencia === 'historial_clases') {
+          const cols = plantilla.columnas_historial;
+          const head = ['No.', 'Fecha', 'Hora inicio', 'Hora final'];
+          if (cols.tema) head.push('Tema');
+          if (cols.horas) head.push('Total horas');
+          if (cols.firma) head.push(`Firma ${labels.docente.toLowerCase()}`);
+
           autoTable(doc, {
             startY: y,
-            head: [['No.', 'Fecha', 'Hora inicio', 'Hora final', 'Tema', 'Total horas', 'Firma docente']],
-            body: clases.map((c, i) => [
-              i + 1,
-              this.formatFecha(c.fecha),
-              c.hora_inicio,
-              c.hora_fin,
-              c.temas_tratados || '—',
-              this.calcularHoras(c.hora_inicio, c.hora_fin),
-              '',
-            ]),
-            styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
-            headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8.5 },
+            head: [head],
+            body: clases.map((c, i) => {
+              const fila: (string | number)[] = [i + 1, this.formatFecha(c.fecha), c.hora_inicio, c.hora_fin];
+              if (cols.tema) fila.push(c.temas_tratados || '—');
+              if (cols.horas) fila.push(this.calcularHoras(c.hora_inicio, c.hora_fin));
+              if (cols.firma) fila.push('');
+              return fila;
+            }),
+            styles: { fontSize, cellPadding: 3, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
+            headStyles: { fillColor: colorTabla, textColor: 255, fontStyle: 'bold', fontSize: fontSize + 0.5 },
             alternateRowStyles: { fillColor: [243, 244, 246] },
-            columnStyles: { 0: { cellWidth: 10 }, 4: { cellWidth: 58 }, 6: { cellWidth: 28 } },
+            columnStyles: { 0: { cellWidth: 10 } },
+            margin: { top: y, bottom: 22 },
+          });
+          y = ((doc as any).lastAutoTable?.finalY ?? y + 40) + 10;
+        } else if (seccionId === 'tabla_asistencia' && plantilla.tipo_tabla_asistencia === 'matriz_estudiantes' && matriz) {
+          const cols = plantilla.columnas_matriz;
+          const head = ['No.', 'Nombre'];
+          if (cols.cedula) head.push('Cédula');
+          for (const c of matriz.clases) head.push(this.formatFecha(c.fecha));
+          if (cols.porcentaje) head.push('%');
+
+          autoTable(doc, {
+            startY: y,
+            head: [head],
+            body: matriz.filas.map((f, i) => {
+              const fila: (string | number)[] = [i + 1, `${f.nombres} ${f.apellidos}`];
+              if (cols.cedula) fila.push(f.cedula || '—');
+              for (const c of matriz.clases) fila.push(this.abreviaturaEstado(f.estadosPorClase[c.id!]));
+              if (cols.porcentaje) fila.push(`${f.porcentajeAsistencia}%`);
+              return fila;
+            }),
+            styles: { fontSize, cellPadding: 2.5, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1, halign: 'center' },
+            headStyles: { fillColor: colorTabla, textColor: 255, fontStyle: 'bold', fontSize: fontSize + 0.5 },
+            alternateRowStyles: { fillColor: [243, 244, 246] },
+            columnStyles: { 0: { cellWidth: 10 }, 1: { halign: 'left', cellWidth: 40 } },
+            margin: { top: y, bottom: 22 },
+          });
+          y = ((doc as any).lastAutoTable?.finalY ?? y + 40) + 4;
+          if (plantilla.mostrar_leyenda) {
+            doc.setFontSize(7.5);
+            doc.setFont('helvetica', 'italic');
+            doc.setTextColor(100);
+            doc.text('P = Presente   T = Tarde   J = Justificado   A = Ausente', 14, y);
+            y += 8;
+          } else {
+            y += 4;
+          }
+        } else if (seccionId === 'listado_estudiantes') {
+          if (y > pageHeight - 40) { doc.addPage(); y = 20; }
+          y = addPdfSectionTitle(doc, 'Listado de estudiantes matriculados', y);
+          autoTable(doc, {
+            startY: y,
+            head: [['No.', 'Nombre', 'Cédula', 'Programa']],
+            body: estudiantesInscritos.map((e: any, i: number) => [
+              i + 1,
+              `${e.estudiantes?.nombres ?? ''} ${e.estudiantes?.apellidos ?? ''}`.trim() || '—',
+              e.estudiantes?.cedula || '—',
+              e.estudiantes?.programa || a.programa || '—',
+            ]),
+            styles: { fontSize, cellPadding: 2.5, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
+            headStyles: { fillColor: colorTabla, textColor: 255, fontStyle: 'bold', fontSize: fontSize + 0.5 },
+            alternateRowStyles: { fillColor: [243, 244, 246] },
+            columnStyles: { 0: { cellWidth: 10 } },
             margin: { top: y, bottom: 22 },
           });
           y = ((doc as any).lastAutoTable?.finalY ?? y + 40) + 10;
@@ -400,8 +498,8 @@ export class ReportesPage implements OnInit {
           doc.line(pageWidth - 90, y, pageWidth - 20, y);
           doc.setFontSize(9);
           doc.setTextColor(60);
-          doc.text('Firma docente', 55, y + 5, { align: 'center' });
-          doc.text(this.formatoSegundaFirma() || 'Segunda firma', pageWidth - 55, y + 5, { align: 'center' });
+          doc.text(`Firma ${labels.docente.toLowerCase()}`, 55, y + 5, { align: 'center' });
+          doc.text(this.formatoSegundaFirma() || labels.segundaFirmaSugerida, pageWidth - 55, y + 5, { align: 'center' });
           y += 15;
         }
       }
@@ -418,7 +516,7 @@ export class ReportesPage implements OnInit {
     }
   }
 
-  exportarHistorialInstitucionalExcel() {
+  async exportarHistorialInstitucionalExcel() {
     const a = this.asignatura();
     const perfil = this.authService.currentProfileValue;
     if (!a || !perfil) return;
@@ -428,43 +526,118 @@ export class ReportesPage implements OnInit {
       return;
     }
 
+    this.exportandoInstitucionalExcel.set(true);
+    try {
+      await this.generarExcelInstitucional(a, perfil, clases);
+    } catch (e: any) {
+      console.error(e);
+      this.toast.error('No se pudo generar el Excel institucional');
+    } finally {
+      this.exportandoInstitucionalExcel.set(false);
+    }
+  }
+
+  private async generarExcelInstitucional(a: Asignatura, perfil: any, clases: Asistencia[]) {
+    const plantilla = this.plantillaReporte();
     const titulo = this.formatoTitulo() || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE';
     const anioTexto = this.anioSeleccionado() ? String(this.anioSeleccionado()) : 'Todos';
+    const labels = LABELS_INSTITUCION[plantilla.tipo_institucion];
 
-    const filas: any[][] = [
+    const encabezado: any[][] = [
       [titulo, '', '', '', '', 'Código:', this.formatoCodigo() || '—'],
       ['', '', '', '', '', 'Versión:', this.formatoVersion() || '—'],
       [],
-      [`Docente: ${perfil.nombres} ${perfil.apellidos}`, '', '', `Programa: ${a.programa || perfil.programa || '—'}`],
-      [`Asignatura: ${a.nombre} (${a.codigo})`, '', '', `Año: ${anioTexto}`, '', `Periodo: ${a.periodo}`],
+      [`${labels.docente}: ${perfil.nombres} ${perfil.apellidos}`, '', '', `${labels.segundoCampo}: ${a.programa || perfil.programa || '—'}`],
+      [`${labels.asignatura}: ${a.nombre} (${a.codigo})`, '', '', `Año: ${anioTexto}`, '', `${labels.nivel}: ${a.nivel} · Periodo: ${a.periodo}`],
       [],
-      ['No.', 'Fecha', 'Hora inicio', 'Hora final', 'Tema', 'Total horas', 'Firma docente'],
-      ...clases.map((c, i) => [
-        i + 1,
-        this.formatFecha(c.fecha),
-        c.hora_inicio,
-        c.hora_fin,
-        c.temas_tratados || '',
-        this.calcularHoras(c.hora_inicio, c.hora_fin),
-        '',
-      ]),
-      [],
-      ['Firma docente:', '', '', this.formatoSegundaFirma() ? `${this.formatoSegundaFirma()}:` : 'Segunda firma:'],
     ];
 
-    const ws = XLSX.utils.aoa_to_sheet(filas);
-    ws['!cols'] = [{ wch: 6 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 42 }, { wch: 12 }, { wch: 20 }];
+    let filas: any[][];
+    let numColumnas: number;
+    let anchoColumnas: { wch: number }[];
 
-    // Fila 0: título del formato en negrita. Fila 6: encabezados de columna de la tabla.
-    const HEADER_ROW = 6;
+    if (plantilla.tipo_tabla_asistencia === 'matriz_estudiantes') {
+      const matriz = await this.reportesService.matrizAsistencia(this.asignaturaId, this.anioSeleccionado() ?? undefined);
+      const cols = plantilla.columnas_matriz;
+      const head = ['No.', 'Nombre'];
+      if (cols.cedula) head.push('Cédula');
+      for (const c of matriz.clases) head.push(this.formatFecha(c.fecha));
+      if (cols.porcentaje) head.push('%');
+
+      filas = [
+        ...encabezado,
+        head,
+        ...matriz.filas.map((f, i) => {
+          const fila: any[] = [i + 1, `${f.nombres} ${f.apellidos}`];
+          if (cols.cedula) fila.push(f.cedula || '—');
+          for (const c of matriz.clases) fila.push(this.abreviaturaEstado(f.estadosPorClase[c.id!]));
+          if (cols.porcentaje) fila.push(f.porcentajeAsistencia);
+          return fila;
+        }),
+      ];
+      if (plantilla.mostrar_leyenda) filas.push([], ['P = Presente   T = Tarde   J = Justificado   A = Ausente']);
+      filas.push([], [`Firma ${labels.docente.toLowerCase()}:`, '', '', `${this.formatoSegundaFirma() || labels.segundaFirmaSugerida}:`]);
+
+      numColumnas = head.length;
+      anchoColumnas = [{ wch: 6 }, { wch: 26 }, ...head.slice(2).map(() => ({ wch: 12 }))];
+    } else {
+      const cols = plantilla.columnas_historial;
+      const head = ['No.', 'Fecha', 'Hora inicio', 'Hora final'];
+      if (cols.tema) head.push('Tema');
+      if (cols.horas) head.push('Total horas');
+      if (cols.firma) head.push(`Firma ${labels.docente.toLowerCase()}`);
+
+      filas = [
+        ...encabezado,
+        head,
+        ...clases.map((c, i) => {
+          const fila: any[] = [i + 1, this.formatFecha(c.fecha), c.hora_inicio, c.hora_fin];
+          if (cols.tema) fila.push(c.temas_tratados || '');
+          if (cols.horas) fila.push(this.calcularHoras(c.hora_inicio, c.hora_fin));
+          if (cols.firma) fila.push('');
+          return fila;
+        }),
+        [],
+        [`Firma ${labels.docente.toLowerCase()}:`, '', '', `${this.formatoSegundaFirma() || labels.segundaFirmaSugerida}:`],
+      ];
+      numColumnas = head.length;
+      anchoColumnas = [{ wch: 6 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 42 }, { wch: 12 }, { wch: 20 }].slice(0, numColumnas);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(filas);
+    ws['!cols'] = anchoColumnas;
+
+    const HEADER_ROW = encabezado.length;
     const bodyStart = HEADER_ROW + 1;
-    const bodyEnd = bodyStart + clases.length - 1;
+    const totalFilasBody = plantilla.tipo_tabla_asistencia === 'matriz_estudiantes'
+      ? filas.length - encabezado.length - 1 - (plantilla.mostrar_leyenda ? 4 : 2)
+      : clases.length;
+    const bodyEnd = bodyStart + totalFilasBody - 1;
     if (ws['A1']) ws['A1'].s = { font: { bold: true, sz: 12 } };
-    styleHeaderRow(ws, HEADER_ROW, 7);
-    applyZebraStripes(ws, bodyStart, bodyEnd, 7);
+    styleHeaderRow(ws, HEADER_ROW, numColumnas);
+    applyZebraStripes(ws, bodyStart, bodyEnd, numColumnas);
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Historial de clases');
+    XLSX.utils.book_append_sheet(wb, ws, plantilla.tipo_tabla_asistencia === 'matriz_estudiantes' ? 'Matriz de asistencia' : 'Historial de clases');
+
+    if (seccionActiva(plantilla, 'listado_estudiantes')) {
+      const estudiantes = await this.asignaturasService.listarEstudiantesInscritos(this.asignaturaId);
+      const filasEstudiantes = [
+        ['No.', 'Nombre', 'Cédula', 'Programa'],
+        ...estudiantes.map((e: any, i: number) => [
+          i + 1,
+          `${e.estudiantes?.nombres ?? ''} ${e.estudiantes?.apellidos ?? ''}`.trim() || '—',
+          e.estudiantes?.cedula || '—',
+          e.estudiantes?.programa || a.programa || '—',
+        ]),
+      ];
+      const wsEstudiantes = XLSX.utils.aoa_to_sheet(filasEstudiantes);
+      wsEstudiantes['!cols'] = [{ wch: 6 }, { wch: 30 }, { wch: 16 }, { wch: 26 }];
+      styleHeaderRow(wsEstudiantes, 0, 4);
+      applyZebraStripes(wsEstudiantes, 1, filasEstudiantes.length - 1, 4);
+      XLSX.utils.book_append_sheet(wb, wsEstudiantes, 'Listado de estudiantes');
+    }
+
     XLSX.writeFile(wb, `historial-clases-${a.codigo}.xlsx`);
 
     if (this.logoUrl()) {

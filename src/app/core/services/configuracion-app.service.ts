@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { MetodoPagoConfig } from '../../shared/utils/metodos-pago.util';
 
 export interface ConfiguracionApp {
   id: string;
@@ -20,8 +21,10 @@ export interface ConfiguracionApp {
   /** Precio estándar de Premium (Parte 2), configurable por el admin. */
   premium_precio_mensual?: number | null;
   premium_precio_anual?: number | null;
-  /** Cuenta/Nequi/banco a la que el docente debe transferir — texto libre, se muestra antes de subir el comprobante. */
+  /** Nota adicional libre — se muestra junto a los métodos de pago estructurados de abajo. */
   premium_info_pago?: string | null;
+  /** Métodos de pago activos (Nequi, Bancolombia, etc.) con su dato de contacto/cuenta. */
+  metodos_pago_premium?: MetodoPagoConfig[] | null;
   /** Funcionalidad 5 — recordatorios de clase por push. */
   recordatorio_clase_minutos_antes?: number;
   vapid_public_key?: string | null;

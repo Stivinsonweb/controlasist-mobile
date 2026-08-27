@@ -187,7 +187,7 @@ export class AsignaturasService {
   async listarEstudiantesInscritos(asignaturaId: string) {
     const { data, error } = await this.supabase
       .from('estudiantes_asignaturas')
-      .select(`estudiante_id, estudiantes ( id, nombres, apellidos, cedula, email, telefono, foto_url, observaciones )`)
+      .select(`estudiante_id, estudiantes ( id, nombres, apellidos, cedula, email, telefono, foto_url, observaciones, programa )`)
       .eq('asignatura_id', asignaturaId)
       .eq('activo', true);
     if (error) throw error;

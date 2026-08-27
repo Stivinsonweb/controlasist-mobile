@@ -25,6 +25,16 @@ export interface ResumenGeneral {
   porcentajeAsistencia: number;
 }
 
+export interface FilaMatrizEstudiante {
+  estudiante_id: string;
+  nombres: string;
+  apellidos: string;
+  cedula?: string;
+  /** asistencia_id (id de la clase) -> estado del estudiante en esa clase. */
+  estadosPorClase: Record<string, EstadoAsistencia>;
+  porcentajeAsistencia: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReportesService {
   constructor(private supabaseService: SupabaseService) {}
@@ -58,10 +68,42 @@ export class ReportesService {
 
     const { data, error } = await this.supabase
       .from('registros_asistencia')
-      .select('estudiante_id, estado, estudiantes ( id, nombres, apellidos, cedula )')
+      .select('asistencia_id, estudiante_id, estado, estudiantes ( id, nombres, apellidos, cedula )')
       .in('asistencia_id', clasesIds);
     if (error) throw error;
     return { clases, registros: (data || []) as any[] };
+  }
+
+  /** Estudiantes en filas, clases (fechas) en columnas — el formato de "lista de asistencia" clásico. */
+  async matrizAsistencia(asignaturaId: string, anio?: number): Promise<{ clases: Asistencia[]; filas: FilaMatrizEstudiante[] }> {
+    const { clases, registros } = await this.registrosDeClases(asignaturaId, anio);
+
+    const mapa = new Map<string, FilaMatrizEstudiante>();
+    for (const r of registros) {
+      const est = r.estudiantes;
+      if (!est) continue;
+      if (!mapa.has(r.estudiante_id)) {
+        mapa.set(r.estudiante_id, {
+          estudiante_id: r.estudiante_id,
+          nombres: est.nombres,
+          apellidos: est.apellidos,
+          cedula: est.cedula,
+          estadosPorClase: {},
+          porcentajeAsistencia: 0,
+        });
+      }
+      mapa.get(r.estudiante_id)!.estadosPorClase[r.asistencia_id] = r.estado as EstadoAsistencia;
+    }
+
+    const filas = Array.from(mapa.values());
+    for (const fila of filas) {
+      const estados = Object.values(fila.estadosPorClase);
+      const asistio = estados.filter((e) => e === 'presente' || e === 'tarde' || e === 'justificado').length;
+      fila.porcentajeAsistencia = estados.length > 0 ? Math.round((asistio / estados.length) * 100) : 0;
+    }
+
+    const clasesOrdenadas = [...clases].sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora_inicio.localeCompare(b.hora_inicio));
+    return { clases: clasesOrdenadas, filas: filas.sort((a, b) => a.apellidos.localeCompare(b.apellidos)) };
   }
 
   async resumenPorEstudiante(asignaturaId: string, anio?: number): Promise<ResumenEstudiante[]> {
@@ -99,6 +141,26 @@ export class ReportesService {
       fila.porcentajeAsistencia = fila.total > 0 ? Math.round((asistio / fila.total) * 100) : 0;
     }
     return filas.sort((a, b) => a.apellidos.localeCompare(b.apellidos));
+  }
+
+  /** % de asistencia de cada clase dictada, en orden cronológico — para la gráfica de tendencia. */
+  async porcentajePorClase(asignaturaId: string, anio?: number): Promise<{ fecha: string; porcentaje: number }[]> {
+    const { clases, registros } = await this.registrosDeClases(asignaturaId, anio);
+
+    const porClase = new Map<string, { asistio: number; total: number }>();
+    for (const r of registros) {
+      const acc = porClase.get(r.asistencia_id) || { asistio: 0, total: 0 };
+      acc.total++;
+      if (r.estado === 'presente' || r.estado === 'tarde' || r.estado === 'justificado') acc.asistio++;
+      porClase.set(r.asistencia_id, acc);
+    }
+
+    return [...clases]
+      .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora_inicio.localeCompare(b.hora_inicio))
+      .map((c) => {
+        const acc = porClase.get(c.id!);
+        return { fecha: c.fecha, porcentaje: acc && acc.total > 0 ? Math.round((acc.asistio / acc.total) * 100) : 0 };
+      });
   }
 
   async resumenGeneral(asignaturaId: string, anio?: number): Promise<ResumenGeneral> {

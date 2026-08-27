@@ -9,13 +9,22 @@ import { ConfiguracionAppService } from '../../core/services/configuracion-app.s
 import { PremiumSuscripcionService, PagoPremium, SolicitudPremium, PeriodoPremium } from '../../core/services/premium-suscripcion.service';
 import { NotificacionesService, Notificacion } from '../../core/services/notificaciones.service';
 import { ToastService } from '../../core/services/toast.service';
+import { parsearPesosCOP } from '../../shared/utils/moneda-cop.util';
+import { MetodoPagoConfig, normalizarMetodosPago } from '../../shared/utils/metodos-pago.util';
+import { MetodoPagoIconComponent } from '../../shared/components/metodo-pago-icon/metodo-pago-icon.component';
 import {
   LogoPosicion,
   LogoTamano,
   PlantillaReporte,
   SECCIONES_REPORTE,
   SeccionReporteId,
+  TipoTablaAsistencia,
+  TamanoFuenteTabla,
+  ColorTablaModo,
+  TipoInstitucion,
+  LABELS_INSTITUCION,
   defaultPlantillaReporte,
+  normalizarPlantilla,
   seccionActiva,
 } from '../../core/services/plantilla-reporte.model';
 
@@ -26,10 +35,19 @@ const CLASES_EJEMPLO = [
   { fecha: '17/03/2026', hora: '08:00 - 10:00', tema: 'Taller práctico en grupos' },
 ];
 
+/** Filas de ejemplo para la vista previa de "Matriz de estudiantes" y "Listado de estudiantes". */
+const ESTUDIANTES_EJEMPLO = [
+  { nombre: 'Ana Martínez', cedula: '1.020.345.678', estados: ['P', 'P', 'T'], porcentaje: 92 },
+  { nombre: 'Carlos Ruiz', cedula: '1.098.234.512', estados: ['P', 'A', 'P'], porcentaje: 78 },
+  { nombre: 'Laura Gómez', cedula: '1.045.678.901', estados: ['J', 'P', 'P'], porcentaje: 85 },
+];
+
+const LEYENDA_ESTADOS = 'P = Presente   T = Tarde   J = Justificado   A = Ausente';
+
 @Component({
   selector: 'app-premium',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, MetodoPagoIconComponent],
   templateUrl: './premium.page.html',
 })
 export class PremiumPage implements OnInit, OnDestroy {
@@ -51,7 +69,8 @@ export class PremiumPage implements OnInit, OnDestroy {
 
   mostrarFormularioPago = signal(false);
   subiendoComprobante = signal(false);
-  formPago = { monto: null as number | null, fecha_pago_declarada: '', periodo_declarado_por_docente: 'mensual' as PeriodoPremium };
+  formPago = { monto: '', fecha_pago_declarada: '', periodo_declarado_por_docente: 'mensual' as PeriodoPremium };
+  metodosPago = signal<MetodoPagoConfig[]>([]);
   archivoComprobante: File | null = null;
 
   // ---------- Editor de plantilla (Parte 1) ----------
@@ -62,8 +81,21 @@ export class PremiumPage implements OnInit, OnDestroy {
 
   secciones = SECCIONES_REPORTE;
   clasesEjemplo = CLASES_EJEMPLO;
+  estudiantesEjemplo = ESTUDIANTES_EJEMPLO;
+  leyendaEstados = LEYENDA_ESTADOS;
   posicionesLogo: LogoPosicion[] = ['izquierda', 'centro', 'derecha'];
   tamanosLogo: LogoTamano[] = ['pequeno', 'mediano', 'grande'];
+  tamanosFuente: TamanoFuenteTabla[] = ['compacta', 'normal', 'grande'];
+
+  colorTablaActual(): string {
+    const p = this.plantilla();
+    return p.color_tabla_modo === 'personalizado' ? p.color_tabla_hex : 'var(--accent-from)';
+  }
+
+  tamanoFuentePreviewPx(): string {
+    const t = this.plantilla().tamano_fuente;
+    return t === 'compacta' ? '10px' : t === 'grande' ? '13px' : '11px';
+  }
 
   guardando = signal(false);
   guardadoOk = signal(false);
@@ -94,7 +126,7 @@ export class PremiumPage implements OnInit, OnDestroy {
       this.logoUrl.set(perfil.logo_institucional_url || null);
       this.titulo.set(perfil.formato_reporte_titulo || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
       this.segundaFirma.set(perfil.formato_reporte_segunda_firma || '');
-      this.plantilla.set(perfil.plantilla_reporte ? { ...defaultPlantillaReporte(), ...perfil.plantilla_reporte } : defaultPlantillaReporte());
+      this.plantilla.set(normalizarPlantilla(perfil.plantilla_reporte));
 
       await Promise.all([this.cargarEstadoSuscripcion(), this.cargarNotificaciones()]);
     } catch (e: any) {
@@ -120,6 +152,7 @@ export class PremiumPage implements OnInit, OnDestroy {
     this.precioMensual.set(precioPersonalizado ?? config?.premium_precio_mensual ?? null);
     this.precioAnual.set(config?.premium_precio_anual ?? null);
     this.infoPago.set(config?.premium_info_pago || null);
+    this.metodosPago.set(normalizarMetodosPago(config?.metodos_pago_premium).filter((m) => m.activo));
 
     this.solicitudPendiente.set(solicitudes.find((s) => s.estado === 'pendiente') || null);
     this.pagoPendiente.set(pagos.find((p) => p.estado === 'pendiente') || null);
@@ -149,10 +182,12 @@ export class PremiumPage implements OnInit, OnDestroy {
     this.enviandoSolicitud.set(true);
     try {
       await this.premiumService.solicitarPruebaGratis(this.docenteId);
-      this.toast.success('Solicitud enviada. Un administrador la revisará pronto.');
+      await this.authService.resolveProfile(this.userId);
+      this.premiumActivo.set(true);
+      this.toast.success('¡Premium activado! Ya puedes personalizar tu plantilla — tienes 30 días de prueba.');
       await this.cargarEstadoSuscripcion();
     } catch (e: any) {
-      this.toast.error(e.message || 'No se pudo enviar la solicitud');
+      this.toast.error(e.message || 'No se pudo activar la prueba gratis');
     } finally {
       this.enviandoSolicitud.set(false);
     }
@@ -164,7 +199,7 @@ export class PremiumPage implements OnInit, OnDestroy {
 
   cerrarFormularioPago() {
     this.mostrarFormularioPago.set(false);
-    this.formPago = { monto: null, fecha_pago_declarada: '', periodo_declarado_por_docente: 'mensual' };
+    this.formPago = { monto: '', fecha_pago_declarada: '', periodo_declarado_por_docente: 'mensual' };
     this.archivoComprobante = null;
   }
 
@@ -174,14 +209,15 @@ export class PremiumPage implements OnInit, OnDestroy {
   }
 
   async enviarComprobante() {
-    if (!this.formPago.monto || !this.formPago.fecha_pago_declarada || !this.archivoComprobante) {
+    const monto = parsearPesosCOP(this.formPago.monto);
+    if (!monto || !this.formPago.fecha_pago_declarada || !this.archivoComprobante) {
       this.toast.warning('Completa el monto, la fecha y adjunta el comprobante');
       return;
     }
     this.subiendoComprobante.set(true);
     try {
       await this.premiumService.subirComprobante(this.userId, this.docenteId, {
-        monto: this.formPago.monto,
+        monto,
         fecha_pago_declarada: this.formPago.fecha_pago_declarada,
         periodo_declarado_por_docente: this.formPago.periodo_declarado_por_docente,
         archivo: this.archivoComprobante,
@@ -246,6 +282,50 @@ export class PremiumPage implements OnInit, OnDestroy {
       const activa = p.secciones_activas.includes(id);
       return { ...p, secciones_activas: activa ? p.secciones_activas.filter((s) => s !== id) : [...p.secciones_activas, id] };
     });
+    this.programarGuardado();
+  }
+
+  labelsInstitucion() {
+    return LABELS_INSTITUCION[this.plantilla().tipo_institucion];
+  }
+
+  setTipoInstitucion(tipo: TipoInstitucion) {
+    this.plantilla.update((p) => ({ ...p, tipo_institucion: tipo }));
+    this.programarGuardado();
+  }
+
+  setTipoTabla(tipo: TipoTablaAsistencia) {
+    this.plantilla.update((p) => ({ ...p, tipo_tabla_asistencia: tipo }));
+    this.programarGuardado();
+  }
+
+  toggleColumnaHistorial(col: 'tema' | 'horas' | 'firma') {
+    this.plantilla.update((p) => ({ ...p, columnas_historial: { ...p.columnas_historial, [col]: !p.columnas_historial[col] } }));
+    this.programarGuardado();
+  }
+
+  toggleColumnaMatriz(col: 'cedula' | 'porcentaje') {
+    this.plantilla.update((p) => ({ ...p, columnas_matriz: { ...p.columnas_matriz, [col]: !p.columnas_matriz[col] } }));
+    this.programarGuardado();
+  }
+
+  toggleLeyenda() {
+    this.plantilla.update((p) => ({ ...p, mostrar_leyenda: !p.mostrar_leyenda }));
+    this.programarGuardado();
+  }
+
+  setTamanoFuente(t: TamanoFuenteTabla) {
+    this.plantilla.update((p) => ({ ...p, tamano_fuente: t }));
+    this.programarGuardado();
+  }
+
+  setColorTablaModo(modo: ColorTablaModo) {
+    this.plantilla.update((p) => ({ ...p, color_tabla_modo: modo }));
+    this.programarGuardado();
+  }
+
+  onColorTablaHexChange(hex: string) {
+    this.plantilla.update((p) => ({ ...p, color_tabla_hex: hex }));
     this.programarGuardado();
   }
 

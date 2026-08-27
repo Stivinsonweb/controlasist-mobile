@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
+import { SwUpdate } from '@angular/service-worker';
 import { AuthService, UserProfile } from '../core/services/auth.service';
 import { ToastService } from '../core/services/toast.service';
 import { ConfiguracionAppService } from '../core/services/configuracion-app.service';
@@ -207,7 +208,8 @@ export class LayoutComponent implements OnInit {
     private toast: ToastService,
     private configuracionService: ConfiguracionAppService,
     private accentTheme: AccentThemeService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private swUpdate: SwUpdate
   ) {}
 
   tema() {
@@ -236,6 +238,32 @@ export class LayoutComponent implements OnInit {
         }
       })
       .catch((e) => console.error('Error verificando versión de la app:', e));
+
+    this.iniciarDeteccionActualizacionesPWA();
+  }
+
+  /**
+   * El Service Worker de Angular por defecto solo revisa si hay una versión nueva del build al
+   * navegar, y aunque la descargue en segundo plano, NO la aplica hasta el siguiente arranque
+   * completo de la app — en una PWA instalada que se queda "reanudada" en segundo plano (no se
+   * cierra de verdad), eso hacía que el usuario nunca viera los cambios. Aquí se revisa
+   * activamente (al iniciar, al volver de segundo plano, y cada 15 min) y en cuanto hay una
+   * versión lista se reutiliza el mismo banner de "Actualizar ahora" — sin esto, tocaba cerrar y
+   * volver a abrir la app varias veces para que sirviera.
+   */
+  private iniciarDeteccionActualizacionesPWA() {
+    if (!this.swUpdate.isEnabled) return;
+
+    this.swUpdate.versionUpdates.pipe(filter((evt) => evt.type === 'VERSION_READY')).subscribe(() => {
+      this.mostrarActualizacion.set(true);
+    });
+
+    const revisar = () => this.swUpdate.checkForUpdate().catch(() => {});
+    revisar();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') revisar();
+    });
+    setInterval(revisar, 15 * 60 * 1000);
   }
 
   async actualizarAhora() {

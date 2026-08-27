@@ -45,8 +45,9 @@ export class PremiumSuscripcionService {
 
   // ---------- Docente ----------
 
+  /** Se activa al instante — la prueba gratis ya no necesita aprobación del admin. */
   async solicitarPruebaGratis(docenteId: string) {
-    const { error } = await this.supabase.from('solicitudes_premium').insert([{ docente_id: docenteId }]);
+    const { error } = await this.supabase.rpc('docente_activar_prueba_gratis', { p_docente_id: docenteId });
     if (error) throw error;
   }
 
