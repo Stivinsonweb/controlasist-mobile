@@ -147,6 +147,17 @@ export class AdminService {
     return (data || []) as Estudiante[];
   }
 
+  /** Estudiantes distintos (inscripciones activas) y asignaturas activas por docente, vía RPC de admin. */
+  async conteoEstudiantesPorDocente(): Promise<Map<string, { estudiantes: number; asignaturas: number }>> {
+    const { data, error } = await this.supabase.rpc('admin_conteo_estudiantes_por_docente');
+    if (error) throw error;
+    const mapa = new Map<string, { estudiantes: number; asignaturas: number }>();
+    for (const fila of (data || []) as { docente_id: string; total_estudiantes: number; total_asignaturas: number }[]) {
+      mapa.set(fila.docente_id, { estudiantes: Number(fila.total_estudiantes), asignaturas: Number(fila.total_asignaturas) });
+    }
+    return mapa;
+  }
+
   async contarAsignaturasPorDocente(docenteId: string) {
     const { count, error } = await this.supabase
       .from('asignaturas')

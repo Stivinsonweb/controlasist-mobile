@@ -56,7 +56,11 @@
           </p>
           <p class="truncate text-xs" style="color: var(--text-muted);">{{ d.email }}</p>
         </div>
-        <span *ngIf="d.programa" class="badge-info hidden shrink-0 sm:inline-block">{{ d.programa }}</span>
+        <div class="shrink-0 text-right">
+          <p class="text-base font-extrabold leading-none" style="color: var(--text-primary);">{{ totalEstudiantes(d) }}</p>
+          <p class="mt-0.5 text-[10px] font-medium uppercase tracking-wide" style="color: var(--text-muted);">{{ totalEstudiantes(d) === 1 ? 'estudiante' : 'estudiantes' }}</p>
+        </div>
+        <span *ngIf="d.programa" class="badge-info hidden shrink-0 lg:inline-block">{{ d.programa }}</span>
         <svg class="h-5 w-5 shrink-0 transition-transform" style="color: var(--text-muted);" [class.rotate-180]="expandedId() === d.id" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
       </button>
 
@@ -65,6 +69,8 @@
         <div><span style="color: var(--text-muted);">Entidad:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.entidad || '—' }}</span></div>
         <div><span style="color: var(--text-muted);">Programa:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.programa || '—' }}</span></div>
         <div><span style="color: var(--text-muted);">Área:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ d.area || '—' }}</span></div>
+        <div><span style="color: var(--text-muted);">Estudiantes inscritos:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ totalEstudiantes(d) }}</span></div>
+        <div><span style="color: var(--text-muted);">Asignaturas activas:</span> <span class="font-medium" style="color: var(--text-secondary);">{{ totalAsignaturas(d) }}</span></div>
         <div class="sm:col-span-2">
           <button *ngIf="!d.verificado" type="button" (click)="verificarManual(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-primary btn-sm">Verificar cuenta</button>
           <button *ngIf="d.verificado" type="button" (click)="revocarVerificacion(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-outline btn-sm">Revocar verificación</button>

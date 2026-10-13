@@ -17,6 +17,7 @@ import { VerificacionDocenteService, SolicitudVerificacion } from '../../../core
 export class AdminDocentesPage implements OnInit {
   loading = signal(true);
   docentes = signal<Docente[]>([]);
+  conteos = signal<Map<string, { estudiantes: number; asignaturas: number }>>(new Map());
   solicitudesVerificacion = signal<SolicitudVerificacion[]>([]);
   procesandoVerificacionId = signal<string | null>(null);
   notaRechazoVerificacion: Record<string, string> = {};
@@ -62,8 +63,13 @@ export class AdminDocentesPage implements OnInit {
   async load() {
     this.loading.set(true);
     try {
-      const [data, solicitudes] = await Promise.all([this.adminService.listarDocentes(), this.verificacionService.pendientes()]);
+      const [data, solicitudes, conteos] = await Promise.all([
+        this.adminService.listarDocentes(),
+        this.verificacionService.pendientes(),
+        this.adminService.conteoEstudiantesPorDocente().catch(() => new Map()),
+      ]);
       this.docentes.set(data);
+      this.conteos.set(conteos);
       this.solicitudesVerificacion.set(solicitudes);
     } catch (e) {
       console.error(e);
@@ -123,6 +129,14 @@ export class AdminDocentesPage implements OnInit {
   }
 
   /** Premium otorgado por el admin: sin vencimiento, hasta que lo quite. Reemplaza una prueba o pago vigente. */
+  totalEstudiantes(d: Docente): number {
+    return this.conteos().get(d.id)?.estudiantes ?? 0;
+  }
+
+  totalAsignaturas(d: Docente): number {
+    return this.conteos().get(d.id)?.asignaturas ?? 0;
+  }
+
   async activarPremium(d: Docente) {
     this.procesandoPremiumId.set(d.id);
     try {
