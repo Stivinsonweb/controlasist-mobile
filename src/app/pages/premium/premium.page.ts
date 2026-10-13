@@ -44,6 +44,19 @@ const ESTUDIANTES_EJEMPLO = [
 
 const LEYENDA_ESTADOS = 'P = Presente   T = Tarde   J = Justificado   A = Ausente';
 
+const TITULO_FORMATO_DEFAULT = 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE';
+
+/** Solo estas notificaciones se muestran aquí — los recordatorios de clase viven en la campana. */
+const TIPOS_NOTIFICACION_PREMIUM = [
+  'premium_solicitud_aprobada',
+  'premium_solicitud_rechazada',
+  'premium_pago_aprobado',
+  'premium_pago_rechazado',
+  'premium_por_vencer',
+];
+
+type VistaPlantilla = 'gratis' | 'premium';
+
 @Component({
   selector: 'app-premium',
   standalone: true,
@@ -73,9 +86,14 @@ export class PremiumPage implements OnInit, OnDestroy {
   metodosPago = signal<MetodoPagoConfig[]>([]);
   archivoComprobante: File | null = null;
 
+  // ---------- Slider Plantilla gratis / Plantilla Premium ----------
+  vista = signal<VistaPlantilla>('gratis');
+  plantillaGratis = defaultPlantillaReporte();
+  tituloGratis = TITULO_FORMATO_DEFAULT;
+
   // ---------- Editor de plantilla (Parte 1) ----------
   logoUrl = signal<string | null>(null);
-  titulo = signal('FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
+  titulo = signal(TITULO_FORMATO_DEFAULT);
   segundaFirma = signal('');
   plantilla = signal<PlantillaReporte>(defaultPlantillaReporte());
 
@@ -87,14 +105,26 @@ export class PremiumPage implements OnInit, OnDestroy {
   tamanosLogo: LogoTamano[] = ['pequeno', 'mediano', 'grande'];
   tamanosFuente: TamanoFuenteTabla[] = ['compacta', 'normal', 'grande'];
 
-  colorTablaActual(): string {
-    const p = this.plantilla();
+  // La vista previa se reutiliza para la plantilla gratis y la Premium, por eso reciben la plantilla.
+  colorTabla(p: PlantillaReporte): string {
     return p.color_tabla_modo === 'personalizado' ? p.color_tabla_hex : 'var(--accent-from)';
   }
 
-  tamanoFuentePreviewPx(): string {
-    const t = this.plantilla().tamano_fuente;
+  tamanoFuentePx(p: PlantillaReporte): string {
+    const t = p.tamano_fuente;
     return t === 'compacta' ? '10px' : t === 'grande' ? '13px' : '11px';
+  }
+
+  seccionVisible(p: PlantillaReporte, id: SeccionReporteId): boolean {
+    return seccionActiva(p, id);
+  }
+
+  labelsDe(p: PlantillaReporte) {
+    return LABELS_INSTITUCION[p.tipo_institucion];
+  }
+
+  cambiarVista(v: VistaPlantilla) {
+    this.vista.set(v);
   }
 
   guardando = signal(false);
@@ -122,9 +152,10 @@ export class PremiumPage implements OnInit, OnDestroy {
       this.docenteId = perfil.id;
       this.perfil.set(perfil as Docente);
       this.premiumActivo.set(!!(perfil as Docente).premium_activo);
+      if (this.premiumActivo()) this.vista.set('premium');
 
       this.logoUrl.set(perfil.logo_institucional_url || null);
-      this.titulo.set(perfil.formato_reporte_titulo || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
+      this.titulo.set(perfil.formato_reporte_titulo || TITULO_FORMATO_DEFAULT);
       this.segundaFirma.set(perfil.formato_reporte_segunda_firma || '');
       this.plantilla.set(normalizarPlantilla(perfil.plantilla_reporte));
 
@@ -160,15 +191,15 @@ export class PremiumPage implements OnInit, OnDestroy {
   }
 
   private async cargarNotificaciones() {
-    const lista = await this.notificacionesService.misNotificaciones(10).catch(() => []);
-    this.notificaciones.set(lista);
+    const lista = await this.notificacionesService.misNotificaciones(50).catch(() => []);
+    this.notificaciones.set(lista.filter((n) => TIPOS_NOTIFICACION_PREMIUM.includes(n.tipo) && !n.leida).slice(0, 3));
   }
 
   async marcarNotificacionLeida(n: Notificacion) {
     if (n.leida) return;
     try {
       await this.notificacionesService.marcarLeida(n.id);
-      this.notificaciones.update((lista) => lista.map((x) => (x.id === n.id ? { ...x, leida: true } : x)));
+      this.notificaciones.update((lista) => lista.filter((x) => x.id !== n.id));
     } catch {
       // No es crítico si falla — no bloquea la lectura de la notificación en pantalla.
     }
@@ -184,6 +215,7 @@ export class PremiumPage implements OnInit, OnDestroy {
       await this.premiumService.solicitarPruebaGratis(this.docenteId);
       await this.authService.resolveProfile(this.userId);
       this.premiumActivo.set(true);
+      this.vista.set('premium');
       this.toast.success('¡Premium activado! Ya puedes personalizar tu plantilla — tienes 30 días de prueba.');
       await this.cargarEstadoSuscripcion();
     } catch (e: any) {
@@ -283,10 +315,6 @@ export class PremiumPage implements OnInit, OnDestroy {
       return { ...p, secciones_activas: activa ? p.secciones_activas.filter((s) => s !== id) : [...p.secciones_activas, id] };
     });
     this.programarGuardado();
-  }
-
-  labelsInstitucion() {
-    return LABELS_INSTITUCION[this.plantilla().tipo_institucion];
   }
 
   setTipoInstitucion(tipo: TipoInstitucion) {
