@@ -32,9 +32,9 @@ export class ThemeService {
   private leerPreferenciaGuardada(): TemaPreferencia {
     try {
       const v = localStorage.getItem(STORAGE_KEY);
-      return v === 'claro' || v === 'oscuro' || v === 'sistema' ? v : 'oscuro';
+      return v === 'claro' || v === 'oscuro' || v === 'sistema' ? v : 'claro';
     } catch {
-      return 'oscuro';
+      return 'claro';
     }
   }
 
