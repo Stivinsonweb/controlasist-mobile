@@ -128,6 +128,8 @@ export class DetalleAsignaturaPage implements OnInit {
   estados = ESTADOS_CLASE;
   claseSeleccionada = signal<{ horario: Horario; estado: string; esHoy: boolean } | null>(null);
   estadoElegido = '';
+  /** Estado ya guardado: el diálogo pasa del selector al mensaje de resultado. */
+  estadoGuardado = '';
   savingEstado = false;
 
   // Tomar asistencia por estudiante
@@ -362,12 +364,14 @@ export class DetalleAsignaturaPage implements OnInit {
   // ===== Estado de clase =====
   onClaseClick(evento: { horario: Horario; estado: string; esHoy: boolean }) {
     this.claseSeleccionada.set(evento);
+    this.estadoGuardado = '';
     this.estadoElegido = ['realizada', 'cancelada', 'aplazada'].includes(evento.estado) ? evento.estado : '';
   }
 
   cerrarEstadoClase() {
     this.claseSeleccionada.set(null);
     this.estadoElegido = '';
+    this.estadoGuardado = '';
   }
 
   async guardarEstadoClase() {
@@ -380,21 +384,9 @@ export class DetalleAsignaturaPage implements OnInit {
     try {
       await this.asignaturasService.actualizarEstadoHorario(seleccion.horario.id, this.estadoElegido);
 
-      // Primero el estado, luego la asistencia: solo una clase realizada lleva toma de asistencia.
-      // Cancelada/aplazada no crea registros, así que no genera fallas a los estudiantes.
-      if (this.estadoElegido === 'realizada') {
-        this.toast.success('Clase marcada como realizada. Ahora toma la asistencia.');
-        await this.load();
-        await this.abrirTomarAsistencia();
-        return;
-      }
-
-      this.toast.success(
-        this.estadoElegido === 'cancelada'
-          ? 'Clase cancelada. Los estudiantes no tendrán falla por esta clase.'
-          : 'Clase aplazada. Los estudiantes no tendrán falla; toma la asistencia cuando se dicte.'
-      );
-      this.cerrarEstadoClase();
+      // Primero el estado, luego un mensaje según el estado: solo una clase realizada lleva toma
+      // de asistencia. Cancelada/aplazada no crea registros, así que no genera fallas.
+      this.estadoGuardado = this.estadoElegido;
       await this.load();
     } catch (e: any) {
       this.toast.error(e.message || 'No se pudo guardar el estado');

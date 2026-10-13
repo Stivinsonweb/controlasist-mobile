@@ -273,6 +273,7 @@
 <!-- Marcar estado de clase -->
 <app-dialog [open]="!!claseSeleccionada() && !showTomarAsistencia" (closed)="cerrarEstadoClase()">
   <ng-container *ngIf="claseSeleccionada() as c">
+   <ng-container *ngIf="!estadoGuardado">
     <h3 class="text-lg font-bold text-slate-900">Estado de la clase</h3>
     <p class="mt-1 text-sm text-slate-500">{{ dias[c.horario.dia_semana] }} · {{ c.horario.hora_inicio }} - {{ c.horario.hora_fin }}{{ c.horario.aula ? ' · ' + c.horario.aula : '' }}</p>
 
@@ -294,27 +295,37 @@
       </button>
     </div>
 
-    <!-- Qué pasa con la asistencia según el estado elegido -->
-    <div *ngIf="estadoElegido" class="mt-4 rounded-xl border px-3.5 py-3 text-sm"
-         [style.border-color]="colorEstado(estadoElegido)" [style.background]="colorEstado(estadoElegido) + '14'">
-      <ng-container [ngSwitch]="estadoElegido">
-        <p *ngSwitchCase="'realizada'" class="text-slate-700">
-          <span class="font-semibold">Siguiente paso:</span> al guardar se abrirá la toma de asistencia de esta clase.
-        </p>
-        <p *ngSwitchCase="'cancelada'" class="text-slate-700">
-          <span class="font-semibold">Clase cancelada:</span> no se toma asistencia y los estudiantes <span class="font-semibold">no tendrán falla</span> por esta clase.
-        </p>
-        <p *ngSwitchCase="'aplazada'" class="text-slate-700">
-          <span class="font-semibold">Clase aplazada:</span> no se toma asistencia hoy y los estudiantes <span class="font-semibold">no tendrán falla</span>. Toma la asistencia el día en que se dicte la clase.
-        </p>
-      </ng-container>
-    </div>
-
     <div class="mt-5 flex gap-2">
       <button (click)="cerrarEstadoClase()" class="btn-outline flex-1">Cancelar</button>
       <button (click)="guardarEstadoClase()" [disabled]="savingEstado || !estadoElegido" class="flex-1 rounded-xl py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50" [style.backgroundColor]="colorEstado(estadoElegido)">
-        {{ savingEstado ? 'Guardando...' : estadoElegido === 'realizada' ? 'Guardar y tomar asistencia' : 'Guardar estado' }}
+        {{ savingEstado ? 'Guardando...' : 'Guardar estado' }}
       </button>
+    </div>
+   </ng-container>
+
+    <!-- Paso 2: mensaje según el estado guardado -->
+    <div *ngIf="estadoGuardado" class="text-center">
+      <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl text-white" [style.backgroundColor]="colorEstado(estadoGuardado)">
+        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      </span>
+      <ng-container [ngSwitch]="estadoGuardado">
+        <ng-container *ngSwitchCase="'realizada'">
+          <h3 class="mt-4 text-lg font-bold text-slate-900">Clase realizada</h3>
+          <p class="mt-2 text-sm text-slate-600">El estado quedó guardado. Ahora toma la asistencia de tus estudiantes para esta clase.</p>
+          <button (click)="abrirTomarAsistencia()" class="btn-primary mt-5 w-full">Tomar asistencia</button>
+          <button (click)="cerrarEstadoClase()" class="btn-ghost btn-sm mt-2 w-full">Más tarde</button>
+        </ng-container>
+        <ng-container *ngSwitchCase="'cancelada'">
+          <h3 class="mt-4 text-lg font-bold text-slate-900">Clase cancelada</h3>
+          <p class="mt-2 text-sm text-slate-600">No se toma asistencia para esta clase. Los estudiantes <span class="font-semibold">no tendrán falla</span>.</p>
+          <button (click)="cerrarEstadoClase()" class="btn-primary mt-5 w-full">Entendido</button>
+        </ng-container>
+        <ng-container *ngSwitchCase="'aplazada'">
+          <h3 class="mt-4 text-lg font-bold text-slate-900">Clase aplazada</h3>
+          <p class="mt-2 text-sm text-slate-600">No se toma asistencia hoy y los estudiantes <span class="font-semibold">no tendrán falla</span>. Toma la asistencia el día en que se dicte la clase.</p>
+          <button (click)="cerrarEstadoClase()" class="btn-primary mt-5 w-full">Entendido</button>
+        </ng-container>
+      </ng-container>
     </div>
   </ng-container>
 </app-dialog>
