@@ -294,16 +294,28 @@
       </button>
     </div>
 
+    <!-- Qué pasa con la asistencia según el estado elegido -->
+    <div *ngIf="estadoElegido" class="mt-4 rounded-xl border px-3.5 py-3 text-sm"
+         [style.border-color]="colorEstado(estadoElegido)" [style.background]="colorEstado(estadoElegido) + '14'">
+      <ng-container [ngSwitch]="estadoElegido">
+        <p *ngSwitchCase="'realizada'" class="text-slate-700">
+          <span class="font-semibold">Siguiente paso:</span> al guardar se abrirá la toma de asistencia de esta clase.
+        </p>
+        <p *ngSwitchCase="'cancelada'" class="text-slate-700">
+          <span class="font-semibold">Clase cancelada:</span> no se toma asistencia y los estudiantes <span class="font-semibold">no tendrán falla</span> por esta clase.
+        </p>
+        <p *ngSwitchCase="'aplazada'" class="text-slate-700">
+          <span class="font-semibold">Clase aplazada:</span> no se toma asistencia hoy y los estudiantes <span class="font-semibold">no tendrán falla</span>. Toma la asistencia el día en que se dicte la clase.
+        </p>
+      </ng-container>
+    </div>
+
     <div class="mt-5 flex gap-2">
       <button (click)="cerrarEstadoClase()" class="btn-outline flex-1">Cancelar</button>
       <button (click)="guardarEstadoClase()" [disabled]="savingEstado || !estadoElegido" class="flex-1 rounded-xl py-3 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50" [style.backgroundColor]="colorEstado(estadoElegido)">
-        {{ savingEstado ? 'Guardando...' : 'Guardar estado' }}
+        {{ savingEstado ? 'Guardando...' : estadoElegido === 'realizada' ? 'Guardar y tomar asistencia' : 'Guardar estado' }}
       </button>
     </div>
-
-    <button (click)="abrirTomarAsistencia()" class="btn-ghost btn-sm mt-3 w-full">
-      Tomar asistencia de esta clase
-    </button>
   </ng-container>
 </app-dialog>
 

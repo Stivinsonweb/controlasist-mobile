@@ -379,7 +379,21 @@ export class DetalleAsignaturaPage implements OnInit {
     this.savingEstado = true;
     try {
       await this.asignaturasService.actualizarEstadoHorario(seleccion.horario.id, this.estadoElegido);
-      this.toast.success('Estado guardado exitosamente');
+
+      // Primero el estado, luego la asistencia: solo una clase realizada lleva toma de asistencia.
+      // Cancelada/aplazada no crea registros, así que no genera fallas a los estudiantes.
+      if (this.estadoElegido === 'realizada') {
+        this.toast.success('Clase marcada como realizada. Ahora toma la asistencia.');
+        await this.load();
+        await this.abrirTomarAsistencia();
+        return;
+      }
+
+      this.toast.success(
+        this.estadoElegido === 'cancelada'
+          ? 'Clase cancelada. Los estudiantes no tendrán falla por esta clase.'
+          : 'Clase aplazada. Los estudiantes no tendrán falla; toma la asistencia cuando se dicte.'
+      );
       this.cerrarEstadoClase();
       await this.load();
     } catch (e: any) {
@@ -473,6 +487,8 @@ export class DetalleAsignaturaPage implements OnInit {
 
   cerrarTomarAsistencia() {
     this.showTomarAsistencia = false;
+    // Si venía de "Estado de la clase", no se vuelve a abrir ese diálogo al cerrar la asistencia.
+    this.cerrarEstadoClase();
     this.asistenciaActual = null;
     this.registrosTrabajo = [];
     this.pendienteAsistenciaPayload = null;

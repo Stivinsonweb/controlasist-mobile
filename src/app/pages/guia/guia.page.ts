@@ -46,7 +46,7 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     descripcion: 'En cada clase programada, toca "Tomar asistencia" y marca a cada estudiante como presente, tarde o ausente.',
     pasos: [
       'En el detalle de la asignatura, haz clic en la clase del día que quieres registrar dentro del calendario de clases.',
-      'Marca el estado de la clase (realizada, cancelada o aplazada); si fue realizada, presiona "Tomar asistencia de esta clase".',
+      'Marca primero el estado de la clase: si fue realizada se abre la toma de asistencia; si fue cancelada o aplazada no se toma asistencia y los estudiantes no tienen falla.',
       'Marca a cada estudiante como presente, tarde, justificado o ausente — o usa "Marcar todos presentes" y ajusta solo las excepciones.',
       'Selecciona el tipo de clase (teórica, taller, evaluación o laboratorio) y describe los temas tratados — ambos son obligatorios para guardar.',
       'Agrega observaciones si lo necesitas y presiona "Guardar asistencia".',
