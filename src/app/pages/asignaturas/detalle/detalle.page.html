@@ -88,7 +88,7 @@
     <div class="space-y-5">
       <div class="card p-6 text-center">
         <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Código de acceso</p>
-        <p class="mt-2 font-mono text-2xl font-extrabold tracking-widest" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); -webkit-background-clip: text; background-clip: text; color: transparent;">{{ a.codigo_acceso || '——————' }}</p>
+        <p class="mt-2 break-all font-mono text-lg font-extrabold tracking-wider sm:text-xl" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); -webkit-background-clip: text; background-clip: text; color: transparent;">{{ a.codigo_acceso || '——————' }}</p>
         <div class="mt-3 grid grid-cols-2 gap-2">
           <button (click)="copiarCodigo()" class="btn-outline text-xs">Copiar</button>
           <button (click)="abrirCodigoConfig()" class="btn-outline text-xs">Configurar</button>
@@ -392,7 +392,7 @@
 <app-dialog [open]="showCodigoConfig" (closed)="showCodigoConfig = false">
   <ng-container *ngIf="asignatura() as a">
     <h3 class="text-lg font-bold text-slate-900">Código de acceso</h3>
-    <p class="mt-2 text-center font-mono text-2xl font-extrabold tracking-widest text-primary-700">{{ a.codigo_acceso || '——————' }}</p>
+    <p class="mt-2 break-all text-center font-mono text-lg font-extrabold tracking-wider text-primary-700 sm:text-xl">{{ a.codigo_acceso || '——————' }}</p>
 
     <div class="mt-4 grid grid-cols-2 gap-2">
       <button (click)="copiarCodigo()" class="btn-outline text-xs">Copiar</button>
