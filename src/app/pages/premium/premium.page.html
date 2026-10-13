@@ -91,14 +91,10 @@
         <h2 class="mt-4 text-xl font-bold" style="color: var(--text-primary);">Activa <span class="text-gradient-accent">Premium</span></h2>
         <p class="mt-1.5 text-sm" style="color: var(--text-muted);">Personaliza el formato de tus reportes de asistencia: logo, secciones, orden y más.</p>
 
-        <div *ngIf="precioMensual() || precioAnual()" class="mt-5 flex justify-center gap-3">
-          <div *ngIf="precioMensual()" class="rounded-xl px-4 py-2.5" style="background: var(--bg-surface-2);">
+        <div *ngIf="precioMensual()" class="mt-5 flex justify-center">
+          <div class="rounded-xl px-5 py-2.5" style="background: var(--bg-surface-2);">
             <p class="text-lg font-extrabold" style="color: var(--text-primary);">{{ precioMensual() | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
             <p class="text-[11px]" style="color: var(--text-muted);">por mes</p>
-          </div>
-          <div *ngIf="precioAnual()" class="rounded-xl px-4 py-2.5" style="background: var(--bg-surface-2);">
-            <p class="text-lg font-extrabold" style="color: var(--text-primary);">{{ precioAnual() | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
-            <p class="text-[11px]" style="color: var(--text-muted);">por año</p>
           </div>
         </div>
 
@@ -111,7 +107,7 @@
         <!-- Comprobante pendiente -->
         <div *ngIf="pagoPendiente() as p" class="mt-6 rounded-xl border px-4 py-3 text-left text-sm" style="border-color: var(--border-subtle-2); background: var(--bg-surface-2);">
           <p class="font-semibold" style="color: var(--text-primary);">Tu comprobante de pago está en revisión</p>
-          <p class="mt-1 text-xs" style="color: var(--text-muted);">Monto {{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }} · {{ p.periodo_declarado_por_docente }} · enviado el {{ p.created_at | date:'d MMM yyyy' }}</p>
+          <p class="mt-1 text-xs" style="color: var(--text-muted);">Monto {{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }} · enviado el {{ p.created_at | date:'d MMM yyyy' }}</p>
         </div>
 
         <!-- Acciones -->
@@ -156,7 +152,7 @@
               </ng-container>
             </div>
             <button *ngIf="perfil()?.premium_fuente !== 'admin' && !mostrarFormularioPago()" type="button" (click)="abrirFormularioPago()" class="btn-outline btn-sm">
-              Renovar / cambiar plan
+              Renovar
             </button>
           </div>
         </div>
@@ -368,7 +364,7 @@
       <ul class="mt-3 space-y-2">
         <li *ngFor="let p of historialPagos()" class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm" style="background: var(--bg-surface-2);">
           <div>
-            <p class="font-medium" style="color: var(--text-secondary);">{{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }} · {{ p.periodo_declarado_por_docente }}</p>
+            <p class="font-medium" style="color: var(--text-secondary);">{{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
             <p class="text-xs" style="color: var(--text-muted);">{{ p.created_at | date:'d MMM yyyy' }}</p>
           </div>
           <span class="badge-neutral shrink-0 text-[10px]" [class.text-emerald-600]="p.estado === 'aprobado'" [class.text-red-600]="p.estado === 'rechazado'">{{ p.estado }}</span>
@@ -380,30 +376,15 @@
     <ng-template #formularioPagoTpl>
     <div class="space-y-4 rounded-xl border p-4 text-left" style="border-color: var(--border-subtle-2);">
 
-      <!-- Paso 1: plan -->
-      <div>
-        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">1 · Elige tu plan</p>
-        <div class="mt-2 grid grid-cols-2 gap-2">
-          <button type="button" (click)="seleccionarPeriodo('mensual')"
-                  class="rounded-xl border px-3 py-2.5 text-left transition-colors"
-                  [style.border-color]="formPago.periodo_declarado_por_docente === 'mensual' ? 'var(--accent-from)' : 'var(--border-subtle-2)'"
-                  [style.background]="formPago.periodo_declarado_por_docente === 'mensual' ? 'var(--bg-surface-2)' : 'transparent'">
-            <span class="block text-xs font-semibold" style="color: var(--text-secondary);">Mensual</span>
-            <span class="block text-base font-extrabold" style="color: var(--text-primary);">{{ precioMensual() ? (precioMensual() | currency:'COP':'symbol-narrow':'1.0-0') : '—' }}</span>
-          </button>
-          <button type="button" (click)="seleccionarPeriodo('anual')"
-                  class="rounded-xl border px-3 py-2.5 text-left transition-colors"
-                  [style.border-color]="formPago.periodo_declarado_por_docente === 'anual' ? 'var(--accent-from)' : 'var(--border-subtle-2)'"
-                  [style.background]="formPago.periodo_declarado_por_docente === 'anual' ? 'var(--bg-surface-2)' : 'transparent'">
-            <span class="block text-xs font-semibold" style="color: var(--text-secondary);">Anual</span>
-            <span class="block text-base font-extrabold" style="color: var(--text-primary);">{{ precioAnual() ? (precioAnual() | currency:'COP':'symbol-narrow':'1.0-0') : '—' }}</span>
-          </button>
-        </div>
+      <!-- Precio -->
+      <div *ngIf="precioMensual()" class="flex items-baseline justify-between rounded-xl px-3 py-2.5" style="background: var(--bg-surface-2);">
+        <span class="text-xs font-semibold" style="color: var(--text-secondary);">Premium mensual</span>
+        <span class="text-base font-extrabold" style="color: var(--text-primary);">{{ precioMensual() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
       </div>
 
-      <!-- Paso 2: pagar -->
+      <!-- Paso 1: pagar -->
       <div>
-        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">2 · Paga con cualquiera de estos medios</p>
+        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">1 · Paga con cualquiera de estos medios</p>
 
         <div class="mt-2 flex items-center justify-between gap-2 rounded-xl px-3 py-2.5" style="background: var(--bg-surface-2);">
           <div class="min-w-0">
@@ -430,9 +411,9 @@
         <p *ngIf="infoPago()" class="mt-2 text-xs italic" style="color: var(--text-muted);">{{ infoPago() }}</p>
       </div>
 
-      <!-- Paso 3: comprobante -->
+      <!-- Paso 2: comprobante -->
       <div class="space-y-3">
-        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">3 · Sube tu comprobante</p>
+        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">2 · Sube tu comprobante</p>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Monto pagado</label>

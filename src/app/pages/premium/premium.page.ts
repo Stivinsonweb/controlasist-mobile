@@ -73,7 +73,6 @@ export class PremiumPage implements OnInit, OnDestroy {
   perfil = signal<Docente | null>(null);
   premiumActivo = signal(false);
   precioMensual = signal<number | null>(null);
-  precioAnual = signal<number | null>(null);
   infoPago = signal<string | null>(null);
   solicitudPendiente = signal<SolicitudPremium | null>(null);
   pagoPendiente = signal<PagoPremium | null>(null);
@@ -183,7 +182,6 @@ export class PremiumPage implements OnInit, OnDestroy {
 
     const precioPersonalizado = this.perfil()?.premium_precio_personalizado;
     this.precioMensual.set(precioPersonalizado ?? config?.premium_precio_mensual ?? null);
-    this.precioAnual.set(config?.premium_precio_anual ?? null);
     this.infoPago.set(config?.premium_info_pago || null);
     this.metodosPago.set(normalizarMetodosPago(config?.metodos_pago_premium).filter((m) => m.activo));
 
@@ -237,15 +235,9 @@ export class PremiumPage implements OnInit, OnDestroy {
 
   abrirFormularioPago() {
     this.formPago.fecha_pago_declarada = new Date().toISOString().split('T')[0];
-    this.seleccionarPeriodo(this.formPago.periodo_declarado_por_docente);
-    this.mostrarFormularioPago.set(true);
-  }
-
-  /** Elegir el plan llena el monto exacto a pagar (el docente aún puede corregirlo). */
-  seleccionarPeriodo(periodo: PeriodoPremium) {
-    this.formPago.periodo_declarado_por_docente = periodo;
-    const precio = periodo === 'anual' ? this.precioAnual() : this.precioMensual();
+    const precio = this.precioMensual();
     if (precio) this.formPago.monto = formatearPesosCOP(precio);
+    this.mostrarFormularioPago.set(true);
   }
 
   async copiar(texto: string, que: string) {

@@ -53,19 +53,14 @@
               <p class="mt-1 text-xs" style="color: var(--text-secondary);">Referencia: <strong class="font-mono">{{ referencia(p.docente_id) }}</strong></p>
               <p class="mt-1 text-xs" style="color: var(--text-secondary);">
                 Monto declarado: <strong>{{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</strong> ·
-                Fecha del pago: {{ p.fecha_pago_declarada | date:'d MMM yyyy' }} ·
-                Periodo sugerido por el docente: <strong>{{ p.periodo_declarado_por_docente }}</strong>
+                Fecha del pago: {{ p.fecha_pago_declarada | date:'d MMM yyyy' }}
               </p>
             </div>
             <button type="button" (click)="verComprobante(p)" class="btn-outline btn-sm shrink-0">Ver comprobante</button>
           </div>
 
           <div class="mt-3 flex flex-wrap items-center gap-2">
-            <label class="text-xs font-medium" style="color: var(--text-secondary);">Periodo a aplicar:</label>
-            <select [(ngModel)]="periodoConfirmado[p.id]" class="input-field w-auto text-xs">
-              <option value="mensual">Mensual</option>
-              <option value="anual">Anual</option>
-            </select>
+            <span class="text-xs" style="color: var(--text-muted);">Al aprobar se suma 1 mes de Premium.</span>
             <div class="ml-auto flex gap-2">
               <button type="button" (click)="rechazarPago(p)" [disabled]="procesandoId() === p.id" class="btn-outline btn-sm">Rechazar</button>
               <button type="button" (click)="aprobarPago(p)" [disabled]="procesandoId() === p.id" class="btn-primary btn-sm">Aprobar</button>
@@ -117,15 +112,9 @@
     <div *ngIf="tab() === 'precio'" class="card max-w-xl p-6">
       <h3 class="text-sm font-bold" style="color: var(--text-primary);">Precio estándar de Premium</h3>
       <p class="mt-1 text-xs" style="color: var(--text-muted);">Se muestra a todos los docentes, salvo que tengan un precio personalizado (pestaña "Docentes").</p>
-      <div class="mt-4 grid grid-cols-2 gap-3">
-        <div>
-          <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Precio mensual</label>
-          <input #mensual type="text" inputmode="numeric" [ngModel]="formatearPesos(config()?.premium_precio_mensual)" class="input-field text-sm" placeholder="50.000" />
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Precio anual</label>
-          <input #anual type="text" inputmode="numeric" [ngModel]="formatearPesos(config()?.premium_precio_anual)" class="input-field text-sm" placeholder="500.000" />
-        </div>
+      <div class="mt-4">
+        <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Precio mensual</label>
+        <input #mensual type="text" inputmode="numeric" [ngModel]="formatearPesos(config()?.premium_precio_mensual)" class="input-field text-sm" placeholder="50.000" />
       </div>
 
       <h3 class="mt-6 text-sm font-bold" style="color: var(--text-primary);">Métodos de pago</h3>
@@ -155,7 +144,7 @@
         <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Nota adicional (opcional)</label>
         <textarea #infoPago rows="2" [ngModel]="config()?.premium_info_pago" class="input-field text-sm" placeholder="Ej: escribe por WhatsApp al confirmar el pago"></textarea>
       </div>
-      <button type="button" (click)="guardarPrecioGlobal(mensual.value, anual.value, infoPago.value)" [disabled]="guardandoPrecioGlobal()" class="btn-primary btn-sm mt-4 w-full">
+      <button type="button" (click)="guardarPrecioGlobal(mensual.value, infoPago.value)" [disabled]="guardandoPrecioGlobal()" class="btn-primary btn-sm mt-4 w-full">
         {{ guardandoPrecioGlobal() ? 'Guardando...' : 'Guardar precio y métodos de pago' }}
       </button>
     </div>

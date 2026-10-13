@@ -97,7 +97,7 @@ const TEMAS_DOCENTE: GuiaTema[] = [
       'Entra a "Premium" desde el menú lateral.',
       'Si nunca has usado Premium, presiona "Solicitar prueba gratis de 1 mes" — se activa al instante, sin esperar aprobación.',
       'Si ya usaste tu prueba, presiona "Activar Premium": verás los métodos de pago disponibles (Nequi, Bancolombia, etc. con su ícono) y subes tu comprobante (monto, fecha y el periodo que pagaste) — un administrador lo revisa y activa tu acceso.',
-      'Con Premium ya activo, puedes renovar o cambiar de plan (mensual/anual) cuando quieras desde el botón "Renovar / cambiar plan" arriba del editor — no hace falta esperar a que venza.',
+      'Con Premium ya activo, puedes renovar tu plan mensual cuando quieras desde el botón "Renovar" arriba del editor — no hace falta esperar a que venza.',
       'Elige el "Tipo de institución" (Universidad o Escolar) — cambia la terminología del formato (Docente/Profesor, Asignatura/Área, Nivel/Grado...).',
       'En "Tabla de asistencia", elige entre "Historial de clases" (una fila por sesión) o "Matriz de estudiantes" (estudiantes en filas, fechas en columnas, el formato clásico de lista de asistencia) — cada una con sus propias columnas configurables, leyenda, tamaño de letra y color.',
       'Personaliza también la posición y tamaño del logo, los títulos del encabezado, y el orden/activación de las demás secciones del reporte arrastrándolas.',

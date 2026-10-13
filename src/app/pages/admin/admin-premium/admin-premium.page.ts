@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, Docente } from '../../../core/services/admin.service';
 import { ConfiguracionAppService, ConfiguracionApp } from '../../../core/services/configuracion-app.service';
-import { referenciaPagoDocente, PremiumSuscripcionService, SolicitudPremium, PagoPremium, PeriodoPremium } from '../../../core/services/premium-suscripcion.service';
+import { referenciaPagoDocente, PremiumSuscripcionService, SolicitudPremium, PagoPremium } from '../../../core/services/premium-suscripcion.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { parsearPesosCOP, formatearPesosCOP } from '../../../shared/utils/moneda-cop.util';
 import { MetodoPagoConfig, MetodoPagoTipo, METODOS_PAGO_CATALOGO, normalizarMetodosPago, catalogoMetodo } from '../../../shared/utils/metodos-pago.util';
@@ -62,7 +62,6 @@ export class AdminPremiumPage implements OnInit {
 
   procesandoId = signal<string | null>(null);
   notaRechazo: Record<string, string> = {};
-  periodoConfirmado: Record<string, PeriodoPremium> = {};
   precioPersonalizadoEdit: Record<string, string> = {};
   guardandoPrecioGlobal = signal(false);
   subiendoQr = signal<MetodoPagoTipo | null>(null);
@@ -110,7 +109,6 @@ export class AdminPremiumPage implements OnInit {
       this.config.set(config);
       this.metodosPago.set(normalizarMetodosPago(config?.metodos_pago_premium));
 
-      for (const p of pagos) this.periodoConfirmado[p.id] = p.periodo_declarado_por_docente;
     } catch (e) {
       console.error('Error cargando panel de Premium:', e);
       this.toast.error('No se pudo cargar el panel de Premium');
@@ -159,10 +157,10 @@ export class AdminPremiumPage implements OnInit {
   }
 
   async aprobarPago(p: PagoPremium) {
-    const periodo = this.periodoConfirmado[p.id] || p.periodo_declarado_por_docente;
     this.procesandoId.set(p.id);
     try {
-      await this.premiumService.aprobarPago(p.id, periodo);
+      // Premium solo tiene plan mensual: cada pago aprobado suma 1 mes.
+      await this.premiumService.aprobarPago(p.id, 'mensual');
       this.toast.success('Pago aprobado — Premium extendido');
       await this.cargarTodo();
     } catch (e: any) {
@@ -260,14 +258,13 @@ export class AdminPremiumPage implements OnInit {
     }
   }
 
-  async guardarPrecioGlobal(mensual: string, anual: string, infoPago: string) {
+  async guardarPrecioGlobal(mensual: string, infoPago: string) {
     const cfg = this.config();
     if (!cfg) return;
     this.guardandoPrecioGlobal.set(true);
     try {
       const actualizado = await this.configuracionAppService.actualizar(cfg.id, {
         premium_precio_mensual: parsearPesosCOP(mensual),
-        premium_precio_anual: parsearPesosCOP(anual),
         premium_info_pago: infoPago || null,
         metodos_pago_premium: this.metodosPago(),
       });
