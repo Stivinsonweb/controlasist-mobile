@@ -35,6 +35,7 @@ export class DocentePerfilPage implements OnInit {
   showPassword = false;
   email = '';
   fotoUrl: string | null = null;
+  premiumActivo = false;
   nombres = '';
   apellidos = '';
   private docenteId = '';
@@ -102,6 +103,7 @@ export class DocentePerfilPage implements OnInit {
         .catch((e) => console.error('Error cargando solicitud de verificación:', e));
       this.email = perfil.email;
       this.fotoUrl = perfil.foto_url || null;
+      this.premiumActivo = !!(perfil as any).premium_activo;
       this.nombres = perfil.nombres;
       this.apellidos = perfil.apellidos;
       this.temaSeleccionado.set(perfil.tema_acento || 'emerald-teal');

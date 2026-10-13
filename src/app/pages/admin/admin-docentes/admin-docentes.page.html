@@ -48,7 +48,7 @@
   <div *ngIf="!loading() && paginados().length > 0" class="space-y-3">
     <div *ngFor="let d of paginados()" class="card overflow-hidden">
       <button (click)="toggleExpand(d.id)" class="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-white/5">
-        <app-avatar [fotoUrl]="d.foto_url" [iniciales]="iniciales(d)" colorFondo="#e0e7ff" textColor="#4338ca" sizeClass="h-11 w-11 text-sm" [ring]="true" />
+        <app-avatar [fotoUrl]="d.foto_url" [iniciales]="iniciales(d)" colorFondo="#e0e7ff" textColor="#4338ca" sizeClass="h-11 w-11 text-sm" [ring]="true" [premium]="!!d.premium_activo" />
         <div class="min-w-0 flex-1">
           <p class="flex items-center gap-1 truncate text-sm font-semibold" style="color: var(--text-primary);">
             {{ d.nombres }} {{ d.apellidos }}
@@ -68,6 +68,19 @@
         <div class="sm:col-span-2">
           <button *ngIf="!d.verificado" type="button" (click)="verificarManual(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-primary btn-sm">Verificar cuenta</button>
           <button *ngIf="d.verificado" type="button" (click)="revocarVerificacion(d)" [disabled]="procesandoVerificacionId() === d.id" class="btn-outline btn-sm">Revocar verificación</button>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 sm:col-span-2">
+          <span class="text-xs" style="color: var(--text-muted);">
+            Premium:
+            <span class="font-semibold" style="color: var(--text-secondary);">
+              {{ !d.premium_activo ? 'No activo' : d.premium_fuente === 'admin' ? 'Activado por el administrador' : d.premium_fuente === 'prueba' ? 'Prueba gratis' : 'Pagado' }}
+            </span>
+            <ng-container *ngIf="d.premium_activo && d.premium_fecha_vencimiento"> · vence el {{ d.premium_fecha_vencimiento | date:'d MMM yyyy' }}</ng-container>
+          </span>
+          <button *ngIf="!d.premium_activo || d.premium_fuente !== 'admin'" type="button" (click)="activarPremium(d)" [disabled]="procesandoPremiumId() === d.id" class="btn-primary btn-sm">
+            {{ procesandoPremiumId() === d.id ? 'Activando...' : 'Activar Premium' }}
+          </button>
+          <button *ngIf="d.premium_activo && d.premium_fuente === 'admin'" type="button" (click)="quitarPremium(d)" [disabled]="procesandoPremiumId() === d.id" class="btn-outline btn-sm">Quitar Premium</button>
         </div>
       </div>
     </div>

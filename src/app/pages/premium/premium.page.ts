@@ -54,6 +54,7 @@ const TIPOS_NOTIFICACION_PREMIUM = [
   'premium_pago_rechazado',
   'premium_por_vencer',
   'premium_vencido',
+  'premium_otorgado',
 ];
 
 type VistaPlantilla = 'gratis' | 'premium';

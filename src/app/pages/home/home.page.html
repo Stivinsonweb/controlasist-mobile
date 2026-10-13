@@ -3,7 +3,7 @@
   <!-- Encabezado de perfil -->
   <div class="card mb-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex items-center gap-4">
-      <app-avatar *ngIf="!loadingProfile()" [fotoUrl]="docente()?.foto_url" [iniciales]="getIniciales()" colorFondo="var(--accent-from)" shape="square" sizeClass="h-14 w-14 text-lg" />
+      <app-avatar *ngIf="!loadingProfile()" [fotoUrl]="docente()?.foto_url" [iniciales]="getIniciales()" colorFondo="var(--accent-from)" shape="square" sizeClass="h-14 w-14 text-lg" [premium]="!!docente()?.premium_activo" />
       <div *ngIf="loadingProfile()" class="flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">—</div>
       <div>
         <p class="text-lg font-bold" style="color: var(--text-primary);">{{ getNombreCompleto() }}</p>

@@ -147,7 +147,7 @@ interface NavItem {
               <p class="text-sm font-semibold leading-none" style="color: var(--text-primary);">{{ nombreCompleto() }}</p>
               <p class="text-xs capitalize" style="color: var(--text-muted);">{{ role() }}</p>
             </div>
-            <app-avatar [fotoUrl]="profile()?.foto_url" [iniciales]="iniciales()" colorFondo="var(--accent-from)" textColor="#ffffff" sizeClass="h-10 w-10 text-sm" [ring]="true" />
+            <app-avatar [fotoUrl]="profile()?.foto_url" [iniciales]="iniciales()" colorFondo="var(--accent-from)" textColor="#ffffff" sizeClass="h-10 w-10 text-sm" [ring]="true" [premium]="esPremium()" />
           </div>
         </header>
 
@@ -285,6 +285,10 @@ export class LayoutComponent implements OnInit {
 
   role() {
     return this.profile()?.rol ?? '';
+  }
+
+  esPremium(): boolean {
+    return this.role() === 'docente' && !!(this.profile() as any)?.premium_activo;
   }
 
   nombreCompleto() {

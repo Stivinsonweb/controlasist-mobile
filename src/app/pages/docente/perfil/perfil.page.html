@@ -11,8 +11,8 @@
   <div *ngIf="!loading" class="space-y-6">
     <div class="card flex items-center gap-4 p-6">
       <div class="relative shrink-0">
-        <app-avatar [fotoUrl]="fotoUrl" [iniciales]="iniciales" colorFondo="var(--accent-from)" shape="square" sizeClass="h-16 w-16 text-xl" [ring]="true" />
-        <span *ngIf="verificado()" class="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-dark-soft">
+        <app-avatar [fotoUrl]="fotoUrl" [iniciales]="iniciales" colorFondo="var(--accent-from)" shape="square" sizeClass="h-16 w-16 text-xl" [ring]="true" [premium]="premiumActivo" />
+        <span *ngIf="verificado()" class="absolute -right-1.5 -top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-dark-soft">
           <app-verificado-badge [mostrar]="true" sizeClass="h-5 w-5" />
         </span>
       </div>

@@ -30,7 +30,7 @@
       </div>
 
       <div *ngIf="docenteEncontrado() as d" class="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5" style="background: var(--bg-surface-2);">
-        <app-avatar [fotoUrl]="d.foto_url" [iniciales]="d.nombres.charAt(0) + d.apellidos.charAt(0)" colorFondo="var(--accent-from)" sizeClass="h-9 w-9 text-sm" />
+        <app-avatar [fotoUrl]="d.foto_url" [iniciales]="d.nombres.charAt(0) + d.apellidos.charAt(0)" colorFondo="var(--accent-from)" sizeClass="h-9 w-9 text-sm" [premium]="!!d.premium_activo" />
         <div class="flex items-center gap-1.5">
           <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ d.nombres }} {{ d.apellidos }}</p>
           <app-verificado-badge [mostrar]="!!d.verificado" />

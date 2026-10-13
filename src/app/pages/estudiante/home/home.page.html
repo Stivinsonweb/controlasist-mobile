@@ -75,7 +75,7 @@
     </div>
 
     <div *ngIf="a.docente" class="mt-4 flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
-      <app-avatar [fotoUrl]="a.docente.foto_url" [iniciales]="(a.docente.nombres.charAt(0)) + (a.docente.apellidos.charAt(0))" colorFondo="var(--accent-from)" sizeClass="h-10 w-10 text-sm" />
+      <app-avatar [fotoUrl]="a.docente.foto_url" [iniciales]="(a.docente.nombres.charAt(0)) + (a.docente.apellidos.charAt(0))" colorFondo="var(--accent-from)" sizeClass="h-10 w-10 text-sm" [premium]="!!a.docente.premium_activo" />
       <div class="flex items-center gap-1.5">
         <p class="text-sm font-semibold text-slate-800">{{ a.docente.nombres }} {{ a.docente.apellidos }}</p>
         <app-verificado-badge [mostrar]="!!a.docente.verificado" />

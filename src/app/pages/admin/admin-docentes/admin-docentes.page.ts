@@ -5,6 +5,7 @@ import { AdminService, Docente } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { VerificadoBadgeComponent } from '../../../shared/components/verificado-badge/verificado-badge.component';
+import { PremiumSuscripcionService } from '../../../core/services/premium-suscripcion.service';
 import { VerificacionDocenteService, SolicitudVerificacion } from '../../../core/services/verificacion-docente.service';
 
 @Component({
@@ -45,7 +46,14 @@ export class AdminDocentesPage implements OnInit {
     return this.filtrados().slice(start, start + this.itemsPerPage);
   });
 
-  constructor(private adminService: AdminService, private toast: ToastService, private verificacionService: VerificacionDocenteService) {}
+  procesandoPremiumId = signal<string | null>(null);
+
+  constructor(
+    private adminService: AdminService,
+    private toast: ToastService,
+    private verificacionService: VerificacionDocenteService,
+    private premiumService: PremiumSuscripcionService
+  ) {}
 
   async ngOnInit() {
     await this.load();
@@ -111,6 +119,33 @@ export class AdminDocentesPage implements OnInit {
       this.toast.error(e.message || 'No se pudo rechazar la solicitud');
     } finally {
       this.procesandoVerificacionId.set(null);
+    }
+  }
+
+  /** Premium otorgado por el admin: sin vencimiento, hasta que lo quite. Reemplaza una prueba o pago vigente. */
+  async activarPremium(d: Docente) {
+    this.procesandoPremiumId.set(d.id);
+    try {
+      await this.premiumService.otorgarPremiumManual(d.id);
+      this.toast.success(`Premium activado para ${d.nombres}`);
+      await this.load();
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo activar Premium');
+    } finally {
+      this.procesandoPremiumId.set(null);
+    }
+  }
+
+  async quitarPremium(d: Docente) {
+    this.procesandoPremiumId.set(d.id);
+    try {
+      await this.premiumService.revocarPremiumManual(d.id);
+      this.toast.success(`Premium quitado a ${d.nombres}`);
+      await this.load();
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo quitar Premium');
+    } finally {
+      this.procesandoPremiumId.set(null);
     }
   }
 
