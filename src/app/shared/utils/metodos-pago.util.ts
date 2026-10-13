@@ -1,4 +1,4 @@
-export type MetodoPagoTipo = 'nequi' | 'daviplata' | 'bancolombia' | 'davivienda' | 'pse' | 'efectivo' | 'otro';
+export type MetodoPagoTipo = 'bre_b' | 'nequi' | 'daviplata' | 'bancolombia' | 'davivienda' | 'pse' | 'efectivo' | 'otro';
 
 export interface MetodoPagoCatalogoItem {
   tipo: MetodoPagoTipo;
@@ -9,6 +9,7 @@ export interface MetodoPagoCatalogoItem {
 }
 
 export const METODOS_PAGO_CATALOGO: MetodoPagoCatalogoItem[] = [
+  { tipo: 'bre_b', label: 'Llave Bre-B', placeholder: 'Tu llave (celular, correo o @alias)', color: '#0f766e' },
   { tipo: 'nequi', label: 'Nequi', placeholder: 'Número de celular', color: '#d6006e' },
   { tipo: 'daviplata', label: 'Daviplata', placeholder: 'Número de celular', color: '#e2001a' },
   { tipo: 'bancolombia', label: 'Bancolombia', placeholder: 'Número de cuenta', color: '#fdda24' },
@@ -22,6 +23,8 @@ export interface MetodoPagoConfig {
   tipo: MetodoPagoTipo;
   dato: string;
   activo: boolean;
+  /** Imagen del QR para pagar (bucket público qr-pagos), opcional. */
+  qr_url?: string | null;
 }
 
 export function catalogoMetodo(tipo: MetodoPagoTipo): MetodoPagoCatalogoItem {

@@ -378,45 +378,85 @@
   </ng-template>
 
     <ng-template #formularioPagoTpl>
-      <div class="space-y-3 rounded-xl border p-4 text-left" style="border-color: var(--border-subtle-2);">
-        <h3 class="text-sm font-bold" style="color: var(--text-primary);">Sube tu comprobante de pago</h3>
+    <div class="space-y-4 rounded-xl border p-4 text-left" style="border-color: var(--border-subtle-2);">
 
-        <div *ngIf="metodosPago().length > 0" class="space-y-1.5">
-          <p class="text-xs font-semibold" style="color: var(--text-secondary);">Datos para pagar</p>
-          <div *ngFor="let m of metodosPago()" class="flex items-center gap-2.5 rounded-lg px-3 py-2" style="background: var(--bg-surface-2);">
-            <app-metodo-pago-icon [tipo]="m.tipo" sizeClass="h-7 w-7" />
-            <p class="text-xs" style="color: var(--text-secondary);">{{ m.dato }}</p>
+      <!-- Paso 1: plan -->
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">1 · Elige tu plan</p>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <button type="button" (click)="seleccionarPeriodo('mensual')"
+                  class="rounded-xl border px-3 py-2.5 text-left transition-colors"
+                  [style.border-color]="formPago.periodo_declarado_por_docente === 'mensual' ? 'var(--accent-from)' : 'var(--border-subtle-2)'"
+                  [style.background]="formPago.periodo_declarado_por_docente === 'mensual' ? 'var(--bg-surface-2)' : 'transparent'">
+            <span class="block text-xs font-semibold" style="color: var(--text-secondary);">Mensual</span>
+            <span class="block text-base font-extrabold" style="color: var(--text-primary);">{{ precioMensual() ? (precioMensual() | currency:'COP':'symbol-narrow':'1.0-0') : '—' }}</span>
+          </button>
+          <button type="button" (click)="seleccionarPeriodo('anual')"
+                  class="rounded-xl border px-3 py-2.5 text-left transition-colors"
+                  [style.border-color]="formPago.periodo_declarado_por_docente === 'anual' ? 'var(--accent-from)' : 'var(--border-subtle-2)'"
+                  [style.background]="formPago.periodo_declarado_por_docente === 'anual' ? 'var(--bg-surface-2)' : 'transparent'">
+            <span class="block text-xs font-semibold" style="color: var(--text-secondary);">Anual</span>
+            <span class="block text-base font-extrabold" style="color: var(--text-primary);">{{ precioAnual() ? (precioAnual() | currency:'COP':'symbol-narrow':'1.0-0') : '—' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 2: pagar -->
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">2 · Paga con cualquiera de estos medios</p>
+
+        <div class="mt-2 flex items-center justify-between gap-2 rounded-xl px-3 py-2.5" style="background: var(--bg-surface-2);">
+          <div class="min-w-0">
+            <p class="text-[11px]" style="color: var(--text-muted);">Escribe esta referencia en la descripción del pago</p>
+            <p class="font-mono text-base font-extrabold tracking-wider" style="color: var(--text-primary);">{{ referencia }}</p>
+          </div>
+          <button type="button" (click)="copiar(referencia, 'Referencia')" class="btn-outline btn-sm shrink-0">Copiar</button>
+        </div>
+
+        <div *ngIf="metodosPago().length > 0" class="mt-2 space-y-1.5">
+          <div *ngFor="let m of metodosPago()" class="rounded-lg px-3 py-2" style="background: var(--bg-surface-2);">
+            <div class="flex items-center gap-2.5">
+              <app-metodo-pago-icon [tipo]="m.tipo" sizeClass="h-7 w-7" />
+              <div class="min-w-0 flex-1">
+                <p class="text-[11px] font-semibold" style="color: var(--text-muted);">{{ labelMetodo(m.tipo) }}</p>
+                <p class="break-all text-xs font-medium" style="color: var(--text-secondary);">{{ m.dato }}</p>
+              </div>
+              <button *ngIf="m.qr_url" type="button" (click)="qrAbierto.set(qrAbierto() === m.tipo ? null : m.tipo)" class="btn-outline btn-sm shrink-0">QR</button>
+              <button *ngIf="m.dato" type="button" (click)="copiar(m.dato, labelMetodo(m.tipo))" class="btn-outline btn-sm shrink-0">Copiar</button>
+            </div>
+            <img *ngIf="m.qr_url && qrAbierto() === m.tipo" [src]="m.qr_url" [alt]="'QR ' + labelMetodo(m.tipo)" class="mx-auto mt-2 w-48 max-w-full rounded-lg bg-white p-2" />
           </div>
         </div>
-        <p *ngIf="infoPago()" class="text-xs italic" style="color: var(--text-muted);">{{ infoPago() }}</p>
+        <p *ngIf="infoPago()" class="mt-2 text-xs italic" style="color: var(--text-muted);">{{ infoPago() }}</p>
+      </div>
 
-        <div>
-          <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Monto pagado</label>
-          <input type="text" inputmode="numeric" [(ngModel)]="formPago.monto" class="input-field text-sm" placeholder="50.000" />
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Fecha del pago</label>
-          <input type="date" [(ngModel)]="formPago.fecha_pago_declarada" class="input-field text-sm" />
-        </div>
-        <div>
-          <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">¿Qué periodo pagaste?</label>
-          <select [(ngModel)]="formPago.periodo_declarado_por_docente" class="input-field text-sm">
-            <option value="mensual">Mensual</option>
-            <option value="anual">Anual</option>
-          </select>
+      <!-- Paso 3: comprobante -->
+      <div class="space-y-3">
+        <p class="text-xs font-bold uppercase tracking-wide" style="color: var(--text-muted);">3 · Sube tu comprobante</p>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Monto pagado</label>
+            <input type="text" inputmode="numeric" [(ngModel)]="formPago.monto" class="input-field text-sm" placeholder="50.000" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Fecha del pago</label>
+            <input type="date" [(ngModel)]="formPago.fecha_pago_declarada" class="input-field text-sm" />
+          </div>
         </div>
         <div>
           <label class="mb-1 block text-xs font-medium" style="color: var(--text-secondary);">Comprobante (imagen o PDF)</label>
           <input type="file" accept="image/*,.pdf" (change)="onArchivoComprobante($event)" class="input-field text-sm" />
         </div>
-        <div class="flex gap-2 pt-1">
-          <button type="button" (click)="cerrarFormularioPago()" class="btn-outline btn-sm flex-1">Cancelar</button>
-          <button type="button" (click)="enviarComprobante()" [disabled]="subiendoComprobante()" class="btn-primary btn-sm flex-1">
-            {{ subiendoComprobante() ? 'Enviando...' : 'Enviar' }}
-          </button>
-        </div>
       </div>
-    </ng-template>
+
+      <div class="flex gap-2 pt-1">
+        <button type="button" (click)="cerrarFormularioPago()" class="btn-outline btn-sm flex-1">Cancelar</button>
+        <button type="button" (click)="enviarComprobante()" [disabled]="subiendoComprobante()" class="btn-primary btn-sm flex-1">
+          {{ subiendoComprobante() ? 'Enviando...' : 'Enviar comprobante' }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
 
   <!-- Vista previa en vivo — compartida por la plantilla gratis y la Premium -->
   <ng-template #vistaPreviaTpl let-p let-t="t" let-f="f">

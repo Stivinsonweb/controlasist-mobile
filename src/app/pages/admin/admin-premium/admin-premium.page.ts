@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, Docente } from '../../../core/services/admin.service';
 import { ConfiguracionAppService, ConfiguracionApp } from '../../../core/services/configuracion-app.service';
-import { PremiumSuscripcionService, SolicitudPremium, PagoPremium, PeriodoPremium } from '../../../core/services/premium-suscripcion.service';
+import { referenciaPagoDocente, PremiumSuscripcionService, SolicitudPremium, PagoPremium, PeriodoPremium } from '../../../core/services/premium-suscripcion.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { parsearPesosCOP, formatearPesosCOP } from '../../../shared/utils/moneda-cop.util';
 import { MetodoPagoConfig, MetodoPagoTipo, METODOS_PAGO_CATALOGO, normalizarMetodosPago, catalogoMetodo } from '../../../shared/utils/metodos-pago.util';
@@ -65,6 +65,7 @@ export class AdminPremiumPage implements OnInit {
   periodoConfirmado: Record<string, PeriodoPremium> = {};
   precioPersonalizadoEdit: Record<string, string> = {};
   guardandoPrecioGlobal = signal(false);
+  subiendoQr = signal<MetodoPagoTipo | null>(null);
 
   metodosPago = signal<MetodoPagoConfig[]>(normalizarMetodosPago(null));
   catalogoMetodosPago = METODOS_PAGO_CATALOGO;
@@ -216,6 +217,32 @@ export class AdminPremiumPage implements OnInit {
 
   onDatoMetodoPagoChange(tipo: MetodoPagoTipo, dato: string) {
     this.metodosPago.update((lista) => lista.map((m) => (m.tipo === tipo ? { ...m, dato } : m)));
+  }
+
+  referencia(docenteId: string): string {
+    return referenciaPagoDocente(docenteId);
+  }
+
+  /** Sube el QR al bucket público; queda guardado en la config al pulsar "Guardar precio y métodos de pago". */
+  async onQrMetodoPago(tipo: MetodoPagoTipo, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0];
+    input.value = '';
+    if (!archivo) return;
+    this.subiendoQr.set(tipo);
+    try {
+      const url = await this.premiumService.subirQrMetodoPago(tipo, archivo);
+      this.metodosPago.update((lista) => lista.map((m) => (m.tipo === tipo ? { ...m, qr_url: url } : m)));
+      this.toast.success('QR cargado — guarda para publicarlo');
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo subir el QR');
+    } finally {
+      this.subiendoQr.set(null);
+    }
+  }
+
+  quitarQrMetodoPago(tipo: MetodoPagoTipo) {
+    this.metodosPago.update((lista) => lista.map((m) => (m.tipo === tipo ? { ...m, qr_url: null } : m)));
   }
 
   async guardarPrecioPersonalizado(d: Docente) {

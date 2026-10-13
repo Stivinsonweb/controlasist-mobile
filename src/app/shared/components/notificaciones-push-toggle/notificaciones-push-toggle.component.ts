@@ -22,7 +22,7 @@ import { ToastService } from '../../../core/services/toast.service';
         <div>
           <h3 class="text-base font-bold" style="color: var(--text-primary);">Recordatorios de clase</h3>
           <p class="mt-1 text-sm" style="color: var(--text-muted);">
-            Recibe una notificación en tu navegador antes de que empiece cada clase, incluso con la app cerrada.
+            {{ rol === 'administrador' ? 'Recibe un aviso al instante cuando un docente sube un comprobante de pago, incluso con la app cerrada.' : 'Recibe una notificación en tu navegador antes de que empiece cada clase, incluso con la app cerrada.' }}
           </p>
         </div>
         <button
@@ -43,7 +43,7 @@ import { ToastService } from '../../../core/services/toast.service';
 })
 export class NotificacionesPushToggleComponent implements OnInit {
   @Input({ required: true }) usuarioId!: string;
-  @Input({ required: true }) rol!: 'docente' | 'estudiante';
+  @Input({ required: true }) rol!: 'docente' | 'estudiante' | 'administrador';
 
   soportado = signal(false);
   suscrito = signal(false);

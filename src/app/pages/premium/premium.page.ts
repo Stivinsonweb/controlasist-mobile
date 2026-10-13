@@ -6,11 +6,11 @@ import { SupabaseService } from '../../core/services/supabase.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminService, Docente } from '../../core/services/admin.service';
 import { ConfiguracionAppService } from '../../core/services/configuracion-app.service';
-import { PremiumSuscripcionService, PagoPremium, SolicitudPremium, PeriodoPremium } from '../../core/services/premium-suscripcion.service';
+import { PremiumSuscripcionService, PagoPremium, SolicitudPremium, PeriodoPremium, referenciaPagoDocente } from '../../core/services/premium-suscripcion.service';
 import { NotificacionesService, Notificacion } from '../../core/services/notificaciones.service';
 import { ToastService } from '../../core/services/toast.service';
-import { parsearPesosCOP } from '../../shared/utils/moneda-cop.util';
-import { MetodoPagoConfig, normalizarMetodosPago } from '../../shared/utils/metodos-pago.util';
+import { formatearPesosCOP, parsearPesosCOP } from '../../shared/utils/moneda-cop.util';
+import { MetodoPagoConfig, MetodoPagoTipo, catalogoMetodo, normalizarMetodosPago } from '../../shared/utils/metodos-pago.util';
 import { MetodoPagoIconComponent } from '../../shared/components/metodo-pago-icon/metodo-pago-icon.component';
 import {
   LogoPosicion,
@@ -53,6 +53,7 @@ const TIPOS_NOTIFICACION_PREMIUM = [
   'premium_pago_aprobado',
   'premium_pago_rechazado',
   'premium_por_vencer',
+  'premium_vencido',
 ];
 
 type VistaPlantilla = 'gratis' | 'premium';
@@ -85,6 +86,7 @@ export class PremiumPage implements OnInit, OnDestroy {
   formPago = { monto: '', fecha_pago_declarada: '', periodo_declarado_por_docente: 'mensual' as PeriodoPremium };
   metodosPago = signal<MetodoPagoConfig[]>([]);
   archivoComprobante: File | null = null;
+  qrAbierto = signal<MetodoPagoTipo | null>(null);
 
   // ---------- Slider Plantilla gratis / Plantilla Premium ----------
   vista = signal<VistaPlantilla>('gratis');
@@ -225,14 +227,41 @@ export class PremiumPage implements OnInit, OnDestroy {
     }
   }
 
+  get referencia(): string {
+    return this.docenteId ? referenciaPagoDocente(this.docenteId) : '';
+  }
+
+  labelMetodo(tipo: MetodoPagoTipo): string {
+    return catalogoMetodo(tipo).label;
+  }
+
   abrirFormularioPago() {
+    this.formPago.fecha_pago_declarada = new Date().toISOString().split('T')[0];
+    this.seleccionarPeriodo(this.formPago.periodo_declarado_por_docente);
     this.mostrarFormularioPago.set(true);
+  }
+
+  /** Elegir el plan llena el monto exacto a pagar (el docente aún puede corregirlo). */
+  seleccionarPeriodo(periodo: PeriodoPremium) {
+    this.formPago.periodo_declarado_por_docente = periodo;
+    const precio = periodo === 'anual' ? this.precioAnual() : this.precioMensual();
+    if (precio) this.formPago.monto = formatearPesosCOP(precio);
+  }
+
+  async copiar(texto: string, que: string) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      this.toast.success(`${que} copiado`);
+    } catch {
+      this.toast.warning('No se pudo copiar, cópialo manualmente');
+    }
   }
 
   cerrarFormularioPago() {
     this.mostrarFormularioPago.set(false);
     this.formPago = { monto: '', fecha_pago_declarada: '', periodo_declarado_por_docente: 'mensual' };
     this.archivoComprobante = null;
+    this.qrAbierto.set(null);
   }
 
   onArchivoComprobante(event: Event) {

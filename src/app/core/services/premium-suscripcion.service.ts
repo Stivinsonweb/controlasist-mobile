@@ -2,6 +2,15 @@ import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
 const BUCKET_COMPROBANTES = 'comprobantes-pago';
+const BUCKET_QR_PAGOS = 'qr-pagos';
+
+/**
+ * Referencia corta y estable por docente para la descripción del pago (ej. CA-4F21A9), así el admin
+ * identifica quién pagó. Misma fórmula que la función SQL referencia_pago_docente().
+ */
+export function referenciaPagoDocente(docenteId: string): string {
+  return 'CA-' + docenteId.replace(/-/g, '').slice(0, 6).toUpperCase();
+}
 
 export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada';
 export type EstadoPago = 'pendiente' | 'aprobado' | 'rechazado';
@@ -104,6 +113,17 @@ export class PremiumSuscripcionService {
       return null;
     }
     return data?.signedUrl || null;
+  }
+
+  // ---------- Admin: QR de métodos de pago ----------
+
+  /** Sube el QR de un método de pago al bucket público y devuelve su URL. */
+  async subirQrMetodoPago(tipo: string, archivo: File): Promise<string> {
+    const ext = archivo.name.split('.').pop() || 'png';
+    const ruta = `${tipo}-${Date.now()}.${ext}`;
+    const { error } = await this.supabase.storage.from(BUCKET_QR_PAGOS).upload(ruta, archivo, { cacheControl: '3600', upsert: false });
+    if (error) throw error;
+    return this.supabase.storage.from(BUCKET_QR_PAGOS).getPublicUrl(ruta).data.publicUrl;
   }
 
   // ---------- Admin: colas ----------

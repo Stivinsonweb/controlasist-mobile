@@ -5,6 +5,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { NotificacionesPushToggleComponent } from '../../../shared/components/notificaciones-push-toggle/notificaciones-push-toggle.component';
 
 function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -15,7 +16,7 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'app-admin-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NotificacionesPushToggleComponent],
   templateUrl: './admin-perfil.page.html',
 })
 export class AdminPerfilPage implements OnInit {
@@ -27,7 +28,7 @@ export class AdminPerfilPage implements OnInit {
   showPassword = false;
   email = '';
   private adminId = '';
-  private authUserId = '';
+  authUserId = '';
 
   constructor(
     private fb: FormBuilder,

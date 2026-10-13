@@ -46,7 +46,7 @@ export class PushNotificationsService {
   }
 
   /** Pide permiso al navegador (si hace falta) y guarda la suscripción en Supabase. */
-  async activar(usuarioId: string, rol: 'docente' | 'estudiante'): Promise<void> {
+  async activar(usuarioId: string, rol: 'docente' | 'estudiante' | 'administrador'): Promise<void> {
     if (!this.soportado) throw new Error('Este navegador no soporta notificaciones push, o la app no está instalada/en producción');
 
     if (this.iosSinInstalar()) {

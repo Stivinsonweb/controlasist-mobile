@@ -23,6 +23,14 @@ const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
 
 const LOTE = 200;
 
+/** A qué página lleva cada notificación al tocarla. */
+function urlParaTipo(tipo: string | null): string {
+  if (!tipo) return '/';
+  if (tipo.startsWith('admin_')) return '/admin/premium';
+  if (tipo.startsWith('premium_')) return '/premium';
+  return '/';
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -45,7 +53,7 @@ serve(async (req) => {
 
     const { data: pendientes, error: pendientesError } = await supabase
       .from('notificaciones')
-      .select('id, usuario_id, titulo, cuerpo')
+      .select('id, usuario_id, tipo, titulo, cuerpo')
       .eq('enviado_push', false)
       .order('created_at', { ascending: true })
       .limit(LOTE);
@@ -78,7 +86,7 @@ serve(async (req) => {
           title: n.titulo,
           body: n.cuerpo,
           icon: '/icons/icon-192.png',
-          data: { onActionClick: { default: { operation: 'openWindow', url: '/' } } },
+          data: { onActionClick: { default: { operation: 'navigateLastFocusedOrOpen', url: urlParaTipo(n.tipo) } } },
         },
       });
 
