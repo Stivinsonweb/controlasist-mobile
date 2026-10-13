@@ -25,13 +25,27 @@ export interface Asignatura {
 
 const CODIGO_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-function generarCodigoAleatorio(): string {
-  let codigo = '';
-  for (let i = 0; i < 8; i++) {
-    codigo += CODIGO_CHARS.charAt(Math.floor(Math.random() * CODIGO_CHARS.length));
-    if (i === 3) codigo += '-';
+/** Mayúsculas, sin tildes ni caracteres que no sean letras o números ("Diseño 3D" → "DISENO3D"). */
+function limpiarParaCodigo(texto: string | null | undefined): string {
+  return (texto || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+}
+
+/**
+ * Formato NOMBRE-CODIGO-XXXX: 4 primeras letras del nombre + código de la asignatura + 4 caracteres
+ * aleatorios (el sufijo evita choques entre grupos de la misma materia). Debe coincidir con el
+ * trigger generar_codigo_acceso_trigger (migración 20261013_codigo_acceso_con_nombre.sql).
+ */
+function generarCodigoAcceso(nombre: string, codigoAsignatura: string): string {
+  let sufijo = '';
+  for (let i = 0; i < 4; i++) {
+    sufijo += CODIGO_CHARS.charAt(Math.floor(Math.random() * CODIGO_CHARS.length));
   }
-  return codigo;
+  const partes = [limpiarParaCodigo(nombre).slice(0, 4), limpiarParaCodigo(codigoAsignatura).slice(0, 20), sufijo];
+  return partes.filter(Boolean).join('-');
 }
 
 export interface Horario {
@@ -151,8 +165,15 @@ export class AsignaturasService {
 
   /** Genera un código nuevo con reintentos ante colisión (la app original no verificaba unicidad). */
   async regenerarCodigoAcceso(id: string) {
+    const { data: asignatura, error: asignaturaError } = await this.supabase
+      .from('asignaturas')
+      .select('nombre, codigo')
+      .eq('id', id)
+      .single();
+    if (asignaturaError) throw asignaturaError;
+
     for (let intento = 0; intento < 5; intento++) {
-      const nuevoCodigo = generarCodigoAleatorio();
+      const nuevoCodigo = generarCodigoAcceso(asignatura.nombre, asignatura.codigo);
       const { data: existente, error: existenteError } = await this.supabase
         .from('asignaturas')
         .select('id')

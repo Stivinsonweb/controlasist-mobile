@@ -124,7 +124,7 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
     descripcion: 'Ingresa el código que te compartió tu docente para unirte a su asignatura.',
     pasos: [
       'Entra a "Inscribirme" desde tu inicio.',
-      'Escribe el código de acceso que te compartió tu docente (formato tipo XXXX-XXXX) y presiona "Buscar".',
+      'Escribe el código de acceso que te compartió tu docente (empieza con el nombre y el código de la asignatura, ej. INGE-2720507-6PVL) y presiona "Buscar".',
       'Verifica que la asignatura encontrada sea la correcta (nombre, grupo y periodo) — verás la foto del docente y, si tiene la cuenta verificada, una insignia azul junto a su nombre.',
       'Presiona "Inscribirme" para confirmar — quedará agregada a tu lista de asignaturas.',
     ],
