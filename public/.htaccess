@@ -22,3 +22,11 @@
   AddType application/javascript .js
   AddType application/json .json
 </IfModule>
+
+# Archivos que deciden qué versión de la app se carga: sin caché, para que las actualizaciones
+# lleguen de inmediato. El resto de .js/.css llevan hash en el nombre y sí se pueden cachear.
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|ngsw-worker\.js|ngsw\.json|safety-worker\.js|worker-basic\.min\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>

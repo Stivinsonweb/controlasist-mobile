@@ -15,6 +15,10 @@ echo "==> Generando build de producción..."
 cd "$PROJECT_DIR"
 npx ng build
 
+echo "==> Anteponiendo limpieza de caché al service worker..."
+cat "$PROJECT_DIR/scripts/ngsw-reset-prelude.js" "$BUILD_OUT/ngsw-worker.js" > "$BUILD_OUT/ngsw-worker.tmp.js"
+mv "$BUILD_OUT/ngsw-worker.tmp.js" "$BUILD_OUT/ngsw-worker.js"
+
 if [ ! -f "$BUILD_OUT/.htaccess" ]; then
   echo "ERROR: no se encontró .htaccess en $BUILD_OUT — revisa que public/.htaccess exista." >&2
   exit 1
