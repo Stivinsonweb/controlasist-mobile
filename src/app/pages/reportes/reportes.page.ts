@@ -11,10 +11,10 @@ import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminService } from '../../core/services/admin.service';
 import { LogoService } from '../../core/services/logo.service';
-import { addPdfHeader, addPdfFooter, addPdfSectionTitle, brandTableOptions } from '../../shared/utils/pdf-report.util';
-import { XLSX, styleHeaderRow, autofitColumns, formatPercentColumn, applyZebraStripes } from '../../shared/utils/excel-report.util';
-import { LOGO_TAMANO_MM, TAMANO_FUENTE_PT, PlantillaReporte, LABELS_INSTITUCION, defaultPlantillaReporte, normalizarPlantilla, seccionActiva, hexToRgb } from '../../core/services/plantilla-reporte.model';
-import { getAccentPalette } from '../../shared/utils/subject-theme.util';
+import { addPdfHeader, addPdfFooter, brandTableOptions } from '../../shared/utils/pdf-report.util';
+import { dibujarEncabezadoPlantilla, opcionesTablaPlantilla, dibujarTituloSeccionPlantilla, dibujarInfoGeneralPlantilla, dibujarFirmasPlantilla } from '../../shared/utils/plantilla-pdf.util';
+import { XLSX, styleHeaderRow, autofitColumns, formatPercentColumn, applyZebraStripes, EXCEL_HEADER_STYLE_NEGRO } from '../../shared/utils/excel-report.util';
+import { LOGO_TAMANO_MM, TAMANO_FUENTE_PT, PlantillaReporte, LABELS_INSTITUCION, ESTILOS_DISENO, defaultPlantillaReporte, normalizarPlantilla, plantillaEfectiva, seccionActiva } from '../../core/services/plantilla-reporte.model';
 import { ESTADOS_ASISTENCIA } from '../../core/services/asistencias.service';
 import { BarraEstadosComponent, SegmentoBarra } from '../../shared/components/charts/barra-estados.component';
 import { RankingBarrasComponent, BarraRanking } from '../../shared/components/charts/ranking-barras.component';
@@ -217,9 +217,8 @@ export class ReportesPage implements OnInit {
     this.formatoVersion.set(perfil.formato_reporte_version || '');
     this.formatoTitulo.set(perfil.formato_reporte_titulo || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
     this.formatoSegundaFirma.set(perfil.formato_reporte_segunda_firma || '');
-    // TEMPORAL: se aplica en cuanto exista una plantilla guardada, sin chequear premium_activo
-    // — ver PARTE 2 del contexto. Cuando Wompi esté conectado, añadir aquí `&& perfil.premium_activo`.
-    this.plantillaReporte.set(normalizarPlantilla(perfil.plantilla_reporte));
+    // Sin Premium solo aplican las dos plantillas gratis, sin configuración propia.
+    this.plantillaReporte.set(plantillaEfectiva(normalizarPlantilla(perfil.plantilla_reporte), !!perfil.premium_activo));
   }
 
   toggleFormatoConfig() {
@@ -326,74 +325,40 @@ export class ReportesPage implements OnInit {
         necesitaListado ? this.asignaturasService.listarEstudiantesInscritos(this.asignaturaId) : Promise.resolve([]),
       ]);
 
-      const colorHex = plantilla.color_tabla_modo === 'personalizado' ? plantilla.color_tabla_hex : getAccentPalette(perfil.tema_acento).from;
-      const colorTabla = hexToRgb(colorHex);
+      const estilo = ESTILOS_DISENO[plantilla.diseno] ?? ESTILOS_DISENO.institucional;
       const fontSize = TAMANO_FUENTE_PT[plantilla.tamano_fuente];
 
       const titulo = this.formatoTitulo() || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE';
-      const codigo = this.formatoCodigo();
-      const version = this.formatoVersion();
       const labels = LABELS_INSTITUCION[plantilla.tipo_institucion];
+      const segundaFirma = this.formatoSegundaFirma() || labels.segundaFirmaSugerida;
 
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
 
-      // ===== Encabezado: logo en la posición/tamaño de la plantilla (Premium, Parte 1) =====
-      const logoSize = LOGO_TAMANO_MM[plantilla.logo_tamano] ?? LOGO_TAMANO_MM.mediano;
-      let logoX = 14;
-      if (plantilla.logo_posicion === 'centro') logoX = pageWidth / 2 - logoSize / 2;
-      if (plantilla.logo_posicion === 'derecha') logoX = pageWidth - 14 - logoSize;
-
-      let cursorY = 14;
-      if (logoDataUrl) {
-        try {
-          doc.addImage(logoDataUrl, 'PNG', logoX, 8, logoSize, logoSize);
-          if (plantilla.logo_posicion === 'centro') cursorY = 8 + logoSize + 6;
-        } catch (e) {
-          console.error('No se pudo incrustar el logo en el PDF:', e);
-        }
-      }
-
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(20);
-      doc.text(titulo, pageWidth / 2, cursorY, { align: 'center', maxWidth: pageWidth - 90 });
-      cursorY += 5;
-
-      if (plantilla.subtitulo_formato) {
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(90);
-        doc.text(plantilla.subtitulo_formato, pageWidth / 2, cursorY, { align: 'center', maxWidth: pageWidth - 90 });
-        cursorY += 5;
-      }
-
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(90);
-      doc.text(`Código: ${codigo || '—'}`, pageWidth - 14, 11, { align: 'right' });
-      doc.text(`Versión: ${version || '—'}`, pageWidth - 14, 16, { align: 'right' });
-
-      const lineY = Math.max(cursorY + 3, 8 + logoSize + 4);
-      doc.setDrawColor(210);
-      doc.line(14, lineY, pageWidth - 14, lineY);
+      // ===== Encabezado según el diseño de la plantilla =====
+      let y = dibujarEncabezadoPlantilla(doc, estilo, {
+        titulo,
+        subtitulo: plantilla.subtitulo_formato,
+        codigo: this.formatoCodigo(),
+        version: this.formatoVersion(),
+        logoDataUrl,
+        logoSize: LOGO_TAMANO_MM[plantilla.logo_tamano] ?? LOGO_TAMANO_MM.mediano,
+        logoPosicion: plantilla.logo_posicion,
+      });
+      const finTabla = (extra: number) => ((doc as any).lastAutoTable?.finalY ?? y + 40) + extra;
 
       // ===== Secciones, en el orden y con la activación configurados en la plantilla =====
-      let y = lineY + 7;
       for (const seccionId of plantilla.orden_secciones) {
         if (!seccionActiva(plantilla, seccionId)) continue;
 
         if (seccionId === 'info_general') {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(40);
-          doc.text(`${labels.docente}: ${perfil.nombres} ${perfil.apellidos}`, 14, y);
-          doc.text(`${labels.segundoCampo}: ${a.programa || perfil.programa || '—'}`, pageWidth / 2 + 5, y);
-          y += 6;
-          doc.text(`${labels.asignatura}: ${a.nombre} (${a.codigo})`, 14, y);
-          doc.text(`${labels.nivel}: ${a.nivel}    Periodo: ${a.periodo}`, pageWidth / 2 + 5, y);
-          y += 8;
+          y = dibujarInfoGeneralPlantilla(doc, estilo, autoTable, [
+            [labels.docente, `${perfil.nombres} ${perfil.apellidos}`],
+            [labels.segundoCampo, a.programa || perfil.programa || '—'],
+            [labels.asignatura, `${a.nombre} (${a.codigo})`],
+            [`${labels.nivel} / Periodo`, `${a.nivel} · ${a.periodo}`],
+          ], y);
         } else if (seccionId === 'tabla_asistencia' && plantilla.tipo_tabla_asistencia === 'historial_clases') {
           const cols = plantilla.columnas_historial;
           const head = ['No.', 'Fecha', 'Hora inicio', 'Hora final'];
@@ -402,7 +367,7 @@ export class ReportesPage implements OnInit {
           if (cols.firma) head.push(`Firma ${labels.docente.toLowerCase()}`);
 
           autoTable(doc, {
-            startY: y,
+            ...opcionesTablaPlantilla(estilo, fontSize, y),
             head: [head],
             body: clases.map((c, i) => {
               const fila: (string | number)[] = [i + 1, this.formatFecha(c.fecha), c.hora_inicio, c.hora_fin];
@@ -411,13 +376,9 @@ export class ReportesPage implements OnInit {
               if (cols.firma) fila.push('');
               return fila;
             }),
-            styles: { fontSize, cellPadding: 3, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
-            headStyles: { fillColor: colorTabla, textColor: 255, fontStyle: 'bold', fontSize: fontSize + 0.5 },
-            alternateRowStyles: { fillColor: [243, 244, 246] },
-            columnStyles: { 0: { cellWidth: 10 } },
-            margin: { top: y, bottom: 22 },
+            columnStyles: { 0: { cellWidth: 10, halign: 'center' } },
           });
-          y = ((doc as any).lastAutoTable?.finalY ?? y + 40) + 10;
+          y = finTabla(10);
         } else if (seccionId === 'tabla_asistencia' && plantilla.tipo_tabla_asistencia === 'matriz_estudiantes' && matriz) {
           const cols = plantilla.columnas_matriz;
           const head = ['No.', 'Nombre'];
@@ -425,8 +386,10 @@ export class ReportesPage implements OnInit {
           for (const c of matriz.clases) head.push(this.formatFecha(c.fecha));
           if (cols.porcentaje) head.push('%');
 
+          const opciones = opcionesTablaPlantilla(estilo, fontSize, y);
           autoTable(doc, {
-            startY: y,
+            ...opciones,
+            styles: { ...opciones.styles, cellPadding: 2.2, halign: 'center' },
             head: [head],
             body: matriz.filas.map((f, i) => {
               const fila: (string | number)[] = [i + 1, `${f.nombres} ${f.apellidos}`];
@@ -435,17 +398,13 @@ export class ReportesPage implements OnInit {
               if (cols.porcentaje) fila.push(`${f.porcentajeAsistencia}%`);
               return fila;
             }),
-            styles: { fontSize, cellPadding: 2.5, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1, halign: 'center' },
-            headStyles: { fillColor: colorTabla, textColor: 255, fontStyle: 'bold', fontSize: fontSize + 0.5 },
-            alternateRowStyles: { fillColor: [243, 244, 246] },
             columnStyles: { 0: { cellWidth: 10 }, 1: { halign: 'left', cellWidth: 40 } },
-            margin: { top: y, bottom: 22 },
           });
-          y = ((doc as any).lastAutoTable?.finalY ?? y + 40) + 4;
+          y = finTabla(4);
           if (plantilla.mostrar_leyenda) {
             doc.setFontSize(7.5);
-            doc.setFont('helvetica', 'italic');
-            doc.setTextColor(100);
+            doc.setFont(estilo.fuente, 'italic');
+            doc.setTextColor(80);
             doc.text('P = Presente   T = Tarde   J = Justificado   A = Ausente', 14, y);
             y += 8;
           } else {
@@ -453,9 +412,9 @@ export class ReportesPage implements OnInit {
           }
         } else if (seccionId === 'listado_estudiantes') {
           if (y > pageHeight - 40) { doc.addPage(); y = 20; }
-          y = addPdfSectionTitle(doc, 'Listado de estudiantes matriculados', y);
+          y = dibujarTituloSeccionPlantilla(doc, estilo, 'Listado de estudiantes matriculados', y);
           autoTable(doc, {
-            startY: y,
+            ...opcionesTablaPlantilla(estilo, fontSize, y),
             head: [['No.', 'Nombre', 'Cédula', 'Programa']],
             body: estudiantesInscritos.map((e: any, i: number) => [
               i + 1,
@@ -463,44 +422,41 @@ export class ReportesPage implements OnInit {
               e.estudiantes?.cedula || '—',
               e.estudiantes?.programa || a.programa || '—',
             ]),
-            styles: { fontSize, cellPadding: 2.5, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.1 },
-            headStyles: { fillColor: colorTabla, textColor: 255, fontStyle: 'bold', fontSize: fontSize + 0.5 },
-            alternateRowStyles: { fillColor: [243, 244, 246] },
-            columnStyles: { 0: { cellWidth: 10 } },
-            margin: { top: y, bottom: 22 },
+            columnStyles: { 0: { cellWidth: 10, halign: 'center' } },
           });
-          y = ((doc as any).lastAutoTable?.finalY ?? y + 40) + 10;
+          y = finTabla(10);
         } else if (seccionId === 'estadisticas_resumen') {
           if (y > pageHeight - 40) { doc.addPage(); y = 20; }
-          y = addPdfSectionTitle(doc, 'Estadísticas resumen del periodo', y);
+          y = dibujarTituloSeccionPlantilla(doc, estilo, 'Estadísticas resumen del periodo', y);
           const g = this.resumenGeneral();
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(60);
-          const linea = g
-            ? `Clases dictadas: ${g.totalClases}    Presentes: ${g.presente}    Tarde: ${g.tarde}    Justificados: ${g.justificado}    Ausentes: ${g.ausente}`
-            : 'Sin datos disponibles para este periodo.';
-          doc.text(linea, 14, y, { maxWidth: pageWidth - 28 });
-          y += 10;
+          if (g) {
+            autoTable(doc, {
+              ...opcionesTablaPlantilla(estilo, fontSize, y),
+              head: [['Clases dictadas', 'Presentes', 'Tarde', 'Justificados', 'Ausentes']],
+              body: [[g.totalClases, g.presente, g.tarde, g.justificado, g.ausente]],
+              styles: { ...opcionesTablaPlantilla(estilo, fontSize, y).styles, halign: 'center' },
+            });
+            y = finTabla(10);
+          } else {
+            doc.setFontSize(9);
+            doc.setFont(estilo.fuente, 'normal');
+            doc.setTextColor(60);
+            doc.text('Sin datos disponibles para este periodo.', 14, y);
+            y += 10;
+          }
         } else if (seccionId === 'observaciones') {
           if (y > pageHeight - 40) { doc.addPage(); y = 20; }
-          y = addPdfSectionTitle(doc, 'Observaciones generales', y);
+          y = dibujarTituloSeccionPlantilla(doc, estilo, 'Observaciones generales', y);
           doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(60);
+          doc.setFont(estilo.fuente, 'normal');
+          doc.setTextColor(40);
           const lineas = doc.splitTextToSize(plantilla.observaciones_texto || 'Sin observaciones registradas.', pageWidth - 28);
           doc.text(lineas, 14, y);
           y += lineas.length * 4.5 + 6;
         } else if (seccionId === 'firmas') {
-          if (y > pageHeight - 30) { doc.addPage(); y = 30; }
-          doc.setDrawColor(120);
-          doc.line(20, y, 90, y);
-          doc.line(pageWidth - 90, y, pageWidth - 20, y);
-          doc.setFontSize(9);
-          doc.setTextColor(60);
-          doc.text(`Firma ${labels.docente.toLowerCase()}`, 55, y + 5, { align: 'center' });
-          doc.text(this.formatoSegundaFirma() || labels.segundaFirmaSugerida, pageWidth - 55, y + 5, { align: 'center' });
-          y += 15;
+          y += 14;
+          if (y > pageHeight - 34) { doc.addPage(); y = 34; }
+          y = dibujarFirmasPlantilla(doc, estilo, `Firma ${labels.docente.toLowerCase()}`, `${perfil.nombres} ${perfil.apellidos}`, segundaFirma, y);
         }
       }
 
@@ -614,7 +570,7 @@ export class ReportesPage implements OnInit {
       : clases.length;
     const bodyEnd = bodyStart + totalFilasBody - 1;
     if (ws['A1']) ws['A1'].s = { font: { bold: true, sz: 12 } };
-    styleHeaderRow(ws, HEADER_ROW, numColumnas);
+    styleHeaderRow(ws, HEADER_ROW, numColumnas, EXCEL_HEADER_STYLE_NEGRO);
     applyZebraStripes(ws, bodyStart, bodyEnd, numColumnas);
 
     const wb = XLSX.utils.book_new();
@@ -633,7 +589,7 @@ export class ReportesPage implements OnInit {
       ];
       const wsEstudiantes = XLSX.utils.aoa_to_sheet(filasEstudiantes);
       wsEstudiantes['!cols'] = [{ wch: 6 }, { wch: 30 }, { wch: 16 }, { wch: 26 }];
-      styleHeaderRow(wsEstudiantes, 0, 4);
+      styleHeaderRow(wsEstudiantes, 0, 4, EXCEL_HEADER_STYLE_NEGRO);
       applyZebraStripes(wsEstudiantes, 1, filasEstudiantes.length - 1, 4);
       XLSX.utils.book_append_sheet(wb, wsEstudiantes, 'Listado de estudiantes');
     }

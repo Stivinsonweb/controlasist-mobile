@@ -51,6 +51,7 @@ export interface UserProfile {
   formato_reporte_segunda_firma?: string;
   /** Config del editor de plantillas Premium (Parte 1) — null si el docente nunca lo ha usado. */
   plantilla_reporte?: PlantillaReporte | null;
+  premium_activo?: boolean;
   /** Verificación de cuenta — solo se modifica vía funciones SECURITY DEFINER. */
   verificado?: boolean;
   verificado_en?: string | null;

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -20,9 +20,14 @@ import {
   SeccionReporteId,
   TipoTablaAsistencia,
   TamanoFuenteTabla,
-  ColorTablaModo,
   TipoInstitucion,
   LABELS_INSTITUCION,
+  ESTILOS_DISENO,
+  EstiloDiseno,
+  PLANTILLAS_CATALOGO,
+  PlantillaCatalogo,
+  aplicarPlantillaCatalogo,
+  plantillaDelCatalogo,
   defaultPlantillaReporte,
   normalizarPlantilla,
   seccionActiva,
@@ -65,7 +70,7 @@ type VistaPlantilla = 'gratis' | 'premium';
   imports: [CommonModule, FormsModule, DragDropModule, MetodoPagoIconComponent],
   templateUrl: './premium.page.html',
 })
-export class PremiumPage implements OnInit, OnDestroy {
+export class PremiumPage implements OnInit {
   loading = signal(true);
   private docenteId = '';
   private userId = '';
@@ -90,14 +95,36 @@ export class PremiumPage implements OnInit, OnDestroy {
 
   // ---------- Slider Plantilla gratis / Plantilla Premium ----------
   vista = signal<VistaPlantilla>('gratis');
-  plantillaGratis = defaultPlantillaReporte();
-  tituloGratis = TITULO_FORMATO_DEFAULT;
+  plantillasGratis = PLANTILLAS_CATALOGO.filter((c) => c.nivel === 'gratis');
+  catalogo = PLANTILLAS_CATALOGO;
+  /** Config de cada plantilla del catálogo para pintar su miniatura (se calcula una sola vez). */
+  miniaturas: Record<string, PlantillaReporte> = {};
+  seleccionGratis = signal<string>(this.plantillasGratis[0].id);
 
   // ---------- Editor de plantilla (Parte 1) ----------
   logoUrl = signal<string | null>(null);
   titulo = signal(TITULO_FORMATO_DEFAULT);
   segundaFirma = signal('');
   plantilla = signal<PlantillaReporte>(defaultPlantillaReporte());
+  mostrarConfig = signal(false);
+
+  /** Lo último guardado en la base — sirve para saber si hay cambios sin guardar y cuál está en uso. */
+  private guardado = signal<{ titulo: string; segundaFirma: string; plantilla: PlantillaReporte } | null>(null);
+  plantillaEnUsoId = computed(() => this.guardado()?.plantilla.plantilla_id ?? null);
+  hayCambios = computed(() => {
+    const g = this.guardado();
+    if (!g) return true;
+    return (
+      g.titulo !== this.titulo() ||
+      g.segundaFirma !== this.segundaFirma() ||
+      JSON.stringify({ ...g.plantilla, updated_at: '' }) !== JSON.stringify({ ...this.plantilla(), updated_at: '' })
+    );
+  });
+
+  vistaPreviaGratis = computed(() => {
+    const c = plantillaDelCatalogo(this.seleccionGratis())!;
+    return aplicarPlantillaCatalogo(this.plantilla(), c);
+  });
 
   secciones = SECCIONES_REPORTE;
   clasesEjemplo = CLASES_EJEMPLO;
@@ -107,9 +134,38 @@ export class PremiumPage implements OnInit, OnDestroy {
   tamanosLogo: LogoTamano[] = ['pequeno', 'mediano', 'grande'];
   tamanosFuente: TamanoFuenteTabla[] = ['compacta', 'normal', 'grande'];
 
-  // La vista previa se reutiliza para la plantilla gratis y la Premium, por eso reciben la plantilla.
-  colorTabla(p: PlantillaReporte): string {
-    return p.color_tabla_modo === 'personalizado' ? p.color_tabla_hex : 'var(--accent-from)';
+  // La vista previa se reutiliza para la plantilla gratis, la Premium y las miniaturas, por eso reciben la plantilla.
+  estilo(p: PlantillaReporte): EstiloDiseno {
+    return ESTILOS_DISENO[p.diseno] ?? ESTILOS_DISENO.institucional;
+  }
+
+  tituloSugerido(p: PlantillaReporte): string {
+    return LABELS_INSTITUCION[p.tipo_institucion].tituloSugerido;
+  }
+
+  /** Título que muestra la vista previa: el del docente, o el sugerido del tipo de institución si no lo ha cambiado. */
+  tituloVista(p: PlantillaReporte): string {
+    const sugeridos = Object.values(LABELS_INSTITUCION).map((l) => l.tituloSugerido);
+    return !this.titulo() || sugeridos.includes(this.titulo()) ? this.tituloSugerido(p) : this.titulo();
+  }
+
+  labelPlantillaActual(): string {
+    return plantillaDelCatalogo(this.plantilla().plantilla_id)?.nombre ?? 'Plantilla personalizada';
+  }
+
+  claseLogo(p: PlantillaReporte): string {
+    return p.logo_tamano === 'pequeno' ? 'h-10 w-10' : p.logo_tamano === 'grande' ? 'h-20 w-20' : 'h-14 w-14';
+  }
+
+  claseTh(p: PlantillaReporte): string {
+    const e = this.estilo(p);
+    const fondo =
+      e.cabeceraTabla === 'negro' ? 'bg-neutral-900 text-white' : e.cabeceraTabla === 'gris' ? 'bg-neutral-200 text-neutral-900' : 'border-b-2 border-neutral-900 text-neutral-900';
+    return `px-2 py-1.5 font-semibold ${fondo} ${e.bordes === 'rejilla' ? 'border border-neutral-900' : ''}`;
+  }
+
+  claseTd(p: PlantillaReporte): string {
+    return `px-2 py-1.5 text-neutral-800 ${this.estilo(p).bordes === 'rejilla' ? 'border border-neutral-900' : 'border-b border-neutral-200'}`;
   }
 
   tamanoFuentePx(p: PlantillaReporte): string {
@@ -130,8 +186,6 @@ export class PremiumPage implements OnInit, OnDestroy {
   }
 
   guardando = signal(false);
-  guardadoOk = signal(false);
-  private saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private supabaseService: SupabaseService,
@@ -160,6 +214,9 @@ export class PremiumPage implements OnInit, OnDestroy {
       this.titulo.set(perfil.formato_reporte_titulo || TITULO_FORMATO_DEFAULT);
       this.segundaFirma.set(perfil.formato_reporte_segunda_firma || '');
       this.plantilla.set(normalizarPlantilla(perfil.plantilla_reporte));
+      this.guardado.set(perfil.plantilla_reporte ? { titulo: this.titulo(), segundaFirma: this.segundaFirma(), plantilla: this.plantilla() } : null);
+      if (this.plantillasGratis.some((c) => c.id === this.plantilla().plantilla_id)) this.seleccionGratis.set(this.plantilla().plantilla_id);
+      for (const c of this.catalogo) this.miniaturas[c.id] = aplicarPlantillaCatalogo(defaultPlantillaReporte(), c);
 
       await Promise.all([this.cargarEstadoSuscripcion(), this.cargarNotificaciones()]);
     } catch (e: any) {
@@ -168,10 +225,6 @@ export class PremiumPage implements OnInit, OnDestroy {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  ngOnDestroy() {
-    if (this.saveTimer) clearTimeout(this.saveTimer);
   }
 
   private async cargarEstadoSuscripcion() {
@@ -302,32 +355,26 @@ export class PremiumPage implements OnInit, OnDestroy {
 
   setLogoPosicion(pos: LogoPosicion) {
     this.plantilla.update((p) => ({ ...p, logo_posicion: pos }));
-    this.programarGuardado();
   }
 
   setLogoTamano(t: LogoTamano) {
     this.plantilla.update((p) => ({ ...p, logo_tamano: t }));
-    this.programarGuardado();
   }
 
   onTituloChange(v: string) {
     this.titulo.set(v);
-    this.programarGuardado();
   }
 
   onSubtituloChange(v: string) {
     this.plantilla.update((p) => ({ ...p, subtitulo_formato: v }));
-    this.programarGuardado();
   }
 
   onSegundaFirmaChange(v: string) {
     this.segundaFirma.set(v);
-    this.programarGuardado();
   }
 
   onObservacionesChange(v: string) {
     this.plantilla.update((p) => ({ ...p, observaciones_texto: v }));
-    this.programarGuardado();
   }
 
   toggleSeccion(id: SeccionReporteId) {
@@ -336,48 +383,61 @@ export class PremiumPage implements OnInit, OnDestroy {
       const activa = p.secciones_activas.includes(id);
       return { ...p, secciones_activas: activa ? p.secciones_activas.filter((s) => s !== id) : [...p.secciones_activas, id] };
     });
-    this.programarGuardado();
   }
 
   setTipoInstitucion(tipo: TipoInstitucion) {
+    this.ajustarTituloSugerido(tipo);
     this.plantilla.update((p) => ({ ...p, tipo_institucion: tipo }));
-    this.programarGuardado();
+  }
+
+  /** Si el título sigue siendo uno de los sugeridos (no lo escribió el docente), cambia al del nuevo tipo. */
+  private ajustarTituloSugerido(tipo: TipoInstitucion) {
+    const sugeridos = Object.values(LABELS_INSTITUCION).map((l) => l.tituloSugerido);
+    if (!this.titulo() || sugeridos.includes(this.titulo())) this.titulo.set(LABELS_INSTITUCION[tipo].tituloSugerido);
+  }
+
+  // ---------- Galería de plantillas ----------
+
+  seleccionarPlantilla(c: PlantillaCatalogo) {
+    if (c.nivel === 'premium' && !this.premiumActivo()) return;
+    this.ajustarTituloSugerido(c.config.tipo_institucion);
+    this.plantilla.update((p) => aplicarPlantillaCatalogo(p, c));
+  }
+
+  /** Plantilla gratis: se guarda tal cual viene del catálogo. */
+  async guardarPlantillaGratis() {
+    const c = plantillaDelCatalogo(this.seleccionGratis());
+    if (!c) return;
+    this.seleccionarPlantilla(c);
+    await this.guardarPlantilla();
+  }
+
+  restablecerPlantilla() {
+    const c = plantillaDelCatalogo(this.plantilla().plantilla_id);
+    if (c) this.seleccionarPlantilla(c);
   }
 
   setTipoTabla(tipo: TipoTablaAsistencia) {
     this.plantilla.update((p) => ({ ...p, tipo_tabla_asistencia: tipo }));
-    this.programarGuardado();
   }
 
   toggleColumnaHistorial(col: 'tema' | 'horas' | 'firma') {
     this.plantilla.update((p) => ({ ...p, columnas_historial: { ...p.columnas_historial, [col]: !p.columnas_historial[col] } }));
-    this.programarGuardado();
   }
 
   toggleColumnaMatriz(col: 'cedula' | 'porcentaje') {
     this.plantilla.update((p) => ({ ...p, columnas_matriz: { ...p.columnas_matriz, [col]: !p.columnas_matriz[col] } }));
-    this.programarGuardado();
   }
 
   toggleLeyenda() {
     this.plantilla.update((p) => ({ ...p, mostrar_leyenda: !p.mostrar_leyenda }));
-    this.programarGuardado();
   }
 
   setTamanoFuente(t: TamanoFuenteTabla) {
     this.plantilla.update((p) => ({ ...p, tamano_fuente: t }));
-    this.programarGuardado();
   }
 
-  setColorTablaModo(modo: ColorTablaModo) {
-    this.plantilla.update((p) => ({ ...p, color_tabla_modo: modo }));
-    this.programarGuardado();
-  }
 
-  onColorTablaHexChange(hex: string) {
-    this.plantilla.update((p) => ({ ...p, color_tabla_hex: hex }));
-    this.programarGuardado();
-  }
 
   drop(event: CdkDragDrop<SeccionReporteId[]>) {
     if (event.previousIndex === event.currentIndex) return;
@@ -386,25 +446,23 @@ export class PremiumPage implements OnInit, OnDestroy {
       moveItemInArray(orden, event.previousIndex, event.currentIndex);
       return { ...p, orden_secciones: orden };
     });
-    this.programarGuardado();
   }
 
-  private programarGuardado() {
-    this.guardadoOk.set(false);
-    if (this.saveTimer) clearTimeout(this.saveTimer);
-    this.saveTimer = setTimeout(() => this.guardar(), 800);
-  }
-
-  private async guardar() {
-    if (!this.docenteId) return;
+  async guardarPlantilla() {
+    if (!this.docenteId || this.guardando()) return;
     this.guardando.set(true);
     try {
+      const plantilla = { ...this.plantilla(), updated_at: new Date().toISOString() };
       await this.adminService.actualizarPlantillaPremium(this.docenteId, {
         formato_reporte_titulo: this.titulo(),
         formato_reporte_segunda_firma: this.segundaFirma(),
-        plantilla_reporte: { ...this.plantilla(), updated_at: new Date().toISOString() },
+        plantilla_reporte: plantilla,
       });
-      this.guardadoOk.set(true);
+      this.plantilla.set(plantilla);
+      this.guardado.set({ titulo: this.titulo(), segundaFirma: this.segundaFirma(), plantilla });
+      // Reportes lee la plantilla del perfil en memoria: se refresca para que el próximo PDF ya la use.
+      if (this.userId) await this.authService.resolveProfile(this.userId).catch(() => null);
+      this.toast.success('Plantilla guardada. Tus reportes institucionales ya usan este formato.');
     } catch (e: any) {
       console.error('Error guardando la plantilla Premium:', e);
       this.toast.error('No se pudo guardar la plantilla');

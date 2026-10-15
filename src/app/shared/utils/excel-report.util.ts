@@ -17,12 +17,18 @@ export const EXCEL_HEADER_STYLE = {
   alignment: { horizontal: 'center' as const, vertical: 'center' as const },
 };
 
+/** Encabezado negro para los formatos institucionales (las plantillas son solo en negro). */
+export const EXCEL_HEADER_STYLE_NEGRO = {
+  ...EXCEL_HEADER_STYLE,
+  fill: { fgColor: { rgb: '111111' } },
+};
+
 /** Aplica el estilo de encabezado (negrita, fondo verde, texto blanco) a una fila completa. */
-export function styleHeaderRow(ws: XLSX.WorkSheet, rowIndex: number, colCount: number) {
+export function styleHeaderRow(ws: XLSX.WorkSheet, rowIndex: number, colCount: number, style = EXCEL_HEADER_STYLE) {
   for (let c = 0; c < colCount; c++) {
     const ref = XLSX.utils.encode_cell({ r: rowIndex, c });
     if (!ws[ref]) ws[ref] = { t: 's', v: '' };
-    ws[ref].s = EXCEL_HEADER_STYLE;
+    ws[ref].s = style;
   }
 }
 

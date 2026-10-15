@@ -19,6 +19,12 @@ export type ColorTablaModo = 'acento' | 'personalizado';
  */
 export type TipoInstitucion = 'universidad' | 'escolar';
 
+/**
+ * Diseño visual del formato. Todos son monocromáticos (solo negro y grises) para que se vean
+ * profesionales impresos en blanco y negro, como los formatos oficiales de colegios/universidades.
+ */
+export type DisenoPlantilla = 'institucional' | 'planilla' | 'clasico' | 'ejecutivo' | 'minimal' | 'acta';
+
 export interface LabelsInstitucion {
   docente: string;
   asignatura: string;
@@ -57,6 +63,9 @@ export interface SeccionReporteDescriptor {
 /** El título del formato y la segunda firma viven en formato_reporte_titulo / formato_reporte_segunda_firma
  *  (ya existentes, compartidos con la config institucional de la página de reportes) — no se duplican aquí. */
 export interface PlantillaReporte {
+  /** Id de la plantilla del catálogo de la que parte (ver PLANTILLAS_CATALOGO). */
+  plantilla_id: string;
+  diseno: DisenoPlantilla;
   tipo_institucion: TipoInstitucion;
   logo_posicion: LogoPosicion;
   logo_tamano: LogoTamano;
@@ -74,7 +83,7 @@ export interface PlantillaReporte {
   mostrar_leyenda: boolean;
   tamano_fuente: TamanoFuenteTabla;
   color_tabla_modo: ColorTablaModo;
-  /** Solo se usa cuando color_tabla_modo = 'personalizado'. */
+  /** Ya no se usa: los formatos son solo en negro. Se conserva por compatibilidad con plantillas guardadas. */
   color_tabla_hex: string;
 
   updated_at: string;
@@ -91,6 +100,8 @@ export const SECCIONES_REPORTE: SeccionReporteDescriptor[] = [
 
 export function defaultPlantillaReporte(): PlantillaReporte {
   return {
+    plantilla_id: 'uni-institucional',
+    diseno: 'institucional',
     tipo_institucion: 'universidad',
     logo_posicion: 'izquierda',
     logo_tamano: 'mediano',
@@ -145,4 +156,140 @@ export function hexToRgb(hex: string): [number, number, number] {
   const limpio = hex.replace('#', '');
   const bigint = parseInt(limpio.length === 3 ? limpio.split('').map((c) => c + c).join('') : limpio, 16);
   return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+}
+
+// ===================== Diseños y catálogo de plantillas =====================
+
+/** Cómo se dibuja cada parte del formato — lo comparten la vista previa (HTML) y el PDF. */
+export interface EstiloDiseno {
+  fuente: 'helvetica' | 'times';
+  /** caja = encabezado en recuadro (logo | título | código/versión), estilo formato ISO. */
+  encabezado: 'caja' | 'banda' | 'centrado' | 'linea';
+  cabeceraTabla: 'negro' | 'gris' | 'blanco';
+  bordes: 'rejilla' | 'lineas';
+  zebra: boolean;
+  infoEnCaja: boolean;
+}
+
+export const ESTILOS_DISENO: Record<DisenoPlantilla, EstiloDiseno> = {
+  institucional: { fuente: 'helvetica', encabezado: 'caja', cabeceraTabla: 'negro', bordes: 'rejilla', zebra: false, infoEnCaja: true },
+  planilla: { fuente: 'helvetica', encabezado: 'caja', cabeceraTabla: 'gris', bordes: 'rejilla', zebra: false, infoEnCaja: true },
+  clasico: { fuente: 'helvetica', encabezado: 'centrado', cabeceraTabla: 'negro', bordes: 'lineas', zebra: true, infoEnCaja: false },
+  ejecutivo: { fuente: 'helvetica', encabezado: 'banda', cabeceraTabla: 'negro', bordes: 'lineas', zebra: true, infoEnCaja: false },
+  minimal: { fuente: 'helvetica', encabezado: 'linea', cabeceraTabla: 'blanco', bordes: 'lineas', zebra: false, infoEnCaja: false },
+  acta: { fuente: 'times', encabezado: 'centrado', cabeceraTabla: 'gris', bordes: 'rejilla', zebra: false, infoEnCaja: true },
+};
+
+export interface PlantillaCatalogo {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  nivel: 'gratis' | 'premium';
+  /** Configuración que aplica la plantilla; los textos del docente (subtítulo, observaciones) se conservan. */
+  config: Omit<PlantillaReporte, 'subtitulo_formato' | 'observaciones_texto' | 'updated_at' | 'color_tabla_modo' | 'color_tabla_hex'>;
+}
+
+const ORDEN_BASE: SeccionReporteId[] = ['info_general', 'tabla_asistencia', 'listado_estudiantes', 'estadisticas_resumen', 'observaciones', 'firmas'];
+
+export const PLANTILLAS_CATALOGO: PlantillaCatalogo[] = [
+  {
+    id: 'uni-institucional',
+    nombre: 'Universidad · Institucional',
+    descripcion: 'Encabezado en recuadro con logo, título, código y versión, como los formatos de calidad universitarios.',
+    nivel: 'gratis',
+    config: {
+      plantilla_id: 'uni-institucional', diseno: 'institucional', tipo_institucion: 'universidad',
+      logo_posicion: 'izquierda', logo_tamano: 'mediano', orden_secciones: ORDEN_BASE, secciones_activas: [],
+      tipo_tabla_asistencia: 'historial_clases', columnas_historial: { tema: true, horas: true, firma: true },
+      columnas_matriz: { cedula: true, porcentaje: true }, mostrar_leyenda: true, tamano_fuente: 'normal',
+    },
+  },
+  {
+    id: 'col-planilla',
+    nombre: 'Colegio · Planilla escolar',
+    descripcion: 'Planilla cuadriculada con estudiantes en filas y fechas en columnas, lista para imprimir.',
+    nivel: 'gratis',
+    config: {
+      plantilla_id: 'col-planilla', diseno: 'planilla', tipo_institucion: 'escolar',
+      logo_posicion: 'izquierda', logo_tamano: 'mediano', orden_secciones: ORDEN_BASE, secciones_activas: [],
+      tipo_tabla_asistencia: 'matriz_estudiantes', columnas_historial: { tema: true, horas: true, firma: true },
+      columnas_matriz: { cedula: false, porcentaje: true }, mostrar_leyenda: true, tamano_fuente: 'normal',
+    },
+  },
+  {
+    id: 'uni-acta',
+    nombre: 'Universidad · Acta oficial',
+    descripcion: 'Tipografía serif, encabezado centrado con doble línea y resumen estadístico del periodo.',
+    nivel: 'premium',
+    config: {
+      plantilla_id: 'uni-acta', diseno: 'acta', tipo_institucion: 'universidad',
+      logo_posicion: 'centro', logo_tamano: 'mediano', orden_secciones: ORDEN_BASE, secciones_activas: ['estadisticas_resumen', 'observaciones'],
+      tipo_tabla_asistencia: 'historial_clases', columnas_historial: { tema: true, horas: true, firma: true },
+      columnas_matriz: { cedula: true, porcentaje: true }, mostrar_leyenda: true, tamano_fuente: 'normal',
+    },
+  },
+  {
+    id: 'uni-ejecutivo',
+    nombre: 'Universidad · Ejecutivo',
+    descripcion: 'Banda negra superior, matriz de asistencia por estudiante y estadísticas del periodo.',
+    nivel: 'premium',
+    config: {
+      plantilla_id: 'uni-ejecutivo', diseno: 'ejecutivo', tipo_institucion: 'universidad',
+      logo_posicion: 'izquierda', logo_tamano: 'mediano', orden_secciones: ORDEN_BASE, secciones_activas: ['estadisticas_resumen'],
+      tipo_tabla_asistencia: 'matriz_estudiantes', columnas_historial: { tema: true, horas: true, firma: true },
+      columnas_matriz: { cedula: true, porcentaje: true }, mostrar_leyenda: true, tamano_fuente: 'normal',
+    },
+  },
+  {
+    id: 'col-clasico',
+    nombre: 'Colegio · Clásico',
+    descripcion: 'Encabezado centrado, filas alternadas y listado de estudiantes matriculados.',
+    nivel: 'premium',
+    config: {
+      plantilla_id: 'col-clasico', diseno: 'clasico', tipo_institucion: 'escolar',
+      logo_posicion: 'centro', logo_tamano: 'mediano', orden_secciones: ORDEN_BASE, secciones_activas: ['listado_estudiantes', 'observaciones'],
+      tipo_tabla_asistencia: 'matriz_estudiantes', columnas_historial: { tema: true, horas: true, firma: true },
+      columnas_matriz: { cedula: true, porcentaje: true }, mostrar_leyenda: true, tamano_fuente: 'normal',
+    },
+  },
+  {
+    id: 'col-minimal',
+    nombre: 'Colegio · Moderno',
+    descripcion: 'Diseño limpio y minimalista con líneas finas, ideal para el registro de clases.',
+    nivel: 'premium',
+    config: {
+      plantilla_id: 'col-minimal', diseno: 'minimal', tipo_institucion: 'escolar',
+      logo_posicion: 'izquierda', logo_tamano: 'pequeno', orden_secciones: ORDEN_BASE, secciones_activas: ['estadisticas_resumen'],
+      tipo_tabla_asistencia: 'historial_clases', columnas_historial: { tema: true, horas: true, firma: false },
+      columnas_matriz: { cedula: false, porcentaje: true }, mostrar_leyenda: true, tamano_fuente: 'normal',
+    },
+  },
+];
+
+export function plantillaDelCatalogo(id: string): PlantillaCatalogo | undefined {
+  return PLANTILLAS_CATALOGO.find((p) => p.id === id);
+}
+
+/** Aplica una plantilla del catálogo conservando los textos que escribió el docente. */
+export function aplicarPlantillaCatalogo(base: PlantillaReporte, catalogo: PlantillaCatalogo): PlantillaReporte {
+  return {
+    ...base,
+    ...catalogo.config,
+    orden_secciones: [...catalogo.config.orden_secciones],
+    secciones_activas: [...catalogo.config.secciones_activas],
+    columnas_historial: { ...catalogo.config.columnas_historial },
+    columnas_matriz: { ...catalogo.config.columnas_matriz },
+  };
+}
+
+/**
+ * Sin Premium solo se pueden usar las plantillas gratis tal cual vienen: si la guardada es
+ * Premium (ej. se le venció) o fue configurada, se usa la plantilla gratis equivalente.
+ */
+export function plantillaEfectiva(guardada: PlantillaReporte, premiumActivo: boolean): PlantillaReporte {
+  if (premiumActivo) return guardada;
+  const gratis =
+    PLANTILLAS_CATALOGO.find((p) => p.nivel === 'gratis' && p.id === guardada.plantilla_id) ??
+    PLANTILLAS_CATALOGO.find((p) => p.nivel === 'gratis' && p.config.tipo_institucion === guardada.tipo_institucion)!;
+  return aplicarPlantillaCatalogo(guardada, gratis);
 }

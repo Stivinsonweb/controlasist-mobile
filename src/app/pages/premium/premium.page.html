@@ -44,36 +44,49 @@
   </div>
 
   <!-- ============================================================ -->
-  <!-- PLANTILLA GRATIS                                              -->
+  <!-- PLANTILLA GRATIS: dos plantillas (universidad y colegio)       -->
   <!-- ============================================================ -->
-  <div *ngIf="vista() === 'gratis'" class="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] lg:items-start">
-    <div class="space-y-5">
-      <div class="card p-5">
-        <h3 class="text-sm font-bold" style="color: var(--text-primary);">Formato estándar</h3>
-        <p class="mt-1 text-xs" style="color: var(--text-muted);">Es el formato que usan tus reportes sin costo. Ya incluye tu logo institucional (se configura en Reportes).</p>
-        <ul class="mt-3 space-y-1.5 text-xs" style="color: var(--text-secondary);">
-          <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full" style="background: var(--accent-from);"></span>Información general de la asignatura</li>
-          <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full" style="background: var(--accent-from);"></span>Historial de clases (fecha, tema, horas, firma)</li>
-          <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full" style="background: var(--accent-from);"></span>Firmas al final del documento</li>
-        </ul>
+  <div *ngIf="vista() === 'gratis'" class="grid grid-cols-1 gap-6 lg:grid-cols-[360px_1fr] lg:items-start">
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-sm font-bold" style="color: var(--text-primary);">Elige tu plantilla</h3>
+        <p class="mt-1 text-xs" style="color: var(--text-muted);">Dos formatos profesionales en blanco y negro: uno para universidad y otro para colegio. Tu logo se configura en Reportes.</p>
       </div>
 
+      <button *ngFor="let c of plantillasGratis" type="button" (click)="seleccionGratis.set(c.id)"
+              class="card block w-full overflow-hidden text-left transition-all"
+              [style.outline]="seleccionGratis() === c.id ? '2px solid var(--accent-from)' : 'none'"
+              [style.outline-offset]="'2px'">
+        <ng-container *ngTemplateOutlet="miniaturaTpl; context: { $implicit: c }"></ng-container>
+        <div class="p-3.5">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-sm font-bold" style="color: var(--text-primary);">{{ c.nombre }}</p>
+            <span *ngIf="plantillaEnUsoId() === c.id" class="badge-neutral shrink-0 text-[10px]" style="color: var(--accent-from);">En uso</span>
+          </div>
+          <p class="mt-1 text-xs" style="color: var(--text-muted);">{{ c.descripcion }}</p>
+        </div>
+      </button>
+
+      <button type="button" (click)="guardarPlantillaGratis()" [disabled]="guardando()" class="btn-primary w-full">
+        {{ guardando() ? 'Guardando...' : 'Guardar plantilla' }}
+      </button>
+
       <div class="card p-5">
-        <h3 class="text-sm font-bold" style="color: var(--text-primary);">Con Premium puedes además</h3>
+        <h3 class="text-sm font-bold" style="color: var(--text-primary);">Con Premium tienes</h3>
         <ul class="mt-3 space-y-1.5 text-xs" style="color: var(--text-secondary);">
-          <li class="flex items-center gap-2"><svg class="h-3.5 w-3.5 shrink-0 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>Cambiar título, subtítulo y segunda firma</li>
+          <li class="flex items-center gap-2"><svg class="h-3.5 w-3.5 shrink-0 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>{{ catalogo.length }} plantillas profesionales para colegio y universidad</li>
+          <li class="flex items-center gap-2"><svg class="h-3.5 w-3.5 shrink-0 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>Configurar título, subtítulo, segunda firma y logo</li>
           <li class="flex items-center gap-2"><svg class="h-3.5 w-3.5 shrink-0 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>Reordenar y activar secciones (estadísticas, observaciones...)</li>
-          <li class="flex items-center gap-2"><svg class="h-3.5 w-3.5 shrink-0 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>Matriz de estudiantes por fecha, color institucional y tamaño de letra</li>
-          <li class="flex items-center gap-2"><svg class="h-3.5 w-3.5 shrink-0 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>Posición y tamaño del logo, terminología escolar o universitaria</li>
+          <li class="flex items-center gap-2"><svg class="h-3.5 w-3.5 shrink-0 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>Elegir columnas, tipo de tabla y tamaño de letra</li>
         </ul>
-        <button type="button" (click)="cambiarVista('premium')" class="btn-primary mt-4 w-full">
-          {{ premiumActivo() ? 'Ir a mi plantilla Premium' : 'Ver Plantilla Premium' }}
+        <button type="button" (click)="cambiarVista('premium')" class="btn-outline mt-4 w-full">
+          {{ premiumActivo() ? 'Ir a mis plantillas Premium' : 'Ver plantillas Premium' }}
         </button>
       </div>
     </div>
 
     <div class="lg:sticky lg:top-6">
-      <ng-container *ngTemplateOutlet="vistaPreviaTpl; context: { $implicit: plantillaGratis, t: tituloGratis, f: '' }"></ng-container>
+      <ng-container *ngTemplateOutlet="vistaPreviaTpl; context: { $implicit: vistaPreviaGratis(), t: tituloVista(vistaPreviaGratis()), f: segundaFirma() }"></ng-container>
     </div>
   </div>
 
@@ -82,7 +95,21 @@
   <!-- ============================================================ -->
   <ng-container *ngIf="vista() === 'premium'">
 
-    <!-- Premium NO activo: prueba gratis / activación / comprobante -->
+    <!-- Premium NO activo: galería bloqueada + prueba gratis / activación / comprobante -->
+    <div *ngIf="!premiumActivo()" class="mb-6">
+      <h3 class="text-sm font-bold" style="color: var(--text-primary);">Plantillas Premium</h3>
+      <p class="mt-1 text-xs" style="color: var(--text-muted);">Activa Premium para usarlas y configurarlas a tu medida.</p>
+      <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div *ngFor="let c of catalogo" class="card overflow-hidden">
+          <ng-container *ngTemplateOutlet="miniaturaTpl; context: { $implicit: c }"></ng-container>
+          <div class="p-3.5">
+            <p class="text-sm font-bold" style="color: var(--text-primary);">{{ c.nombre }}</p>
+            <p class="mt-1 text-xs" style="color: var(--text-muted);">{{ c.descripcion }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div *ngIf="!premiumActivo()" class="mx-auto max-w-xl">
       <div class="card overflow-hidden p-6 text-center sm:p-8">
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">
@@ -141,16 +168,6 @@
             </p>
           </div>
           <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2 text-xs font-semibold" style="color: var(--text-muted);">
-              <ng-container *ngIf="guardando()">
-                <svg class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                Guardando...
-              </ng-container>
-              <ng-container *ngIf="!guardando() && guardadoOk()">
-                <svg class="h-3.5 w-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                <span class="text-emerald-500">Guardado</span>
-              </ng-container>
-            </div>
             <button *ngIf="perfil()?.premium_fuente !== 'admin' && !mostrarFormularioPago()" type="button" (click)="abrirFormularioPago()" class="btn-outline btn-sm">
               Renovar
             </button>
@@ -161,11 +178,51 @@
         </div>
       </div>
 
-      <p class="mb-4 text-sm" style="color: var(--text-muted);">Personaliza el formato de tus reportes. Los cambios se guardan solos.</p>
+      <!-- Galería de plantillas -->
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 class="text-sm font-bold" style="color: var(--text-primary);">Plantillas profesionales</h3>
+          <p class="mt-1 text-xs" style="color: var(--text-muted);">Elige una plantilla para colegio o universidad, configúrala y guárdala.</p>
+        </div>
+      </div>
+      <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <button *ngFor="let c of catalogo" type="button" (click)="seleccionarPlantilla(c)"
+                class="card block overflow-hidden text-left transition-all"
+                [style.outline]="plantilla().plantilla_id === c.id ? '2px solid var(--accent-from)' : 'none'"
+                [style.outline-offset]="'2px'">
+          <ng-container *ngTemplateOutlet="miniaturaTpl; context: { $implicit: c }"></ng-container>
+          <div class="p-3.5">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-sm font-bold" style="color: var(--text-primary);">{{ c.nombre }}</p>
+              <span *ngIf="plantillaEnUsoId() === c.id" class="badge-neutral shrink-0 text-[10px]" style="color: var(--accent-from);">En uso</span>
+            </div>
+            <p class="mt-1 text-xs" style="color: var(--text-muted);">{{ c.descripcion }}</p>
+          </div>
+        </button>
+      </div>
 
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] lg:items-start">
+      <!-- Acciones -->
+      <div class="card sticky bottom-4 z-20 mt-6 flex flex-wrap items-center justify-between gap-3 p-4">
+        <div class="min-w-0">
+          <p class="text-sm font-bold" style="color: var(--text-primary);">{{ labelPlantillaActual() }}</p>
+          <p class="text-xs" [style.color]="hayCambios() ? '#d97706' : 'var(--text-muted)'">
+            {{ hayCambios() ? 'Tienes cambios sin guardar' : 'Esta es la plantilla que usan tus reportes' }}
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" (click)="mostrarConfig.set(!mostrarConfig())" class="btn-outline btn-sm flex items-center gap-1.5">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
+            {{ mostrarConfig() ? 'Ocultar configuración' : 'Configurar plantilla' }}
+          </button>
+          <button type="button" (click)="guardarPlantilla()" [disabled]="guardando() || !hayCambios()" class="btn-primary btn-sm">
+            {{ guardando() ? 'Guardando...' : 'Guardar plantilla' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-6 lg:items-start" [ngClass]="mostrarConfig() ? 'lg:grid-cols-[380px_1fr]' : ''">
     <!-- Controles -->
-    <div class="space-y-5">
+    <div *ngIf="mostrarConfig()" class="space-y-5">
       <div class="card p-5">
         <h3 class="text-sm font-bold" style="color: var(--text-primary);">Tipo de institución</h3>
         <p class="mt-1 text-xs" style="color: var(--text-muted);">Cambia la terminología del formato (Docente/Profesor, Asignatura/Área, Nivel/Grado...).</p>
@@ -188,6 +245,7 @@
       <div class="card p-5">
         <h3 class="text-sm font-bold" style="color: var(--text-primary);">Logo institucional</h3>
         <p class="mt-1 text-xs" style="color: var(--text-muted);">Configura el logo desde "Reportes → Historial de clases — formato institucional". Aquí solo defines su posición y tamaño.</p>
+        <p *ngIf="estilo(plantilla()).encabezado === 'caja'" class="mt-1.5 text-[11px] italic" style="color: var(--text-muted);">En este diseño el logo va siempre en la casilla izquierda del recuadro.</p>
 
         <p class="mt-3 text-xs font-semibold" style="color: var(--text-secondary);">Posición</p>
         <div class="mt-1.5 grid grid-cols-3 gap-1.5">
@@ -318,23 +376,6 @@
             {{ t }}
           </button>
         </div>
-
-        <p class="mt-4 text-xs font-semibold" style="color: var(--text-secondary);">Color de la tabla</p>
-        <div class="mt-1.5 flex items-center gap-2">
-          <button type="button" (click)="setColorTablaModo('acento')"
-                  class="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
-                  [style.background]="plantilla().color_tabla_modo === 'acento' ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
-                  [style.color]="plantilla().color_tabla_modo === 'acento' ? '#fff' : 'var(--text-secondary)'">
-            Mi tema de acento
-          </button>
-          <button type="button" (click)="setColorTablaModo('personalizado')"
-                  class="flex-1 rounded-lg py-2 text-xs font-semibold transition-all"
-                  [style.background]="plantilla().color_tabla_modo === 'personalizado' ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
-                  [style.color]="plantilla().color_tabla_modo === 'personalizado' ? '#fff' : 'var(--text-secondary)'">
-            Color institucional
-          </button>
-          <input *ngIf="plantilla().color_tabla_modo === 'personalizado'" type="color" [ngModel]="plantilla().color_tabla_hex" (ngModelChange)="onColorTablaHexChange($event)" class="h-9 w-9 shrink-0 cursor-pointer rounded-lg border-0 p-0" />
-        </div>
       </div>
 
       <div class="card p-5" [class.opacity-50]="!estaActiva('observaciones')">
@@ -346,8 +387,8 @@
       </div>
     </div>
 
-        <div class="lg:sticky lg:top-6">
-          <ng-container *ngTemplateOutlet="vistaPreviaTpl; context: { $implicit: plantilla(), t: titulo(), f: segundaFirma() }"></ng-container>
+        <div class="lg:sticky lg:top-6" [class.mx-auto]="!mostrarConfig()" [class.w-full]="!mostrarConfig()" [class.max-w-3xl]="!mostrarConfig()">
+          <ng-container *ngTemplateOutlet="vistaPreviaTpl; context: { $implicit: plantilla(), t: tituloVista(plantilla()), f: segundaFirma() }"></ng-container>
         </div>
       </div>
 
@@ -439,142 +480,244 @@
     </div>
   </ng-template>
 
+  <!-- Miniatura de una plantilla del catálogo (la misma hoja, escalada) -->
+  <ng-template #miniaturaTpl let-c>
+    <div class="relative h-48 overflow-hidden border-b" style="background: var(--bg-surface-3); border-color: var(--border-subtle);">
+      <div class="pointer-events-none absolute left-1/2 top-3 w-[600px]" style="transform: translateX(-50%) scale(0.42); transform-origin: top center;">
+        <ng-container *ngTemplateOutlet="documentoTpl; context: { $implicit: miniaturas[c.id], t: tituloSugerido(miniaturas[c.id]), f: '' }"></ng-container>
+      </div>
+      <span class="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+            [style.background]="c.nivel === 'premium' ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : '#111'"
+            style="color: #fff;">{{ c.nivel === 'premium' ? 'Premium' : 'Gratis' }}</span>
+      <span class="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-neutral-700">{{ c.config.tipo_institucion === 'escolar' ? 'Colegio' : 'Universidad' }}</span>
+      <div *ngIf="c.nivel === 'premium' && !premiumActivo()" class="absolute inset-0 flex items-center justify-center bg-black/25">
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow">
+          <svg class="h-5 w-5 text-neutral-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+        </span>
+      </div>
+    </div>
+  </ng-template>
+
   <!-- Vista previa en vivo — compartida por la plantilla gratis y la Premium -->
   <ng-template #vistaPreviaTpl let-p let-t="t" let-f="f">
     <p class="mb-2 text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Vista previa</p>
-    <div class="rounded-2xl bg-white p-6 text-slate-800 shadow-dark-soft sm:p-8">
+    <ng-container *ngTemplateOutlet="documentoTpl; context: { $implicit: p, t: t, f: f }"></ng-container>
+  </ng-template>
+
+  <!-- Logo del encabezado -->
+  <ng-template #logoTpl let-p>
+    <div class="flex shrink-0 items-center justify-center overflow-hidden rounded border border-dashed border-neutral-300 bg-white" [ngClass]="claseLogo(p)">
+      <img *ngIf="logoUrl()" [src]="logoUrl()" alt="Logo" class="h-full w-full object-contain" />
+      <span *ngIf="!logoUrl()" class="text-[9px] font-semibold text-neutral-400">LOGO</span>
+    </div>
+  </ng-template>
+
+  <!-- La hoja del formato: todo en negro y grises, como se imprime -->
+  <ng-template #documentoTpl let-p let-t="t" let-f="f">
+    <div class="overflow-hidden rounded-2xl bg-white p-6 text-neutral-900 shadow-dark-soft sm:p-8" [class.font-serif]="estilo(p).fuente === 'times'">
 
       <!-- Encabezado -->
-      <div class="flex flex-col items-center gap-2 border-b border-slate-200 pb-3 text-center"
-           [class.sm:flex-row]="p.logo_posicion !== 'centro'"
-           [class.sm:justify-start]="p.logo_posicion === 'izquierda'"
-           [class.sm:justify-end]="p.logo_posicion === 'derecha'"
-           [class.sm:text-left]="p.logo_posicion !== 'centro'">
-        <div class="flex w-full items-center gap-3"
-             [class.flex-col]="p.logo_posicion === 'centro'"
-             [class.justify-start]="p.logo_posicion === 'izquierda'"
-             [class.justify-end]="p.logo_posicion === 'derecha'"
-             [class.justify-center]="p.logo_posicion === 'centro'">
-          <div *ngIf="p.logo_posicion !== 'derecha'" class="flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-slate-300 bg-slate-50"
-               [class.h-10]="p.logo_tamano === 'pequeno'" [class.w-10]="p.logo_tamano === 'pequeno'"
-               [class.h-14]="p.logo_tamano === 'mediano'" [class.w-14]="p.logo_tamano === 'mediano'"
-               [class.h-20]="p.logo_tamano === 'grande'" [class.w-20]="p.logo_tamano === 'grande'">
-            <img *ngIf="logoUrl()" [src]="logoUrl()" alt="Logo" class="h-full w-full object-contain" />
-            <span *ngIf="!logoUrl()" class="text-[9px] text-slate-400">LOGO</span>
+      <ng-container [ngSwitch]="estilo(p).encabezado">
+        <div *ngSwitchCase="'caja'" class="grid grid-cols-[76px_1fr_118px] border border-neutral-900">
+          <div class="flex items-center justify-center border-r border-neutral-900 p-2">
+            <ng-container *ngTemplateOutlet="logoTpl; context: { $implicit: p }"></ng-container>
           </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-extrabold uppercase leading-tight text-slate-900">{{ t || 'Título del formato' }}</p>
-            <p *ngIf="p.subtitulo_formato" class="mt-0.5 text-xs text-slate-500">{{ p.subtitulo_formato }}</p>
+          <div class="flex flex-col items-center justify-center px-3 py-2 text-center">
+            <p class="text-[13px] font-extrabold uppercase leading-tight">{{ t }}</p>
+            <p *ngIf="p.subtitulo_formato" class="mt-0.5 text-[11px] text-neutral-500">{{ p.subtitulo_formato }}</p>
           </div>
-          <div *ngIf="p.logo_posicion === 'derecha'" class="flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-slate-300 bg-slate-50"
-               [class.h-10]="p.logo_tamano === 'pequeno'" [class.w-10]="p.logo_tamano === 'pequeno'"
-               [class.h-14]="p.logo_tamano === 'mediano'" [class.w-14]="p.logo_tamano === 'mediano'"
-               [class.h-20]="p.logo_tamano === 'grande'" [class.w-20]="p.logo_tamano === 'grande'">
-            <img *ngIf="logoUrl()" [src]="logoUrl()" alt="Logo" class="h-full w-full object-contain" />
-            <span *ngIf="!logoUrl()" class="text-[9px] text-slate-400">LOGO</span>
+          <div class="grid grid-rows-3 border-l border-neutral-900 text-[10px]">
+            <div class="flex items-center border-b border-neutral-900 px-2"><span class="font-semibold">Código:</span>&nbsp;D-FO-005</div>
+            <div class="flex items-center border-b border-neutral-900 px-2"><span class="font-semibold">Versión:</span>&nbsp;01</div>
+            <div class="flex items-center px-2"><span class="font-semibold">Fecha:</span>&nbsp;03/03/2026</div>
           </div>
         </div>
-      </div>
+
+        <div *ngSwitchCase="'banda'" class="-mx-6 -mt-6 flex items-center gap-3 bg-neutral-900 px-6 py-4 text-white sm:-mx-8 sm:-mt-8 sm:px-8"
+             [class.flex-row-reverse]="p.logo_posicion === 'derecha'">
+          <ng-container *ngTemplateOutlet="logoTpl; context: { $implicit: p }"></ng-container>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-extrabold uppercase leading-tight">{{ t }}</p>
+            <p *ngIf="p.subtitulo_formato" class="mt-0.5 text-[11px] text-neutral-300">{{ p.subtitulo_formato }}</p>
+          </div>
+          <div *ngIf="p.logo_posicion !== 'derecha'" class="shrink-0 text-right text-[10px] text-neutral-300">
+            <p>Código: D-FO-005</p>
+            <p>Versión: 01</p>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="'centrado'" class="text-center">
+          <div class="flex" [class.justify-center]="p.logo_posicion === 'centro'" [class.justify-start]="p.logo_posicion === 'izquierda'" [class.justify-end]="p.logo_posicion === 'derecha'">
+            <ng-container *ngTemplateOutlet="logoTpl; context: { $implicit: p }"></ng-container>
+          </div>
+          <p class="mt-2 text-sm font-extrabold uppercase leading-tight">{{ t }}</p>
+          <p *ngIf="p.subtitulo_formato" class="mt-0.5 text-[11px] italic text-neutral-500">{{ p.subtitulo_formato }}</p>
+          <p class="mt-1 text-[10px] text-neutral-500">Código: D-FO-005 &nbsp;·&nbsp; Versión: 01 &nbsp;·&nbsp; Fecha: 03/03/2026</p>
+          <div class="mt-2 border-t-[3px] border-neutral-900"></div>
+          <div class="mt-[2px] border-t border-neutral-900"></div>
+        </div>
+
+        <div *ngSwitchDefault>
+          <div class="flex gap-3" [class.flex-col]="p.logo_posicion === 'centro'" [class.items-center]="p.logo_posicion === 'centro'"
+               [class.items-start]="p.logo_posicion !== 'centro'" [class.flex-row-reverse]="p.logo_posicion === 'derecha'">
+            <ng-container *ngTemplateOutlet="logoTpl; context: { $implicit: p }"></ng-container>
+            <div class="min-w-0 flex-1" [class.text-center]="p.logo_posicion === 'centro'">
+              <p class="text-base font-bold leading-tight">{{ t }}</p>
+              <p *ngIf="p.subtitulo_formato" class="mt-0.5 text-[11px] text-neutral-500">{{ p.subtitulo_formato }}</p>
+            </div>
+            <div *ngIf="p.logo_posicion !== 'derecha'" class="shrink-0 text-right text-[10px] text-neutral-500">
+              <p>Código: D-FO-005</p>
+              <p>Versión: 01</p>
+            </div>
+          </div>
+          <div class="mt-3 border-t border-neutral-900"></div>
+        </div>
+      </ng-container>
 
       <!-- Secciones, en el orden configurado -->
       <ng-container *ngFor="let id of p.orden_secciones">
         <ng-container [ngSwitch]="id" *ngIf="seccionVisible(p, id)">
 
-          <div *ngSwitchCase="'info_general'" class="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-600">
-            <p><span class="font-semibold text-slate-500">{{ labelsDe(p).docente }}:</span> Ana Martínez</p>
-            <p><span class="font-semibold text-slate-500">{{ labelsDe(p).segundoCampo }}:</span> {{ p.tipo_institucion === 'escolar' ? 'Mañana' : 'Ingeniería de Sistemas' }}</p>
-            <p><span class="font-semibold text-slate-500">{{ labelsDe(p).asignatura }}:</span> {{ p.tipo_institucion === 'escolar' ? 'Matemáticas' : 'Cálculo Diferencial (MAT-101)' }}</p>
-            <p><span class="font-semibold text-slate-500">{{ labelsDe(p).nivel }} / Periodo:</span> {{ p.tipo_institucion === 'escolar' ? '9° - 2026' : '2026-1' }}</p>
-          </div>
+          <ng-container *ngSwitchCase="'info_general'">
+            <table *ngIf="estilo(p).infoEnCaja" class="mt-4 w-full border-collapse text-left text-[11px]">
+              <tr>
+                <td class="w-24 border border-neutral-900 bg-neutral-200 px-2 py-1 font-semibold">{{ labelsDe(p).docente }}</td>
+                <td class="border border-neutral-900 px-2 py-1">Jorge Ramírez</td>
+                <td class="w-24 border border-neutral-900 bg-neutral-200 px-2 py-1 font-semibold">{{ labelsDe(p).segundoCampo }}</td>
+                <td class="border border-neutral-900 px-2 py-1">{{ p.tipo_institucion === 'escolar' ? 'Mañana' : 'Ingeniería de Sistemas' }}</td>
+              </tr>
+              <tr>
+                <td class="border border-neutral-900 bg-neutral-200 px-2 py-1 font-semibold">{{ labelsDe(p).asignatura }}</td>
+                <td class="border border-neutral-900 px-2 py-1">{{ p.tipo_institucion === 'escolar' ? 'Matemáticas' : 'Cálculo Diferencial (MAT-101)' }}</td>
+                <td class="border border-neutral-900 bg-neutral-200 px-2 py-1 font-semibold">{{ labelsDe(p).nivel }} / Periodo</td>
+                <td class="border border-neutral-900 px-2 py-1">{{ p.tipo_institucion === 'escolar' ? '9° · 2026' : '3 · 2026-1' }}</td>
+              </tr>
+            </table>
+            <div *ngIf="!estilo(p).infoEnCaja" class="mt-4 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-neutral-700">
+              <p><span class="font-semibold text-neutral-900">{{ labelsDe(p).docente }}:</span> Jorge Ramírez</p>
+              <p><span class="font-semibold text-neutral-900">{{ labelsDe(p).segundoCampo }}:</span> {{ p.tipo_institucion === 'escolar' ? 'Mañana' : 'Ingeniería de Sistemas' }}</p>
+              <p><span class="font-semibold text-neutral-900">{{ labelsDe(p).asignatura }}:</span> {{ p.tipo_institucion === 'escolar' ? 'Matemáticas' : 'Cálculo Diferencial (MAT-101)' }}</p>
+              <p><span class="font-semibold text-neutral-900">{{ labelsDe(p).nivel }} / Periodo:</span> {{ p.tipo_institucion === 'escolar' ? '9° · 2026' : '3 · 2026-1' }}</p>
+            </div>
+          </ng-container>
 
-          <div *ngSwitchCase="'tabla_asistencia'" class="mt-4" [style.fontSize]="tamanoFuentePx(p)">
-
+          <div *ngSwitchCase="'tabla_asistencia'" class="mt-4 overflow-x-auto" [style.fontSize]="tamanoFuentePx(p)">
             <!-- Historial de clases -->
-            <table *ngIf="p.tipo_tabla_asistencia === 'historial_clases'" class="w-full border-collapse overflow-hidden rounded-lg text-left">
+            <table *ngIf="p.tipo_tabla_asistencia === 'historial_clases'" class="w-full border-collapse text-left">
               <thead>
-                <tr [style.background]="colorTabla(p)" class="text-white">
-                  <th class="px-2 py-1.5 font-semibold">No.</th>
-                  <th class="px-2 py-1.5 font-semibold">Fecha</th>
-                  <th class="px-2 py-1.5 font-semibold">Hora</th>
-                  <th *ngIf="p.columnas_historial.tema" class="px-2 py-1.5 font-semibold">Tema</th>
-                  <th *ngIf="p.columnas_historial.horas" class="px-2 py-1.5 font-semibold">Horas</th>
-                  <th *ngIf="p.columnas_historial.firma" class="px-2 py-1.5 font-semibold">Firma</th>
+                <tr>
+                  <th [ngClass]="claseTh(p)">No.</th>
+                  <th [ngClass]="claseTh(p)">Fecha</th>
+                  <th [ngClass]="claseTh(p)">Hora</th>
+                  <th *ngIf="p.columnas_historial.tema" [ngClass]="claseTh(p)">Tema</th>
+                  <th *ngIf="p.columnas_historial.horas" [ngClass]="claseTh(p)">Horas</th>
+                  <th *ngIf="p.columnas_historial.firma" [ngClass]="claseTh(p)">Firma</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let c of clasesEjemplo; let i = index; let odd = odd" [class.bg-slate-50]="odd">
-                  <td class="px-2 py-1.5 text-slate-700">{{ i + 1 }}</td>
-                  <td class="px-2 py-1.5 text-slate-700">{{ c.fecha }}</td>
-                  <td class="px-2 py-1.5 text-slate-700">{{ c.hora }}</td>
-                  <td *ngIf="p.columnas_historial.tema" class="px-2 py-1.5 text-slate-700">{{ c.tema }}</td>
-                  <td *ngIf="p.columnas_historial.horas" class="px-2 py-1.5 text-slate-700">2</td>
-                  <td *ngIf="p.columnas_historial.firma" class="px-2 py-1.5"></td>
+                <tr *ngFor="let c of clasesEjemplo; let i = index; let odd = odd" [class.bg-neutral-100]="odd && estilo(p).zebra">
+                  <td [ngClass]="claseTd(p)">{{ i + 1 }}</td>
+                  <td [ngClass]="claseTd(p)">{{ c.fecha }}</td>
+                  <td [ngClass]="claseTd(p)">{{ c.hora }}</td>
+                  <td *ngIf="p.columnas_historial.tema" [ngClass]="claseTd(p)">{{ c.tema }}</td>
+                  <td *ngIf="p.columnas_historial.horas" [ngClass]="claseTd(p)">2</td>
+                  <td *ngIf="p.columnas_historial.firma" [ngClass]="claseTd(p)"></td>
                 </tr>
               </tbody>
             </table>
 
             <!-- Matriz de estudiantes x fechas -->
-            <div *ngIf="p.tipo_tabla_asistencia === 'matriz_estudiantes'" class="overflow-x-auto">
-              <table class="w-full border-collapse overflow-hidden rounded-lg text-left">
+            <ng-container *ngIf="p.tipo_tabla_asistencia === 'matriz_estudiantes'">
+              <table class="w-full border-collapse text-left">
                 <thead>
-                  <tr [style.background]="colorTabla(p)" class="text-white">
-                    <th class="px-2 py-1.5 font-semibold">No.</th>
-                    <th class="px-2 py-1.5 font-semibold">Nombre</th>
-                    <th *ngIf="p.columnas_matriz.cedula" class="px-2 py-1.5 font-semibold">Cédula</th>
-                    <th *ngFor="let c of clasesEjemplo" class="px-2 py-1.5 text-center font-semibold">{{ c.fecha }}</th>
-                    <th *ngIf="p.columnas_matriz.porcentaje" class="px-2 py-1.5 font-semibold">%</th>
+                  <tr>
+                    <th [ngClass]="claseTh(p)">No.</th>
+                    <th [ngClass]="claseTh(p)">Nombre</th>
+                    <th *ngIf="p.columnas_matriz.cedula" [ngClass]="claseTh(p)">Cédula</th>
+                    <th *ngFor="let c of clasesEjemplo" [ngClass]="claseTh(p)" class="text-center">{{ c.fecha }}</th>
+                    <th *ngIf="p.columnas_matriz.porcentaje" [ngClass]="claseTh(p)" class="text-center">%</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let e of estudiantesEjemplo; let i = index; let odd = odd" [class.bg-slate-50]="odd">
-                    <td class="px-2 py-1.5 text-slate-700">{{ i + 1 }}</td>
-                    <td class="px-2 py-1.5 text-slate-700">{{ e.nombre }}</td>
-                    <td *ngIf="p.columnas_matriz.cedula" class="px-2 py-1.5 text-slate-700">{{ e.cedula }}</td>
-                    <td *ngFor="let est of e.estados" class="px-2 py-1.5 text-center font-bold text-slate-700">{{ est }}</td>
-                    <td *ngIf="p.columnas_matriz.porcentaje" class="px-2 py-1.5 font-semibold text-slate-700">{{ e.porcentaje }}%</td>
+                  <tr *ngFor="let e of estudiantesEjemplo; let i = index; let odd = odd" [class.bg-neutral-100]="odd && estilo(p).zebra">
+                    <td [ngClass]="claseTd(p)">{{ i + 1 }}</td>
+                    <td [ngClass]="claseTd(p)">{{ e.nombre }}</td>
+                    <td *ngIf="p.columnas_matriz.cedula" [ngClass]="claseTd(p)">{{ e.cedula }}</td>
+                    <td *ngFor="let est of e.estados" [ngClass]="claseTd(p)" class="text-center font-bold">{{ est }}</td>
+                    <td *ngIf="p.columnas_matriz.porcentaje" [ngClass]="claseTd(p)" class="text-center font-semibold">{{ e.porcentaje }}%</td>
                   </tr>
                 </tbody>
               </table>
-              <p *ngIf="p.mostrar_leyenda" class="mt-2 text-[10px] italic text-slate-500">{{ leyendaEstados }}</p>
+              <p *ngIf="p.mostrar_leyenda" class="mt-2 text-[10px] italic text-neutral-500">{{ leyendaEstados }}</p>
+            </ng-container>
+          </div>
+
+          <div *ngSwitchCase="'listado_estudiantes'" class="mt-5" [style.fontSize]="tamanoFuentePx(p)">
+            <p class="mb-2 border-b border-neutral-900 pb-0.5 text-[11px] font-bold uppercase tracking-wide">Listado de estudiantes matriculados</p>
+            <table class="w-full border-collapse text-left">
+              <thead>
+                <tr>
+                  <th [ngClass]="claseTh(p)">No.</th>
+                  <th [ngClass]="claseTh(p)">Nombre</th>
+                  <th [ngClass]="claseTh(p)">Cédula</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let e of estudiantesEjemplo; let i = index; let odd = odd" [class.bg-neutral-100]="odd && estilo(p).zebra">
+                  <td [ngClass]="claseTd(p)">{{ i + 1 }}</td>
+                  <td [ngClass]="claseTd(p)">{{ e.nombre }}</td>
+                  <td [ngClass]="claseTd(p)">{{ e.cedula }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngSwitchCase="'estadisticas_resumen'" class="mt-5" [style.fontSize]="tamanoFuentePx(p)">
+            <p class="mb-2 border-b border-neutral-900 pb-0.5 text-[11px] font-bold uppercase tracking-wide">Estadísticas resumen del periodo</p>
+            <table class="w-full border-collapse text-center">
+              <thead>
+                <tr>
+                  <th [ngClass]="claseTh(p)" class="text-center">Clases dictadas</th>
+                  <th [ngClass]="claseTh(p)" class="text-center">Presentes</th>
+                  <th [ngClass]="claseTh(p)" class="text-center">Tarde</th>
+                  <th [ngClass]="claseTh(p)" class="text-center">Justificados</th>
+                  <th [ngClass]="claseTh(p)" class="text-center">Ausentes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td [ngClass]="claseTd(p)">12</td>
+                  <td [ngClass]="claseTd(p)">31</td>
+                  <td [ngClass]="claseTd(p)">2</td>
+                  <td [ngClass]="claseTd(p)">1</td>
+                  <td [ngClass]="claseTd(p)">2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngSwitchCase="'observaciones'" class="mt-5">
+            <p class="border-b border-neutral-900 pb-0.5 text-[11px] font-bold uppercase tracking-wide">Observaciones generales</p>
+            <p class="mt-1.5 text-[11px] text-neutral-600">{{ p.observaciones_texto || 'Sin observaciones registradas.' }}</p>
+          </div>
+
+          <div *ngSwitchCase="'firmas'" class="mt-10 grid grid-cols-2 gap-8 text-center text-[11px]">
+            <div class="border-t border-neutral-900 pt-1">
+              <p class="font-semibold">Jorge Ramírez</p>
+              <p class="text-neutral-500">Firma {{ labelsDe(p).docente | lowercase }}</p>
             </div>
-          </div>
-
-          <table *ngSwitchCase="'listado_estudiantes'" class="mt-4 w-full border-collapse overflow-hidden rounded-lg text-left" [style.fontSize]="tamanoFuentePx(p)">
-            <thead>
-              <tr [style.background]="colorTabla(p)" class="text-white">
-                <th class="px-2 py-1.5 font-semibold">No.</th>
-                <th class="px-2 py-1.5 font-semibold">Nombre</th>
-                <th class="px-2 py-1.5 font-semibold">Cédula</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let e of estudiantesEjemplo; let i = index; let odd = odd" [class.bg-slate-50]="odd">
-                <td class="px-2 py-1.5 text-slate-700">{{ i + 1 }}</td>
-                <td class="px-2 py-1.5 text-slate-700">{{ e.nombre }}</td>
-                <td class="px-2 py-1.5 text-slate-700">{{ e.cedula }}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div *ngSwitchCase="'estadisticas_resumen'" class="mt-4 grid grid-cols-4 gap-2 text-center">
-            <div class="rounded-lg bg-emerald-50 px-2 py-2"><p class="text-sm font-extrabold text-emerald-700">92%</p><p class="text-[9px] text-emerald-700/70">Presente</p></div>
-            <div class="rounded-lg bg-amber-50 px-2 py-2"><p class="text-sm font-extrabold text-amber-700">3%</p><p class="text-[9px] text-amber-700/70">Tarde</p></div>
-            <div class="rounded-lg bg-blue-50 px-2 py-2"><p class="text-sm font-extrabold text-blue-700">2%</p><p class="text-[9px] text-blue-700/70">Justif.</p></div>
-            <div class="rounded-lg bg-red-50 px-2 py-2"><p class="text-sm font-extrabold text-red-700">3%</p><p class="text-[9px] text-red-700/70">Ausente</p></div>
-          </div>
-
-          <div *ngSwitchCase="'observaciones'" class="mt-4">
-            <p class="text-xs font-bold text-emerald-700">Observaciones generales</p>
-            <p class="mt-1 text-xs italic text-slate-500">{{ p.observaciones_texto || 'Sin observaciones registradas.' }}</p>
-          </div>
-
-          <div *ngSwitchCase="'firmas'" class="mt-8 grid grid-cols-2 gap-4 text-center text-xs text-slate-600">
-            <div><div class="border-t border-slate-400 pt-1">Firma {{ labelsDe(p).docente | lowercase }}</div></div>
-            <div><div class="border-t border-slate-400 pt-1">{{ f || 'Segunda firma' }}</div></div>
+            <div class="border-t border-neutral-900 pt-1">
+              <p class="font-semibold">{{ f || labelsDe(p).segundaFirmaSugerida }}</p>
+            </div>
           </div>
 
         </ng-container>
       </ng-container>
+
+      <div class="mt-6 flex justify-between border-t border-neutral-200 pt-1.5 text-[9px] text-neutral-400">
+        <span>Generado el 03 de marzo de 2026</span>
+        <span>Página 1 de 1</span>
+      </div>
     </div>
   </ng-template>
 </div>
