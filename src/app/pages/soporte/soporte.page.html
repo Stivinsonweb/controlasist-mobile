@@ -1,4 +1,44 @@
-<div class="relative min-h-screen w-full overflow-hidden px-4 py-10 sm:px-8" style="background: var(--bg-app);">
+<!-- Dentro del panel de docente/estudiante -->
+<div *ngIf="embebido" class="mx-auto max-w-5xl animate-fade-in">
+  <div class="mb-5">
+    <h1 class="text-xl font-bold" style="color: var(--text-primary);">Soporte</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">¿Tienes un problema o una pregunta? Escríbenos y te respondemos por correo.</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px] lg:items-start">
+    <div class="card p-6 sm:p-8">
+      <ng-container *ngTemplateOutlet="formularioTpl"></ng-container>
+    </div>
+
+    <div class="space-y-4">
+      <a routerLink="/guia" class="card block p-5 transition-transform hover:-translate-y-0.5">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+        </div>
+        <p class="mt-3 text-sm font-bold" style="color: var(--text-primary);">Guía paso a paso</p>
+        <p class="mt-1 text-xs" style="color: var(--text-muted);">Antes de escribirnos, revisa cómo funciona cada sección de ControlAsist.</p>
+        <p class="mt-2 text-xs font-semibold" style="color: var(--accent-from);">Abrir la guía &rarr;</p>
+      </a>
+
+      <div class="card p-5">
+        <p class="text-sm font-bold" style="color: var(--text-primary);">Otros canales</p>
+        <ul class="mt-3 space-y-2.5 text-xs" style="color: var(--text-secondary);">
+          <li class="flex items-start gap-2">
+            <svg class="mt-0.5 h-4 w-4 shrink-0" style="color: var(--accent-from);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+            <span>Correo: <a href="mailto:soporte@controlasistencia.co" class="font-semibold" style="color: var(--accent-from);">soporte&#64;controlasistencia.co</a></span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="mt-0.5 h-4 w-4 shrink-0" style="color: var(--accent-from);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>Te respondemos al correo que dejes en el formulario.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Página pública (sin sesión) -->
+<div *ngIf="!embebido" class="relative min-h-screen w-full overflow-hidden px-4 py-10 sm:px-8" style="background: var(--bg-app);">
   <app-decor-blobs />
 
   <div class="relative z-10 mx-auto flex max-w-lg flex-col items-center">
@@ -10,11 +50,17 @@
     <a routerLink="/auth/login" class="mt-4 text-xs font-semibold text-primary-400 hover:text-primary-300">&larr; Volver</a>
 
     <div class="card mt-6 w-full p-8">
+      <ng-container *ngTemplateOutlet="formularioTpl"></ng-container>
+    </div>
+  </div>
+</div>
+
+<ng-template #formularioTpl>
       <ng-container *ngIf="!sent(); else gracias">
         <h1 class="text-2xl font-bold" style="color: var(--text-primary);">Contactar soporte</h1>
         <p class="mt-1 text-sm" style="color: var(--text-muted);">
           Cuéntanos qué pasó. Además de la notificación a nuestro equipo, recibirás una copia de
-          confirmación en tu propio correo — por eso te lo pedimos como dato obligatorio.
+          confirmación en tu correo{{ embebido ? '' : ' — por eso te lo pedimos como dato obligatorio' }}.
         </p>
 
         <form [formGroup]="form" (ngSubmit)="enviar()" class="mt-6 space-y-4">
@@ -25,6 +71,14 @@
             <p *ngIf="correo?.invalid && correo?.touched" class="mt-1.5 text-xs font-medium text-red-400">
               {{ correo?.hasError('required') ? 'El correo es requerido' : 'Formato de correo inválido' }}
             </p>
+          </div>
+
+          <div *ngIf="temas.length > 0">
+            <label class="mb-1.5 block text-sm font-medium" style="color: var(--text-secondary);">Tema <span class="font-normal" style="color: var(--text-muted);">(opcional)</span></label>
+            <select formControlName="tema" class="input-field">
+              <option value="">Selecciona un tema</option>
+              <option *ngFor="let t of temas" [value]="t">{{ t }}</option>
+            </select>
           </div>
 
           <div>
@@ -66,6 +120,4 @@
           <button (click)="enviarOtro()" class="btn-outline mt-6 w-full">Enviar otro mensaje</button>
         </div>
       </ng-template>
-    </div>
-  </div>
-</div>
+</ng-template>

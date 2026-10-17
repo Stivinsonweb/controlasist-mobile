@@ -195,6 +195,8 @@ export class LayoutComponent implements OnInit {
     { label: 'Mi asistencia', route: '/estudiante/asistencia', icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', roles: ['estudiante'] },
     { label: 'Inscribir asignatura', route: '/estudiante/inscribir', icon: 'M12 4.5v15m7.5-7.5h-15', roles: ['estudiante'] },
     { label: 'Mi perfil', route: '/estudiante/perfil', icon: 'M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z', roles: ['estudiante'] },
+    { label: 'Soporte', route: '/docente/soporte', icon: 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z', roles: ['docente'] },
+    { label: 'Soporte', route: '/estudiante/soporte', icon: 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z', roles: ['estudiante'] },
     // TEMPORAL: Premium abierto a todos los docentes hasta conectar Wompi — ver PARTE 2 del
     // contexto. `PREMIUM_ENABLED`/`locked` se ignoran a propósito mientras tanto; cuando Wompi
     // esté listo, volver a `locked: !PREMIUM_ENABLED` y restaurar el chequeo de premium_activo.
