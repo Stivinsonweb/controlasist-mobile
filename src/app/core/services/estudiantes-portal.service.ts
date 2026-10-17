@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Asignatura } from './asignaturas.service';
+import { limpiarDocumento } from '../../shared/utils/documento.util';
 import { Estudiante } from './admin.service';
 
 export interface DocenteResumen {
@@ -35,7 +36,8 @@ export class EstudiantesPortalService {
     return data as Estudiante;
   }
 
-  async actualizarPerfil(estudianteId: string, payload: Partial<Estudiante>) {
+  async actualizarPerfil(estudianteId: string, datos: Partial<Estudiante>) {
+    const payload = 'cedula' in datos ? { ...datos, cedula: limpiarDocumento(datos.cedula) || null } : datos;
     const { data, error } = await this.supabase.from('estudiantes').update(payload).eq('id', estudianteId).select().single();
     if (error) throw error;
     return data as Estudiante;
@@ -95,7 +97,8 @@ export class EstudiantesPortalService {
     return !!(estudiante.cedula && estudiante.telefono && estudiante.programa);
   }
 
-  async completarDatos(estudianteId: string, payload: CompletarDatosPayload) {
+  async completarDatos(estudianteId: string, datos: CompletarDatosPayload) {
+    const payload = { ...datos, cedula: limpiarDocumento(datos.cedula) };
     const { data: existente, error: existenteError } = await this.supabase
       .from('estudiantes')
       .select('id')

@@ -16,6 +16,7 @@ import { MarcaQr } from '../../../core/services/asistencia-qr.service';
 import { SubjectIconComponent } from '../../../shared/components/subject-icon/subject-icon.component';
 import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/subject-theme.util';
 import { fechaLocalISO } from '../../../shared/utils/fecha.util';
+import { limpiarDocumento } from '../../../shared/utils/documento.util';
 
 export interface EstadoOpcion {
   valor: string;
@@ -818,7 +819,7 @@ export class DetalleAsignaturaPage implements OnInit {
 
         const nombres = valor('nombres', 'nombre');
         const apellidos = valor('apellidos', 'apellido');
-        const cedula = valor('cedula', 'cédula', 'documento');
+        const cedula = limpiarDocumento(valor('cedula', 'cédula', 'documento'));
         const email = valor('email', 'correo', 'correo electrónico');
         const password = valor('contraseña', 'contrasena', 'password', 'clave');
         const telefono = valor('telefono', 'teléfono', 'celular');

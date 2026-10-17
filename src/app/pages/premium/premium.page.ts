@@ -43,9 +43,9 @@ const CLASES_EJEMPLO = [
 
 /** Filas de ejemplo para la vista previa de "Matriz de estudiantes" y "Listado de estudiantes". */
 const ESTUDIANTES_EJEMPLO = [
-  { nombre: 'Ana Martínez', cedula: '1.020.345.678', estados: ['P', 'P', 'T'], porcentaje: 92 },
-  { nombre: 'Carlos Ruiz', cedula: '1.098.234.512', estados: ['P', 'A', 'P'], porcentaje: 78 },
-  { nombre: 'Laura Gómez', cedula: '1.045.678.901', estados: ['J', 'P', 'P'], porcentaje: 85 },
+  { nombre: 'Ana Martínez', cedula: '1020345678', estados: ['P', 'P', 'T'], porcentaje: 92 },
+  { nombre: 'Carlos Ruiz', cedula: '1098234512', estados: ['P', 'A', 'P'], porcentaje: 78 },
+  { nombre: 'Laura Gómez', cedula: '1045678901', estados: ['J', 'P', 'P'], porcentaje: 85 },
 ];
 
 const LEYENDA_ESTADOS = 'P = Presente   T = Tarde   J = Justificado   A = Ausente';
