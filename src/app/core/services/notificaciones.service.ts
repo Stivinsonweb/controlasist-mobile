@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
 export interface Notificacion {
@@ -23,6 +23,37 @@ export class NotificacionesService {
 
   private get supabase() {
     return this.supabaseService.supabase;
+  }
+
+  /** No leídas del usuario actual — la campana del layout lo muestra y la página de Notificaciones lo actualiza. */
+  noLeidas = signal(0);
+
+  async refrescarNoLeidas() {
+    try {
+      this.noLeidas.set(await this.contarNoLeidas());
+    } catch {
+      // No crítico: la campana solo deja de mostrar el número.
+    }
+  }
+
+  /** Página de la sección Notificaciones (más recientes primero). */
+  async listar(limite: number, desde = 0, soloNoLeidas = false) {
+    let query = this.supabase.from('notificaciones').select('*').order('created_at', { ascending: false });
+    if (soloNoLeidas) query = query.eq('leida', false);
+    const { data, error } = await query.range(desde, desde + limite - 1);
+    if (error) throw error;
+    return (data || []) as Notificacion[];
+  }
+
+  async marcarTodasLeidas() {
+    const { error } = await this.supabase.from('notificaciones').update({ leida: true }).eq('leida', false);
+    if (error) throw error;
+    this.noLeidas.set(0);
+  }
+
+  async eliminar(id: string) {
+    const { error } = await this.supabase.from('notificaciones').delete().eq('id', id);
+    if (error) throw error;
   }
 
   async misNotificaciones(limite = 20) {

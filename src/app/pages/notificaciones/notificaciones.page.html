@@ -1,0 +1,86 @@
+<div class="mx-auto max-w-3xl animate-fade-in">
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="text-xl font-bold" style="color: var(--text-primary);">Notificaciones</h1>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">
+        {{ noLeidas() > 0 ? 'Tienes ' + noLeidas() + (noLeidas() === 1 ? ' notificación sin leer.' : ' notificaciones sin leer.') : 'Estás al día.' }}
+      </p>
+    </div>
+    <button *ngIf="noLeidas() > 0" type="button" (click)="marcarTodasLeidas()" class="btn-outline btn-sm">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+      Marcar todas como leídas
+    </button>
+  </div>
+
+  <!-- Recibir las notificaciones en el dispositivo (push) -->
+  <app-notificaciones-push-toggle *ngIf="usuarioId" [usuarioId]="usuarioId" [rol]="rol" class="mb-5" />
+
+  <!-- Filtros -->
+  <div *ngIf="!loading() && notificaciones().length > 0" class="mb-4 flex flex-wrap gap-2">
+    <button type="button" (click)="filtro.set('todas')" class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all"
+            [style.background]="filtro() === 'todas' ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
+            [style.color]="filtro() === 'todas' ? '#fff' : 'var(--text-secondary)'">Todas</button>
+    <button type="button" (click)="filtro.set('no-leidas')" class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all"
+            [style.background]="filtro() === 'no-leidas' ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
+            [style.color]="filtro() === 'no-leidas' ? '#fff' : 'var(--text-secondary)'">
+      No leídas<span *ngIf="noLeidas() > 0"> ({{ noLeidas() }})</span>
+    </button>
+    <button *ngFor="let c of filtrosCategoria()" type="button" (click)="filtro.set(c)" class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all"
+            [style.background]="filtro() === c ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
+            [style.color]="filtro() === c ? '#fff' : 'var(--text-secondary)'">{{ labelFiltro(c) }}</button>
+  </div>
+
+  <!-- Cargando -->
+  <div *ngIf="loading()" class="space-y-2">
+    <div *ngFor="let i of [1,2,3,4]" class="card skeleton h-20"></div>
+  </div>
+
+  <!-- Vacío -->
+  <div *ngIf="!loading() && visibles().length === 0" class="card flex flex-col items-center justify-center border border-dashed py-14 text-center" style="border-color: var(--border-subtle-2);">
+    <svg class="h-12 w-12" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+    <p class="mt-4 text-sm font-semibold" style="color: var(--text-secondary);">
+      {{ notificaciones().length === 0 ? 'Aún no tienes notificaciones' : 'No hay notificaciones con este filtro' }}
+    </p>
+    <p class="mt-1 max-w-sm text-sm" style="color: var(--text-muted);">
+      {{ rol === 'estudiante' ? 'Aquí verás los recordatorios de tus clases.' : 'Aquí verás los recordatorios de tus clases y los avisos de Premium y de tu cuenta.' }}
+    </p>
+  </div>
+
+  <!-- Lista agrupada por día -->
+  <div *ngIf="!loading()" class="space-y-5">
+    <section *ngFor="let g of grupos()">
+      <p class="mb-2 text-xs font-bold uppercase tracking-wide first-letter:uppercase" style="color: var(--text-muted);">{{ g.titulo }}</p>
+      <ul class="space-y-2">
+        <li *ngFor="let n of g.items" (click)="marcarLeida(n)"
+            class="card group relative flex cursor-pointer items-start gap-3 p-4 transition-all"
+            [style.opacity]="n.leida ? '0.75' : '1'">
+          <span *ngIf="!n.leida" class="absolute left-1.5 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full" style="background: var(--accent-from);" aria-label="Sin leer"></span>
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" [style.backgroundColor]="info(n).color + '1f'" [style.color]="info(n).color">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" [attr.d]="info(n).icono" /></svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm" [class.font-bold]="!n.leida" [class.font-semibold]="n.leida" style="color: var(--text-primary);">{{ n.titulo }}</p>
+              <span class="shrink-0 text-[11px]" style="color: var(--text-muted);">{{ hora(n.created_at) }}</span>
+            </div>
+            <p class="mt-0.5 text-sm" style="color: var(--text-muted);">{{ n.cuerpo }}</p>
+            <div class="mt-2 flex items-center gap-3">
+              <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" [style.backgroundColor]="info(n).color + '1f'" [style.color]="info(n).color">{{ info(n).label }}</span>
+              <a *ngIf="enlace(n) as link" [routerLink]="link" (click)="marcarLeida(n)" class="text-xs font-semibold" style="color: var(--accent-from);">Ver &rarr;</a>
+            </div>
+          </div>
+          <button type="button" (click)="eliminar(n, $event)" title="Eliminar" aria-label="Eliminar notificación"
+                  class="shrink-0 rounded-lg p-1.5 opacity-60 transition-opacity hover:opacity-100" style="color: var(--text-muted);">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <div *ngIf="hayMas() && filtro() === 'todas'" class="flex justify-center">
+      <button type="button" (click)="cargarMas()" [disabled]="cargandoMas()" class="btn-outline btn-sm">
+        {{ cargandoMas() ? 'Cargando...' : 'Cargar más' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -12,6 +12,7 @@ import { InstallPwaButtonComponent } from '../shared/components/install-pwa-butt
 import { AccentThemeService } from '../core/services/accent-theme.service';
 import { ThemeService, TemaPreferencia } from '../core/services/theme.service';
 import { LogoComponent } from '../shared/components/logo/logo.component';
+import { NotificacionesService } from '../core/services/notificaciones.service';
 
 interface NavItem {
   label: string;
@@ -54,7 +55,9 @@ interface NavItem {
               <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon" />
               </svg>
-              {{ item.label }}
+              <span class="flex-1">{{ item.label }}</span>
+              <span *ngIf="item.route === '/notificaciones' && noLeidas() > 0"
+                    class="min-w-[1.25rem] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white">{{ noLeidas() > 99 ? '99+' : noLeidas() }}</span>
             </a>
             <a *ngIf="item.locked"
                [routerLink]="item.route"
@@ -137,6 +140,15 @@ interface NavItem {
                 </button>
               </div>
             </div>
+            <a *ngIf="role() === 'docente' || role() === 'estudiante'" routerLink="/notificaciones" title="Notificaciones" aria-label="Notificaciones"
+               class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/5" style="color: var(--text-secondary);">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+              <span *ngIf="noLeidas() > 0"
+                    class="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 bg-red-500 px-1 text-[10px] font-bold leading-none text-white"
+                    style="border-color: var(--bg-surface);">{{ noLeidas() > 99 ? '99+' : noLeidas() }}</span>
+            </a>
             <a routerLink="/guia" title="¿Cómo funciona?"
                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-white/5" style="color: var(--text-secondary);">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -195,6 +207,7 @@ export class LayoutComponent implements OnInit {
     { label: 'Mi asistencia', route: '/estudiante/asistencia', icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', roles: ['estudiante'] },
     { label: 'Inscribir asignatura', route: '/estudiante/inscribir', icon: 'M12 4.5v15m7.5-7.5h-15', roles: ['estudiante'] },
     { label: 'Mi perfil', route: '/estudiante/perfil', icon: 'M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z', roles: ['estudiante'] },
+    { label: 'Notificaciones', route: '/notificaciones', icon: 'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0', roles: ['docente', 'estudiante'] },
     { label: 'Soporte', route: '/docente/soporte', icon: 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z', roles: ['docente'] },
     { label: 'Soporte', route: '/estudiante/soporte', icon: 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z', roles: ['estudiante'] },
     // TEMPORAL: Premium abierto a todos los docentes hasta conectar Wompi — ver PARTE 2 del
@@ -211,8 +224,13 @@ export class LayoutComponent implements OnInit {
     private configuracionService: ConfiguracionAppService,
     private accentTheme: AccentThemeService,
     private themeService: ThemeService,
-    private swUpdate: SwUpdate
+    private swUpdate: SwUpdate,
+    private notificacionesService: NotificacionesService
   ) {}
+
+  noLeidas() {
+    return this.notificacionesService.noLeidas();
+  }
 
   tema() {
     return this.themeService.preferencia();
@@ -226,11 +244,13 @@ export class LayoutComponent implements OnInit {
   ngOnInit() {
     this.auth.currentProfile$.subscribe((p) => {
       this.profile.set(p);
+      if (p?.rol === 'docente' || p?.rol === 'estudiante') this.notificacionesService.refrescarNoLeidas();
       this.accentTheme.apply(p?.rol === 'docente' ? p.tema_acento : null);
     });
     this.updateTitle(this.router.url);
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => {
       this.updateTitle((e as NavigationEnd).urlAfterRedirects);
+      if (this.role() === 'docente' || this.role() === 'estudiante') this.notificacionesService.refrescarNoLeidas();
     });
 
     this.configuracionService.obtener()
@@ -242,6 +262,15 @@ export class LayoutComponent implements OnInit {
       .catch((e) => console.error('Error verificando versión de la app:', e));
 
     this.iniciarDeteccionActualizacionesPWA();
+
+    // La campana se mantiene al día sin recargar: al volver a la app y cada 2 minutos.
+    const refrescarCampana = () => {
+      if (document.visibilityState === 'visible' && (this.role() === 'docente' || this.role() === 'estudiante')) {
+        this.notificacionesService.refrescarNoLeidas();
+      }
+    };
+    document.addEventListener('visibilitychange', refrescarCampana);
+    setInterval(refrescarCampana, 2 * 60 * 1000);
   }
 
   /**
