@@ -5,7 +5,7 @@ import { AdminService, Docente } from '../../../core/services/admin.service';
 import { ConfiguracionAppService, ConfiguracionApp } from '../../../core/services/configuracion-app.service';
 import { referenciaPagoDocente, PremiumSuscripcionService, SolicitudPremium, PagoPremium } from '../../../core/services/premium-suscripcion.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { parsearPesosCOP, formatearPesosCOP } from '../../../shared/utils/moneda-cop.util';
+import { parsearPesosCOP, formatearPesosCOP, validarPrecioCOP } from '../../../shared/utils/moneda-cop.util';
 import { MetodoPagoConfig, MetodoPagoTipo, METODOS_PAGO_CATALOGO, normalizarMetodosPago, catalogoMetodo } from '../../../shared/utils/metodos-pago.util';
 import { MetodoPagoIconComponent } from '../../../shared/components/metodo-pago-icon/metodo-pago-icon.component';
 
@@ -246,6 +246,11 @@ export class AdminPremiumPage implements OnInit {
   async guardarPrecioPersonalizado(d: Docente) {
     const raw = this.precioPersonalizadoEdit[d.id];
     const precio = raw === '' || raw === undefined ? null : parsearPesosCOP(raw);
+    const error = validarPrecioCOP(precio);
+    if (error) {
+      this.toast.warning(error);
+      return;
+    }
     this.procesandoId.set(d.id);
     try {
       await this.premiumService.actualizarPrecioPersonalizado(d.id, precio);
@@ -261,10 +266,16 @@ export class AdminPremiumPage implements OnInit {
   async guardarPrecioGlobal(mensual: string, infoPago: string) {
     const cfg = this.config();
     if (!cfg) return;
+    const precio = parsearPesosCOP(mensual);
+    const error = precio === null ? 'Escribe el precio mensual de Premium.' : validarPrecioCOP(precio);
+    if (error) {
+      this.toast.warning(error);
+      return;
+    }
     this.guardandoPrecioGlobal.set(true);
     try {
       const actualizado = await this.configuracionAppService.actualizar(cfg.id, {
-        premium_precio_mensual: parsearPesosCOP(mensual),
+        premium_precio_mensual: precio,
         premium_info_pago: infoPago || null,
         metodos_pago_premium: this.metodosPago(),
       });

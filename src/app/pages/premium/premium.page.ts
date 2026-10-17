@@ -9,7 +9,7 @@ import { ConfiguracionAppService } from '../../core/services/configuracion-app.s
 import { PremiumSuscripcionService, PagoPremium, SolicitudPremium, PeriodoPremium, referenciaPagoDocente } from '../../core/services/premium-suscripcion.service';
 import { NotificacionesService, Notificacion } from '../../core/services/notificaciones.service';
 import { ToastService } from '../../core/services/toast.service';
-import { formatearPesosCOP, parsearPesosCOP } from '../../shared/utils/moneda-cop.util';
+import { formatearPesosCOP, parsearPesosCOP, validarPrecioCOP } from '../../shared/utils/moneda-cop.util';
 import { MetodoPagoConfig, MetodoPagoTipo, catalogoMetodo, normalizarMetodosPago } from '../../shared/utils/metodos-pago.util';
 import { MetodoPagoIconComponent } from '../../shared/components/metodo-pago-icon/metodo-pago-icon.component';
 import {
@@ -320,6 +320,11 @@ export class PremiumPage implements OnInit {
     const monto = parsearPesosCOP(this.formPago.monto);
     if (!monto || !this.formPago.fecha_pago_declarada || !this.archivoComprobante) {
       this.toast.warning('Completa el monto, la fecha y adjunta el comprobante');
+      return;
+    }
+    const errorMonto = validarPrecioCOP(monto);
+    if (errorMonto) {
+      this.toast.warning(errorMonto);
       return;
     }
     this.subiendoComprobante.set(true);
