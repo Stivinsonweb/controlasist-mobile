@@ -684,6 +684,21 @@ export class DetalleAsignaturaPage implements OnInit {
     XLSX.writeFile(wb, 'plantilla-carga-estudiantes.xlsx');
   }
 
+  /**
+   * Excel guarda "CSV UTF-8" en UTF-8 (con BOM), pero el "CSV (delimitado por comas)" de Excel en
+   * Windows lo guarda en ANSI (Windows-1252). Se intenta UTF-8 estricto y, si el archivo no es
+   * UTF-8 válido, se lee como Windows-1252 — así las tildes y la ñ llegan bien en ambos casos.
+   */
+  private decodificarCSV(buffer: ArrayBuffer): string {
+    let texto: string;
+    try {
+      texto = new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+    } catch {
+      texto = new TextDecoder('windows-1252').decode(buffer);
+    }
+    return texto.replace(/^\ufeff/, '');
+  }
+
   async onArchivoSeleccionado(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -697,11 +712,10 @@ export class DetalleAsignaturaPage implements OnInit {
       // Los .xlsx/.xls guardan sus strings en UTF-8 dentro del propio zip, así que XLSX.read los
       // decodifica bien desde el ArrayBuffer. Los .csv en cambio son texto plano: si se pasan como
       // ArrayBuffer, SheetJS los interpreta con el codepage por defecto y las tildes/ñ (UTF-8
-      // multibyte) se corrompen. Para .csv forzamos el decode como UTF-8 explícitamente y les
-      // quitamos el BOM que agrega Excel al usar "Guardar como CSV UTF-8".
+      // multibyte) se corrompen. Para .csv decodificamos el texto nosotros (ver decodificarCSV).
       const esCSV = /\.csv$/i.test(file.name);
       const workbook = esCSV
-        ? XLSX.read(new TextDecoder('utf-8').decode(buffer).replace(/^﻿/, ''), { type: 'string' })
+        ? XLSX.read(this.decodificarCSV(buffer), { type: 'string' })
         : XLSX.read(buffer, { type: 'array' });
       const hoja = workbook.Sheets[workbook.SheetNames[0]];
       const filas = XLSX.utils.sheet_to_json<Record<string, any>>(hoja, { defval: '' });
