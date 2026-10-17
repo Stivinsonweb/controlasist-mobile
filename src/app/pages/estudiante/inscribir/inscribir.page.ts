@@ -55,7 +55,7 @@ export class InscribirPage {
   continuar() {
     const a = this.encontrada();
     if (!a) return;
-    this.router.navigate(['/estudiante/datos-inscripcion'], { queryParams: { asignaturaId: a.id } });
+    this.router.navigate(['/estudiante/datos-inscripcion'], { queryParams: { codigo: this.codigoAcceso.trim() } });
   }
 
   cancelar() {

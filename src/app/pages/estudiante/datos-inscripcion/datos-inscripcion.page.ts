@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AsignaturasService, Asignatura } from '../../../core/services/asignaturas.service';
+import { Asignatura } from '../../../core/services/asignaturas.service';
 import { EstudiantesPortalService } from '../../../core/services/estudiantes-portal.service';
 import { Estudiante } from '../../../core/services/admin.service';
 import { SupabaseService } from '../../../core/services/supabase.service';
@@ -22,13 +22,13 @@ export class DatosInscripcionPage implements OnInit {
   asignatura = signal<Asignatura | null>(null);
 
   private estudianteId = '';
+  private codigo = '';
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private supabaseService: SupabaseService,
-    private asignaturasService: AsignaturasService,
     private portalService: EstudiantesPortalService,
     private toast: ToastService
   ) {}
@@ -41,17 +41,17 @@ export class DatosInscripcionPage implements OnInit {
       programa: ['', [Validators.required]],
     });
 
-    const asignaturaId = this.route.snapshot.queryParamMap.get('asignaturaId');
-    if (!asignaturaId) {
+    this.codigo = this.route.snapshot.queryParamMap.get('codigo') || '';
+    if (!this.codigo) {
       this.toast.warning('Primero busca una asignatura con su código de acceso');
       this.router.navigate(['/estudiante/inscribir']);
       return;
     }
 
-    await this.load(asignaturaId);
+    await this.load();
   }
 
-  async load(asignaturaId: string) {
+  async load() {
     this.loading.set(true);
     try {
       const user = await this.supabaseService.getCurrentUser();
@@ -61,11 +61,16 @@ export class DatosInscripcionPage implements OnInit {
       }
       this.estudianteId = user.id;
 
-      const [asignatura, estudiante] = await Promise.all([
-        this.asignaturasService.obtenerPorId(asignaturaId),
+      const [busqueda, estudiante] = await Promise.all([
+        this.portalService.buscarPorCodigoAcceso(this.codigo),
         this.portalService.obtenerPerfil(user.id),
       ]);
-      this.asignatura.set(asignatura);
+      if (!busqueda.asignatura || busqueda.expirado) {
+        this.toast.error(busqueda.expirado ? 'Este código ha expirado' : 'Código no válido o asignatura inactiva');
+        this.router.navigate(['/estudiante/inscribir']);
+        return;
+      }
+      this.asignatura.set(busqueda.asignatura);
 
       const completos = this.portalService.verificarDatosCompletos(estudiante);
       this.necesitaDatos.set(!completos);
@@ -93,8 +98,7 @@ export class DatosInscripcionPage implements OnInit {
       return;
     }
 
-    const asignaturaId = this.asignatura()?.id;
-    if (!asignaturaId) return;
+    if (!this.asignatura()) return;
 
     this.isSaving = true;
     try {
@@ -102,7 +106,7 @@ export class DatosInscripcionPage implements OnInit {
         await this.portalService.completarDatos(this.estudianteId, this.form.value);
       }
 
-      const resultado = await this.portalService.crearInscripcion(this.estudianteId, asignaturaId);
+      const resultado = await this.portalService.inscribirseConCodigo(this.codigo);
       if (resultado === 'ya-inscrito') {
         this.toast.info('Ya estás inscrito en esta asignatura');
       } else if (resultado === 'reactivada') {

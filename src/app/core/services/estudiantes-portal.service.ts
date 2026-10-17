@@ -83,27 +83,12 @@ export class EstudiantesPortalService {
     if (error) throw error;
   }
 
-  async buscarPorCodigoAcceso(codigo: string) {
-    const codigoLimpio = codigo.trim().toUpperCase();
-    const { data, error } = await this.supabase
-      .from('asignaturas')
-      .select('*')
-      .eq('codigo_acceso', codigoLimpio)
-      .eq('activa', true)
-      .maybeSingle();
+  /** El código se valida en el servidor: los estudiantes no pueden listar asignaturas ni sus códigos. */
+  async buscarPorCodigoAcceso(codigo: string): Promise<{ asignatura: Asignatura | null; docente: DocenteResumen | null; expirado: boolean }> {
+    const { data, error } = await this.supabase.rpc('buscar_asignatura_por_codigo', { p_codigo: codigo.trim() });
     if (error) throw error;
     if (!data) return { asignatura: null, docente: null, expirado: false };
-
-    const asignatura = data as Asignatura & { codigo_expira?: string | null };
-    const expirado = !!asignatura.codigo_expira && new Date(asignatura.codigo_expira) < new Date();
-
-    let docente: DocenteResumen | null = null;
-    if (asignatura.docente_id) {
-      const { data: docenteData } = await this.supabase.rpc('docentes_publicos', { p_ids: [asignatura.docente_id] });
-      docente = ((docenteData as DocenteResumen[] | null)?.[0]) || null;
-    }
-
-    return { asignatura: asignatura as Asignatura, docente, expirado };
+    return { asignatura: data.asignatura as Asignatura, docente: (data.docente as DocenteResumen) || null, expirado: !!data.expirado };
   }
 
   verificarDatosCompletos(estudiante: Estudiante): boolean {
@@ -130,34 +115,10 @@ export class EstudiantesPortalService {
     return data as Estudiante;
   }
 
-  /** Devuelve 'creada' | 'reactivada' | 'ya-inscrito' según el estado previo de la inscripción. */
-  async crearInscripcion(estudianteId: string, asignaturaId: string): Promise<'creada' | 'reactivada' | 'ya-inscrito'> {
-    const { data: existente, error: existenteError } = await this.supabase
-      .from('estudiantes_asignaturas')
-      .select('*')
-      .eq('estudiante_id', estudianteId)
-      .eq('asignatura_id', asignaturaId)
-      .maybeSingle();
-    if (existenteError) throw existenteError;
-
-    if (existente) {
-      if (existente.activo) return 'ya-inscrito';
-      const { error } = await this.supabase
-        .from('estudiantes_asignaturas')
-        .update({ activo: true })
-        .eq('estudiante_id', estudianteId)
-        .eq('asignatura_id', asignaturaId);
-      if (error) throw error;
-      return 'reactivada';
-    }
-
-    const { error } = await this.supabase
-      .from('estudiantes_asignaturas')
-      .insert([{ estudiante_id: estudianteId, asignatura_id: asignaturaId, activo: true }]);
-    if (error) {
-      if (error.code === '23505') return 'ya-inscrito';
-      throw error;
-    }
-    return 'creada';
+  /** Inscribe al estudiante con su código de acceso (validado en el servidor). */
+  async inscribirseConCodigo(codigo: string): Promise<'creada' | 'reactivada' | 'ya-inscrito'> {
+    const { data, error } = await this.supabase.rpc('inscribirse_con_codigo', { p_codigo: codigo.trim() });
+    if (error) throw error;
+    return data as 'creada' | 'reactivada' | 'ya-inscrito';
   }
 }
