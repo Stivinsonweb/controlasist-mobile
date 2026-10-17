@@ -21,7 +21,7 @@
             "assets": [{ "glob": "**/*", "input": "public" }],
             "styles": ["src/styles.scss"],
             "scripts": [],
-            "allowedCommonJsDependencies": ["jspdf", "html2canvas", "canvg", "rgbcolor", "raf", "core-js", "xlsx-js-style"]
+            "allowedCommonJsDependencies": ["jspdf", "html2canvas", "canvg", "rgbcolor", "raf", "core-js", "xlsx-js-style", "qrcode", "jsqr"]
           },
           "configurations": {
             "production": {

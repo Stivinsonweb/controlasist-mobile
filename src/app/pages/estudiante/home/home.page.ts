@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { AsignaturasService, Horario, DIAS_SEMANA } from '../../../core/services/asignaturas.service';
 import { EstudiantesPortalService, AsignaturaConDocente } from '../../../core/services/estudiantes-portal.service';
@@ -16,7 +16,7 @@ import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/
 @Component({
   selector: 'app-estudiante-home',
   standalone: true,
-  imports: [CommonModule, DialogComponent, EduBackgroundComponent, AvatarComponent, SubjectIconComponent, VerificadoBadgeComponent],
+  imports: [CommonModule, RouterLink, DialogComponent, EduBackgroundComponent, AvatarComponent, SubjectIconComponent, VerificadoBadgeComponent],
   templateUrl: './home.page.html',
 })
 export class EstudianteHomePage implements OnInit {

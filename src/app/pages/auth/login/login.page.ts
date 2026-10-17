@@ -47,6 +47,8 @@ export class LoginPage implements OnInit {
     if (this.route.snapshot.queryParamMap.get('forgot') === '1') {
       this.showForgotModal = true;
     }
+    // Viene de un enlace de estudiante (p. ej. el QR de asistencia): se preselecciona "Estudiante".
+    if (this.returnUrl?.startsWith('/estudiante')) this.tipoUsuario = 'estudiante';
   }
 
   private async verificarDisponibilidad() {
@@ -61,6 +63,12 @@ export class LoginPage implements OnInit {
     } catch (e) {
       console.error('Error verificando disponibilidad de la app:', e);
     }
+  }
+
+  /** Ruta interna a la que volver después de iniciar sesión (solo rutas propias, nunca URLs externas). */
+  get returnUrl(): string | null {
+    const url = this.route.snapshot.queryParamMap.get('returnUrl');
+    return url && url.startsWith('/') && !url.startsWith('//') ? url : null;
   }
 
   togglePassword() {
@@ -103,7 +111,8 @@ export class LoginPage implements OnInit {
             return;
           }
           this.toast.success(`Bienvenido ${nombre}`);
-          this.router.navigate(['/estudiante/home']);
+          const destino = this.returnUrl?.startsWith('/estudiante') ? this.returnUrl : '/estudiante/home';
+          this.router.navigateByUrl(destino);
         } else {
           if (rol !== 'administrador' && rol !== 'docente') {
             await this.supabase.auth.signOut();
@@ -112,7 +121,8 @@ export class LoginPage implements OnInit {
             return;
           }
           this.toast.success(`Bienvenido ${nombre}`);
-          this.router.navigate([rol === 'administrador' ? '/admin/dashboard' : '/home']);
+          const destinoDocente = rol === 'docente' && this.returnUrl && !this.returnUrl.startsWith('/estudiante') && !this.returnUrl.startsWith('/admin') ? this.returnUrl : null;
+          this.router.navigateByUrl(destinoDocente || (rol === 'administrador' ? '/admin/dashboard' : '/home'));
         }
       } else {
         this.toast.error(result.error || 'Credenciales inválidas');

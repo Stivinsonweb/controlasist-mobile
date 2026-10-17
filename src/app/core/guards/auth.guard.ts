@@ -3,16 +3,21 @@ import { Router, type CanActivateFn } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
 import { AuthService, type UserProfile } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = async () => {
+export const authGuard: CanActivateFn = async (_route, state) => {
   const supabase = inject(SupabaseService);
   const router = inject(Router);
 
   const session = await supabase.getSession();
   if (session) return true;
 
-  router.navigate(['/auth/login']);
+  irAlLogin(router, state.url);
   return false;
 };
+
+/** Al login recordando a dónde iba (p. ej. el enlace de un QR de asistencia), para volver después. */
+function irAlLogin(router: Router, url: string) {
+  router.navigate(['/auth/login'], { queryParams: url && url !== '/' ? { returnUrl: url } : {} });
+}
 
 export const guestGuard: CanActivateFn = async () => {
   const supabase = inject(SupabaseService);
@@ -35,14 +40,14 @@ function homeForRol(rol: UserProfile['rol']): string {
 
 /** Restringe una ruta a uno o más roles, resolviendo el rol de la sesión activa. */
 export const roleGuard = (...roles: UserProfile['rol'][]): CanActivateFn => {
-  return async () => {
+  return async (_route, state) => {
     const supabase = inject(SupabaseService);
     const authService = inject(AuthService);
     const router = inject(Router);
 
     const session = await supabase.getSession();
     if (!session) {
-      router.navigate(['/auth/login']);
+      irAlLogin(router, state.url);
       return false;
     }
 

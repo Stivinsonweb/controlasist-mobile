@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
+import { fechaLocalISO } from '../../shared/utils/fecha.util';
 
 export interface Asignatura {
   id: string;
@@ -142,7 +143,7 @@ export class AsignaturasService {
   }
 
   async actualizarEstadoHorario(horarioId: string, estado: string) {
-    const fechaHoy = new Date().toISOString().split('T')[0];
+    const fechaHoy = fechaLocalISO();
     const { data, error } = await this.supabase
       .from('horarios')
       .update({ estado, fecha_ultima_actualizacion: fechaHoy })

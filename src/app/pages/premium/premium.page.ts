@@ -32,6 +32,7 @@ import {
   normalizarPlantilla,
   seccionActiva,
 } from '../../core/services/plantilla-reporte.model';
+import { fechaLocalISO } from '../../shared/utils/fecha.util';
 
 /** Datos de ejemplo para que la vista previa se vea "llena" sin depender de datos reales. */
 const CLASES_EJEMPLO = [
@@ -288,7 +289,7 @@ export class PremiumPage implements OnInit {
   }
 
   abrirFormularioPago() {
-    this.formPago.fecha_pago_declarada = new Date().toISOString().split('T')[0];
+    this.formPago.fecha_pago_declarada = fechaLocalISO();
     const precio = this.precioMensual();
     if (precio) this.formPago.monto = formatearPesosCOP(precio);
     this.mostrarFormularioPago.set(true);

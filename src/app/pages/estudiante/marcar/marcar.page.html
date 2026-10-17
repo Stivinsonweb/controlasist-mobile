@@ -1,0 +1,42 @@
+<div class="mx-auto max-w-md animate-fade-in">
+  <!-- Escanear desde la app -->
+  <div *ngIf="vista() === 'escanear'">
+    <h1 class="text-xl font-bold" style="color: var(--text-primary);">Escanear QR de asistencia</h1>
+    <p class="mt-1 text-sm" style="color: var(--text-muted);">Apunta la cámara al código que proyecta tu docente.</p>
+
+    <div *ngIf="!errorCamara()" class="relative mt-5 aspect-square w-full overflow-hidden rounded-3xl bg-black shadow-dark-soft">
+      <video #video class="h-full w-full object-cover" muted playsinline></video>
+      <!-- Marco guía -->
+      <div class="pointer-events-none absolute inset-[14%] rounded-2xl border-4 border-white/80"></div>
+    </div>
+
+    <div *ngIf="errorCamara()" class="card mt-5 p-6 text-center">
+      <svg class="mx-auto h-10 w-10" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+      <p class="mt-3 text-sm" style="color: var(--text-secondary);">{{ errorCamara() }}</p>
+      <button type="button" (click)="iniciarCamara()" class="btn-outline btn-sm mt-4">Intentar de nuevo</button>
+    </div>
+  </div>
+
+  <!-- Enviando -->
+  <div *ngIf="vista() === 'enviando'" class="flex flex-col items-center py-24">
+    <svg class="h-10 w-10 animate-spin text-primary-600" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+    <p class="mt-4 text-sm" style="color: var(--text-muted);">Registrando tu asistencia...</p>
+  </div>
+
+  <!-- Resultado -->
+  <div *ngIf="vista() === 'resultado' && resultado() as r" class="card mt-6 p-8 text-center">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full text-white" [style.backgroundColor]="r.ok ? (r.estado === 'tarde' ? '#f59e0b' : '#10b981') : '#ef4444'">
+      <svg *ngIf="r.ok" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+      <svg *ngIf="!r.ok" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+    </div>
+    <h2 class="mt-4 text-xl font-bold" style="color: var(--text-primary);">{{ r.titulo }}</h2>
+    <p *ngIf="r.asignatura" class="mt-1 text-sm font-semibold" style="color: var(--text-secondary);">
+      {{ r.asignatura }}<span *ngIf="r.ok && r.estado"> · {{ r.estado === 'tarde' ? 'Tarde' : 'Presente' }}</span>
+    </p>
+    <p class="mt-2 text-sm" style="color: var(--text-muted);">{{ r.texto }}</p>
+    <div class="mt-6 flex flex-col gap-2">
+      <button *ngIf="!r.ok" type="button" (click)="iniciarCamara()" class="btn-primary w-full">Escanear de nuevo</button>
+      <a routerLink="/estudiante/home" [class.btn-primary]="r.ok" [class.btn-outline]="!r.ok" class="w-full">Ir al inicio</a>
+    </div>
+  </div>
+</div>

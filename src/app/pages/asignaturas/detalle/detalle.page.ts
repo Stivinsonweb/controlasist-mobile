@@ -11,8 +11,11 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { CalendarioSelectorComponent } from '../../../shared/components/calendario-selector/calendario-selector.component';
 import { CalendarioClasesComponent } from '../../../shared/components/calendario-clases/calendario-clases.component';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { QrAsistenciaComponent } from '../../../shared/components/qr-asistencia/qr-asistencia.component';
+import { MarcaQr } from '../../../core/services/asistencia-qr.service';
 import { SubjectIconComponent } from '../../../shared/components/subject-icon/subject-icon.component';
 import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/subject-theme.util';
+import { fechaLocalISO } from '../../../shared/utils/fecha.util';
 
 export interface EstadoOpcion {
   valor: string;
@@ -86,7 +89,7 @@ interface FilaCargaPreview extends FilaCargaMasiva {
 @Component({
   selector: 'app-detalle-asignatura',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, DialogComponent, CalendarioSelectorComponent, CalendarioClasesComponent, AvatarComponent, SubjectIconComponent],
+  imports: [CommonModule, RouterLink, FormsModule, DialogComponent, CalendarioSelectorComponent, CalendarioClasesComponent, AvatarComponent, SubjectIconComponent, QrAsistenciaComponent],
   templateUrl: './detalle.page.html',
 })
 export class DetalleAsignaturaPage implements OnInit {
@@ -144,6 +147,7 @@ export class DetalleAsignaturaPage implements OnInit {
   asistenciaActual: Asistencia | null = null;
   registrosTrabajo: RegistroTrabajo[] = [];
   busquedaAsistencia = '';
+  mostrarQr = false;
   temasTratados = '';
   observacionesClase = '';
   temasTratadosInvalid = false;
@@ -415,7 +419,7 @@ export class DetalleAsignaturaPage implements OnInit {
     this.temasTratadosInvalid = false;
     this.tipoClaseInvalid = false;
     try {
-      const fechaHoy = new Date().toISOString().split('T')[0];
+      const fechaHoy = fechaLocalISO();
       this.pendienteAsistenciaPayload = {
         asignatura_id: a.id,
         docente_id: a.docente_id,
@@ -485,6 +489,29 @@ export class DetalleAsignaturaPage implements OnInit {
       }));
   }
 
+  /** Clase (fecha y horario) de la toma de asistencia abierta: la que usa la sesión QR. */
+  get claseQr(): { fecha: string; hora_inicio: string; hora_fin: string } | null {
+    const c = this.asistenciaActual || this.pendienteAsistenciaPayload;
+    return c ? { fecha: c.fecha, hora_inicio: c.hora_inicio, hora_fin: c.hora_fin } : null;
+  }
+
+  /** Quien escaneó queda con su estado (presente/tarde); quien no, ausente. Las notas se conservan. */
+  aplicarMarcasQr(marcas: MarcaQr[]) {
+    const porEstudiante = new Map(marcas.map((m) => [m.estudiante_id, m.estado]));
+    let ausentes = 0;
+    for (const r of this.registrosTrabajo) {
+      const estado = porEstudiante.get(r.estudiante_id);
+      if (estado) {
+        r.estado = estado;
+      } else if (r.estado !== 'justificado') {
+        r.estado = 'ausente';
+        ausentes++;
+      }
+    }
+    this.mostrarQr = false;
+    this.toast.success(`${marcas.length} marcaron con QR y ${ausentes} quedaron ausentes. Revisa la lista y guarda.`);
+  }
+
   get registrosFiltrados(): RegistroTrabajo[] {
     const q = this.busquedaAsistencia.trim().toLowerCase();
     if (!q) return this.registrosTrabajo;
@@ -508,6 +535,7 @@ export class DetalleAsignaturaPage implements OnInit {
     this.asistenciaActual = null;
     this.registrosTrabajo = [];
     this.busquedaAsistencia = '';
+    this.mostrarQr = false;
     this.pendienteAsistenciaPayload = null;
     this.temasTratadosInvalid = false;
     this.tipoClaseInvalid = false;

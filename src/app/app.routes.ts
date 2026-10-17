@@ -68,6 +68,7 @@ export const routes: Routes = [
       // Soporte dentro del panel (la misma página pública /soporte, en modo embebido).
       { path: 'docente/soporte', canActivate: [roleGuard('docente')], data: { embebido: true }, loadComponent: () => import('./pages/soporte/soporte.page').then((m) => m.SoportePage) },
       { path: 'estudiante/soporte', canActivate: [roleGuard('estudiante')], data: { embebido: true }, loadComponent: () => import('./pages/soporte/soporte.page').then((m) => m.SoportePage) },
+      { path: 'estudiante/marcar', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/marcar/marcar.page').then((m) => m.MarcarQrPage) },
       { path: 'estudiante/datos-inscripcion', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/datos-inscripcion/datos-inscripcion.page').then((m) => m.DatosInscripcionPage) },
 
       // Premium — editor de plantillas de reportes (Parte 1). TEMPORAL: abierto a todos los

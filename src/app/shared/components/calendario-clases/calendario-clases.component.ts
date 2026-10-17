@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Horario } from '../../../core/services/asignaturas.service';
+import { fechaLocalISO } from '../../utils/fecha.util';
 
 const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -99,7 +100,7 @@ export class CalendarioClasesComponent implements OnInit, OnChanges, OnDestroy {
     this.diaActual = ahora.getDay();
     this.diaHoy = this.diaActual;
     this.horaActual = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
-    this.fechaActual = ahora.toISOString().split('T')[0];
+    this.fechaActual = fechaLocalISO(ahora);
   }
 
   private procesarEstados() {
