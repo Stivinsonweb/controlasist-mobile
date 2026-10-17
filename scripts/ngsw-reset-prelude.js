@@ -6,7 +6,7 @@
 // nuevo; al instalarse borra la caché "ngsw:" para que arranque desde la versión publicada.
 // Para forzar otra limpieza en el futuro, cambia NGSW_RESET_ID (solo cuando haga falta: cada
 // cambio obliga a todos los usuarios a volver a descargar la app).
-const NGSW_RESET_ID = '2026-10-13';
+const NGSW_RESET_ID = '2026-10-17';
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('ngsw:')).map((k) => caches.delete(k))))
