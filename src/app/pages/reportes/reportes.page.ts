@@ -5,13 +5,13 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AsignaturasService, Asignatura } from '../../core/services/asignaturas.service';
-import { ReportesService, ResumenEstudiante, ResumenGeneral } from '../../core/services/reportes.service';
+import { ReportesService, ResumenEstudiante, ResumenGeneral, NotaAsistencia } from '../../core/services/reportes.service';
 import { Asistencia } from '../../core/services/asistencias.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminService } from '../../core/services/admin.service';
 import { LogoService } from '../../core/services/logo.service';
-import { addPdfHeader, addPdfFooter, brandTableOptions } from '../../shared/utils/pdf-report.util';
+import { addPdfHeader, addPdfFooter, addPdfSectionTitle, brandTableOptions } from '../../shared/utils/pdf-report.util';
 import { dibujarEncabezadoPlantilla, opcionesTablaPlantilla, dibujarTituloSeccionPlantilla, dibujarInfoGeneralPlantilla, dibujarFirmasPlantilla } from '../../shared/utils/plantilla-pdf.util';
 import { XLSX, styleHeaderRow, autofitColumns, formatPercentColumn, applyZebraStripes, EXCEL_HEADER_STYLE_NEGRO } from '../../shared/utils/excel-report.util';
 import { LOGO_TAMANO_MM, TAMANO_FUENTE_PT, PlantillaReporte, LABELS_INSTITUCION, ESTILOS_DISENO, defaultPlantillaReporte, normalizarPlantilla, plantillaEfectiva, seccionActiva } from '../../core/services/plantilla-reporte.model';
@@ -39,6 +39,8 @@ export class ReportesPage implements OnInit {
   resumenEstudiantes = signal<ResumenEstudiante[]>([]);
   clases = signal<Asistencia[]>([]);
   tendencia = signal<{ fecha: string; porcentaje: number }[]>([]);
+  /** Justificaciones y notas por estudiante escritas al tomar asistencia. */
+  notas = signal<NotaAsistencia[]>([]);
 
   // ===== Formato institucional (punto 6) =====
   private docenteId = '';
@@ -100,16 +102,18 @@ export class ReportesPage implements OnInit {
     this.loadingDatos.set(true);
     try {
       const anio = this.anioSeleccionado() ?? undefined;
-      const [resumenGeneral, resumenEstudiantes, clases, tendencia] = await Promise.all([
+      const [resumenGeneral, resumenEstudiantes, clases, tendencia, notas] = await Promise.all([
         this.reportesService.resumenGeneral(this.asignaturaId, anio),
         this.reportesService.resumenPorEstudiante(this.asignaturaId, anio),
         this.reportesService.listarClases(this.asignaturaId, anio),
         this.reportesService.porcentajePorClase(this.asignaturaId, anio),
+        this.reportesService.notasDeAsistencia(this.asignaturaId, anio),
       ]);
       this.resumenGeneral.set(resumenGeneral);
       this.resumenEstudiantes.set(resumenEstudiantes);
       this.clases.set(clases);
       this.tendencia.set(tendencia);
+      this.notas.set(notas);
     } catch (e: any) {
       console.error(e);
       this.toast.error('No se pudieron cargar los datos de asistencia');
@@ -132,6 +136,19 @@ export class ReportesPage implements OnInit {
     return [...this.resumenEstudiantes()]
       .sort((a, b) => b.porcentajeAsistencia - a.porcentajeAsistencia)
       .map((r) => ({ label: `${r.nombres} ${r.apellidos}`, valor: r.porcentajeAsistencia }));
+  }
+
+  labelEstado(estado: string): string {
+    return ESTADOS_ASISTENCIA.find((e) => e.valor === estado)?.label || estado;
+  }
+
+  colorEstado(estado: string): string {
+    return ESTADOS_ASISTENCIA.find((e) => e.valor === estado)?.color || '#94a3b8';
+  }
+
+  /** Filas de la tabla "Justificaciones y observaciones" (PDF y Excel). */
+  private filasNotas(): string[][] {
+    return this.notas().map((n) => [this.formatFecha(n.fecha), `${n.nombres} ${n.apellidos}`, this.labelEstado(n.estado), n.observaciones]);
   }
 
   formatFecha(fecha: string): string {
@@ -170,6 +187,18 @@ export class ReportesPage implements OnInit {
       ]),
     });
 
+    if (this.notas().length > 0) {
+      let y = ((doc as any).lastAutoTable?.finalY ?? startY) + 12;
+      if (y > doc.internal.pageSize.getHeight() - 40) { doc.addPage(); y = 20; }
+      y = addPdfSectionTitle(doc, 'Justificaciones y observaciones', y);
+      autoTable(doc, {
+        ...brandTableOptions(y),
+        head: [['Fecha', 'Estudiante', 'Estado', 'Motivo / nota']],
+        body: this.filasNotas(),
+        columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 45 }, 2: { cellWidth: 24 } },
+      });
+    }
+
     addPdfFooter(doc, { logoDataUrl });
     doc.save(`reporte-${a.codigo}.pdf`);
   }
@@ -203,6 +232,7 @@ export class ReportesPage implements OnInit {
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Resumen');
+    this.agregarHojaNotas(wb);
     XLSX.writeFile(wb, `reporte-${a.codigo}.xlsx`);
   }
 
@@ -454,6 +484,18 @@ export class ReportesPage implements OnInit {
           doc.text(lineas, 14, y);
           y += lineas.length * 4.5 + 6;
         } else if (seccionId === 'firmas') {
+          // Justificaciones y notas por estudiante: siempre antes de las firmas, si hay.
+          if (this.notas().length > 0) {
+            if (y > pageHeight - 40) { doc.addPage(); y = 20; }
+            y = dibujarTituloSeccionPlantilla(doc, estilo, 'Justificaciones y observaciones', y);
+            autoTable(doc, {
+              ...opcionesTablaPlantilla(estilo, fontSize, y),
+              head: [['Fecha', 'Estudiante', 'Estado', 'Motivo / nota']],
+              body: this.filasNotas(),
+              columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 45 }, 2: { cellWidth: 24 } },
+            });
+            y = finTabla(10);
+          }
           y += 14;
           if (y > pageHeight - 34) { doc.addPage(); y = 34; }
           y = dibujarFirmasPlantilla(doc, estilo, `Firma ${labels.docente.toLowerCase()}`, `${perfil.nombres} ${perfil.apellidos}`, segundaFirma, y);
@@ -576,6 +618,8 @@ export class ReportesPage implements OnInit {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, plantilla.tipo_tabla_asistencia === 'matriz_estudiantes' ? 'Matriz de asistencia' : 'Historial de clases');
 
+    this.agregarHojaNotas(wb, EXCEL_HEADER_STYLE_NEGRO);
+
     if (seccionActiva(plantilla, 'listado_estudiantes')) {
       const estudiantes = await this.asignaturasService.listarEstudiantesInscritos(this.asignaturaId);
       const filasEstudiantes = [
@@ -599,5 +643,17 @@ export class ReportesPage implements OnInit {
     if (this.logoUrl()) {
       this.toast.info('El logo institucional no se incluye en el Excel (la librería xlsx no soporta imágenes); sí aparece en el PDF.');
     }
+  }
+
+  /** Hoja "Justificaciones" con el motivo/nota de cada estudiante por clase (solo si hay notas). */
+  private agregarHojaNotas(wb: XLSX.WorkBook, estiloEncabezado?: any) {
+    if (this.notas().length === 0) return;
+    const filas = [['Fecha', 'Estudiante', 'Cédula', 'Estado', 'Motivo / nota'],
+      ...this.notas().map((n) => [this.formatFecha(n.fecha), `${n.nombres} ${n.apellidos}`, n.cedula || '', this.labelEstado(n.estado), n.observaciones])];
+    const ws = XLSX.utils.aoa_to_sheet(filas);
+    ws['!cols'] = [{ wch: 14 }, { wch: 30 }, { wch: 16 }, { wch: 14 }, { wch: 60 }];
+    styleHeaderRow(ws, 0, 5, estiloEncabezado);
+    applyZebraStripes(ws, 1, filas.length - 1, 5);
+    XLSX.utils.book_append_sheet(wb, ws, 'Justificaciones');
   }
 }

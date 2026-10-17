@@ -71,7 +71,11 @@ interface RegistroTrabajo {
   estudiante_id: string;
   nombres: string;
   apellidos: string;
+  foto_url?: string;
   estado: EstadoAsistencia;
+  /** Motivo de la justificación o nota del docente sobre este estudiante en esta clase. */
+  observaciones: string;
+  mostrarNota: boolean;
 }
 
 interface FilaCargaPreview extends FilaCargaMasiva {
@@ -139,6 +143,7 @@ export class DetalleAsignaturaPage implements OnInit {
   savingAsistencia = false;
   asistenciaActual: Asistencia | null = null;
   registrosTrabajo: RegistroTrabajo[] = [];
+  busquedaAsistencia = '';
   temasTratados = '';
   observacionesClase = '';
   temasTratadosInvalid = false;
@@ -473,8 +478,27 @@ export class DetalleAsignaturaPage implements OnInit {
         estudiante_id: item.estudiantes.id,
         nombres: item.estudiantes.nombres,
         apellidos: item.estudiantes.apellidos,
+        foto_url: item.estudiantes.foto_url,
         estado: registrosPorEstudiante.get(item.estudiantes.id)?.estado || 'presente',
+        observaciones: registrosPorEstudiante.get(item.estudiantes.id)?.observaciones || '',
+        mostrarNota: !!registrosPorEstudiante.get(item.estudiantes.id)?.observaciones,
       }));
+  }
+
+  get registrosFiltrados(): RegistroTrabajo[] {
+    const q = this.busquedaAsistencia.trim().toLowerCase();
+    if (!q) return this.registrosTrabajo;
+    return this.registrosTrabajo.filter((r) => `${r.nombres} ${r.apellidos}`.toLowerCase().includes(q));
+  }
+
+  contarEstado(valor: EstadoAsistencia): number {
+    return this.registrosTrabajo.filter((r) => r.estado === valor).length;
+  }
+
+  /** Al justificar se abre el campo del motivo; la nota escrita se conserva si cambia de estado. */
+  setEstadoRegistro(r: RegistroTrabajo, valor: EstadoAsistencia) {
+    r.estado = valor;
+    if (valor === 'justificado') r.mostrarNota = true;
   }
 
   cerrarTomarAsistencia() {
@@ -483,6 +507,7 @@ export class DetalleAsignaturaPage implements OnInit {
     this.cerrarEstadoClase();
     this.asistenciaActual = null;
     this.registrosTrabajo = [];
+    this.busquedaAsistencia = '';
     this.pendienteAsistenciaPayload = null;
     this.temasTratadosInvalid = false;
     this.tipoClaseInvalid = false;
@@ -540,7 +565,9 @@ export class DetalleAsignaturaPage implements OnInit {
         });
       }
       await Promise.all(
-        this.registrosTrabajo.map((r) => this.asistenciasService.guardarRegistro(asistencia!.id!, r.estudiante_id, r.estado))
+        this.registrosTrabajo.map((r) =>
+          this.asistenciasService.guardarRegistro(asistencia!.id!, r.estudiante_id, r.estado, r.observaciones.trim() || null)
+        )
       );
       this.toast.success('Asistencia guardada exitosamente');
       this.cerrarTomarAsistencia();
@@ -625,7 +652,7 @@ export class DetalleAsignaturaPage implements OnInit {
     this.editandoObservaciones = false;
   }
 
-  iniciales(e: EstudianteRoster): string {
+  iniciales(e: Pick<EstudianteRoster, 'nombres' | 'apellidos'>): string {
     return `${(e.nombres?.[0] ?? '').toUpperCase()}${(e.apellidos?.[0] ?? '').toUpperCase()}`;
   }
 

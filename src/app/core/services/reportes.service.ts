@@ -35,6 +35,17 @@ export interface FilaMatrizEstudiante {
   porcentajeAsistencia: number;
 }
 
+/** Justificación o nota que el docente escribió para un estudiante en una clase. */
+export interface NotaAsistencia {
+  fecha: string;
+  hora_inicio: string;
+  nombres: string;
+  apellidos: string;
+  cedula?: string;
+  estado: EstadoAsistencia;
+  observaciones: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReportesService {
   constructor(private supabaseService: SupabaseService) {}
@@ -68,7 +79,7 @@ export class ReportesService {
 
     const { data, error } = await this.supabase
       .from('registros_asistencia')
-      .select('asistencia_id, estudiante_id, estado, estudiantes ( id, nombres, apellidos, cedula )')
+      .select('asistencia_id, estudiante_id, estado, observaciones, estudiantes ( id, nombres, apellidos, cedula )')
       .in('asistencia_id', clasesIds);
     if (error) throw error;
     return { clases, registros: (data || []) as any[] };
@@ -141,6 +152,28 @@ export class ReportesService {
       fila.porcentajeAsistencia = fila.total > 0 ? Math.round((asistio / fila.total) * 100) : 0;
     }
     return filas.sort((a, b) => a.apellidos.localeCompare(b.apellidos));
+  }
+
+  /** Justificaciones y notas por estudiante del periodo, en orden cronológico. */
+  async notasDeAsistencia(asignaturaId: string, anio?: number): Promise<NotaAsistencia[]> {
+    const { clases, registros } = await this.registrosDeClases(asignaturaId, anio);
+    const clasesPorId = new Map(clases.map((c) => [c.id!, c]));
+
+    return registros
+      .filter((r) => r.estudiantes && r.observaciones && String(r.observaciones).trim())
+      .map((r) => {
+        const clase = clasesPorId.get(r.asistencia_id);
+        return {
+          fecha: clase?.fecha || '',
+          hora_inicio: clase?.hora_inicio || '',
+          nombres: r.estudiantes.nombres,
+          apellidos: r.estudiantes.apellidos,
+          cedula: r.estudiantes.cedula,
+          estado: r.estado as EstadoAsistencia,
+          observaciones: String(r.observaciones).trim(),
+        };
+      })
+      .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora_inicio.localeCompare(b.hora_inicio) || a.apellidos.localeCompare(b.apellidos));
   }
 
   /** % de asistencia de cada clase dictada, en orden cronológico — para la gráfica de tendencia. */

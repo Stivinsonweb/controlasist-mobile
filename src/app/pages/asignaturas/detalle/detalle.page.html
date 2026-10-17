@@ -347,39 +347,75 @@
     </div>
 
     <ng-container *ngIf="registrosTrabajo.length > 0">
-      <div class="mt-3 flex items-center justify-between">
-        <p class="text-sm text-slate-500">{{ registrosTrabajo.length }} estudiante(s)</p>
-        <button (click)="marcarTodosPresentes()" class="text-xs font-semibold text-primary-600 hover:text-primary-700">Marcar todos presentes</button>
+      <!-- Resumen en vivo -->
+      <div class="mt-3 grid grid-cols-4 gap-1.5">
+        <div *ngFor="let e of estadosAsistencia" class="rounded-xl px-2 py-2 text-center" [style.backgroundColor]="e.color + '1a'">
+          <p class="text-lg font-extrabold leading-none" [style.color]="e.color">{{ contarEstado(e.valor) }}</p>
+          <p class="mt-1 text-[10px] font-semibold uppercase tracking-wide sm:text-[11px]" [style.color]="e.color">{{ e.label }}</p>
+        </div>
       </div>
 
-      <ul class="mt-2 max-h-80 space-y-1.5 overflow-y-auto">
-        <li *ngFor="let r of registrosTrabajo" class="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2">
-          <span class="min-w-0 flex-1 truncate text-sm font-medium text-slate-700">{{ r.nombres }} {{ r.apellidos }}</span>
-          <div class="flex shrink-0 gap-1.5">
-            <button
-              *ngFor="let e of estadosAsistencia"
-              type="button"
-              (click)="r.estado = e.valor"
-              [title]="e.label"
-              [attr.aria-label]="e.label"
-              [attr.aria-pressed]="r.estado === e.valor"
-              class="relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
-              [class.check-pop]="r.estado === e.valor"
-              [style.backgroundColor]="r.estado === e.valor ? e.color : '#e2e8f0'"
-              [style.color]="r.estado === e.valor ? '#ffffff' : '#64748b'"
-              [style.box-shadow]="r.estado === e.valor ? '0 0 0 2px #ffffff, 0 0 0 4px ' + e.color : 'none'"
-            >
-              <ng-container [ngSwitch]="e.icono">
-                <svg *ngSwitchCase="'check'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                <svg *ngSwitchCase="'clock'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 2.5" /></svg>
-                <svg *ngSwitchCase="'flag'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v18M6 4.5h11l-2.5 3.5 2.5 3.5H6" /></svg>
-                <svg *ngSwitchCase="'x'" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" /></svg>
-              </ng-container>
-              <span *ngIf="r.estado === e.valor" class="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white" [style.backgroundColor]="e.color">
-                <svg class="h-2 w-2 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-              </span>
-            </button>
+      <div class="mt-3 flex flex-wrap items-center gap-2">
+        <div *ngIf="registrosTrabajo.length > 6" class="relative min-w-0 flex-1">
+          <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+          <input [(ngModel)]="busquedaAsistencia" class="input-field py-2 pl-9 text-sm" placeholder="Buscar estudiante..." />
+        </div>
+        <p *ngIf="registrosTrabajo.length <= 6" class="flex-1 text-sm text-slate-500">{{ registrosTrabajo.length }} estudiante(s)</p>
+        <button type="button" (click)="marcarTodosPresentes()" class="btn-outline btn-sm shrink-0">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+          Todos presentes
+        </button>
+      </div>
+
+      <ul class="mt-3 max-h-[26rem] space-y-2 overflow-y-auto pr-0.5">
+        <li *ngFor="let r of registrosFiltrados" class="rounded-xl border bg-white p-2.5 transition-colors"
+            [style.borderColor]="colorEstadoAsistencia(r.estado) + '55'">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div class="flex min-w-0 flex-1 items-center gap-2.5">
+              <app-avatar [fotoUrl]="r.foto_url" [iniciales]="iniciales(r)" colorFondo="#dbeafe" textColor="#1d4ed8" sizeClass="h-8 w-8 text-[11px]" />
+              <span class="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{{ r.nombres }} {{ r.apellidos }}</span>
+              <button *ngIf="!r.mostrarNota" type="button" (click)="r.mostrarNota = true" class="shrink-0 text-[11px] font-semibold text-slate-400 hover:text-slate-600 sm:hidden">+ Nota</button>
+            </div>
+
+            <!-- Estados con texto: más claros que solo íconos -->
+            <div class="grid grid-cols-4 gap-1 sm:flex sm:shrink-0" role="radiogroup" [attr.aria-label]="'Asistencia de ' + r.nombres">
+              <button
+                *ngFor="let e of estadosAsistencia"
+                type="button"
+                role="radio"
+                (click)="setEstadoRegistro(r, e.valor)"
+                [attr.aria-checked]="r.estado === e.valor"
+                class="flex flex-col items-center justify-center gap-0.5 rounded-lg px-1.5 py-1.5 text-[10px] font-semibold transition-all sm:flex-row sm:gap-1 sm:px-2.5 sm:text-xs"
+                [class.check-pop]="r.estado === e.valor"
+                [style.backgroundColor]="r.estado === e.valor ? e.color : '#f1f5f9'"
+                [style.color]="r.estado === e.valor ? '#ffffff' : '#64748b'"
+              >
+                <ng-container [ngSwitch]="e.icono">
+                  <svg *ngSwitchCase="'check'" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                  <svg *ngSwitchCase="'clock'" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5V12l3 2.5" /></svg>
+                  <svg *ngSwitchCase="'flag'" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v18M6 4.5h11l-2.5 3.5 2.5 3.5H6" /></svg>
+                  <svg *ngSwitchCase="'x'" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" /></svg>
+                </ng-container>
+                {{ e.label }}
+              </button>
+              <button *ngIf="!r.mostrarNota" type="button" (click)="r.mostrarNota = true" title="Agregar nota" aria-label="Agregar nota"
+                      class="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 sm:flex">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+              </button>
+            </div>
           </div>
+
+          <!-- Motivo de la justificación / nota del estudiante en esta clase -->
+          <div *ngIf="r.mostrarNota" class="mt-2">
+            <label class="mb-1 block text-[11px] font-semibold" [style.color]="r.estado === 'justificado' ? colorEstadoAsistencia('justificado') : '#64748b'">
+              {{ r.estado === 'justificado' ? 'Motivo de la justificación' : 'Nota sobre este estudiante' }}
+            </label>
+            <input [(ngModel)]="r.observaciones" maxlength="300" class="input-field py-2 text-sm"
+                   [placeholder]="r.estado === 'justificado' ? 'Ej: incapacidad médica, calamidad doméstica, permiso de la institución...' : 'Ej: llegó 15 minutos tarde por el transporte'" />
+          </div>
+        </li>
+        <li *ngIf="registrosFiltrados.length === 0" class="rounded-xl border border-dashed border-slate-200 p-4 text-center text-sm text-slate-400">
+          Ningún estudiante coincide con "{{ busquedaAsistencia }}".
         </li>
       </ul>
 
