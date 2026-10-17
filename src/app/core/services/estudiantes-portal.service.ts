@@ -62,10 +62,8 @@ export class EstudiantesPortalService {
     const docenteIds = [...new Set((asignaturas || []).map((a: any) => a.docente_id).filter(Boolean))];
     let docentes: DocenteResumen[] = [];
     if (docenteIds.length > 0) {
-      const { data: docentesData, error: docentesError } = await this.supabase
-        .from('docentes')
-        .select('id, nombres, apellidos, foto_url, verificado, premium_activo')
-        .in('id', docenteIds);
+      // Solo datos públicos del docente — la tabla `docentes` no es legible por estudiantes.
+      const { data: docentesData, error: docentesError } = await this.supabase.rpc('docentes_publicos', { p_ids: docenteIds });
       if (docentesError) throw docentesError;
       docentes = (docentesData || []) as DocenteResumen[];
     }
@@ -101,12 +99,8 @@ export class EstudiantesPortalService {
 
     let docente: DocenteResumen | null = null;
     if (asignatura.docente_id) {
-      const { data: docenteData } = await this.supabase
-        .from('docentes')
-        .select('id, nombres, apellidos, foto_url, verificado, premium_activo')
-        .eq('id', asignatura.docente_id)
-        .maybeSingle();
-      docente = (docenteData as DocenteResumen) || null;
+      const { data: docenteData } = await this.supabase.rpc('docentes_publicos', { p_ids: [asignatura.docente_id] });
+      docente = ((docenteData as DocenteResumen[] | null)?.[0]) || null;
     }
 
     return { asignatura: asignatura as Asignatura, docente, expirado };
