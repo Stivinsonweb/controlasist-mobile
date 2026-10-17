@@ -115,6 +115,18 @@ export class AsistenciasService {
     return this.crearAsistencia(payload);
   }
 
+  /** Clases ya registradas en una fecha para varias asignaturas (para "Mis clases de hoy"). */
+  async listarDeFecha(asignaturaIds: string[], fecha: string) {
+    if (asignaturaIds.length === 0) return [] as Asistencia[];
+    const { data, error } = await this.supabase
+      .from('asistencias')
+      .select('id, asignatura_id, fecha, hora_inicio, hora_fin')
+      .in('asignatura_id', asignaturaIds)
+      .eq('fecha', fecha);
+    if (error) throw error;
+    return (data || []) as Asistencia[];
+  }
+
   /** Historial de clases dictadas para una asignatura, más recientes primero. */
   async listarPorAsignatura(asignaturaId: string) {
     const { data, error } = await this.supabase

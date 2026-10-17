@@ -7,7 +7,7 @@ import { SupabaseService } from '../../core/services/supabase.service';
 import { ToastService } from '../../core/services/toast.service';
 import { NotificacionesPushToggleComponent } from '../../shared/components/notificaciones-push-toggle/notificaciones-push-toggle.component';
 
-type Categoria = 'clases' | 'premium' | 'cuenta' | 'otras';
+type Categoria = 'alertas' | 'clases' | 'premium' | 'cuenta' | 'otras';
 type Filtro = 'todas' | 'no-leidas' | Categoria;
 
 interface CategoriaInfo {
@@ -18,6 +18,11 @@ interface CategoriaInfo {
 }
 
 const CATEGORIAS: Record<Categoria, CategoriaInfo> = {
+  alertas: {
+    label: 'Alertas',
+    color: '#ef4444',
+    icono: 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z',
+  },
   clases: {
     label: 'Clases',
     color: '#3b82f6',
@@ -124,6 +129,7 @@ export class NotificacionesPage implements OnInit {
   }
 
   categoria(n: Notificacion): Categoria {
+    if (n.tipo.startsWith('riesgo_asistencia')) return 'alertas';
     if (n.tipo === 'recordatorio_clase') return 'clases';
     if (n.tipo.startsWith('premium')) return 'premium';
     if (n.tipo.startsWith('verificacion')) return 'cuenta';
@@ -141,6 +147,7 @@ export class NotificacionesPage implements OnInit {
   /** A dónde lleva "Ver" según el tipo y el rol. */
   enlace(n: Notificacion): string | null {
     const c = this.categoria(n);
+    if (c === 'alertas') return this.rol === 'estudiante' ? '/estudiante/asistencia' : '/home';
     if (c === 'clases') return this.rol === 'estudiante' ? '/estudiante/home' : '/home';
     if (c === 'premium' && this.rol === 'docente') return '/premium';
     if (c === 'cuenta' && this.rol === 'docente') return '/docente/perfil';

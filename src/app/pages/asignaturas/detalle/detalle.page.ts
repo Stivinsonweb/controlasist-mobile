@@ -186,6 +186,37 @@ export class DetalleAsignaturaPage implements OnInit {
   async ngOnInit() {
     this.asignaturaId = this.route.snapshot.paramMap.get('id') || '';
     await this.load();
+
+    // Viene de "Mis clases de hoy" (inicio): abre directo la toma de asistencia de esa clase.
+    const claseId = this.route.snapshot.queryParamMap.get('clase');
+    const accion = this.route.snapshot.queryParamMap.get('accion');
+    if (claseId) {
+      this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      await this.abrirClaseDesdeInicio(claseId, accion === 'qr');
+    }
+  }
+
+  /** Marca la clase como realizada (si aún no lo está) y abre la toma de asistencia, o el QR. */
+  private async abrirClaseDesdeInicio(horarioId: string, conQr: boolean) {
+    const horario = this.horarios().find((h) => h.id === horarioId);
+    if (!horario) {
+      this.toast.warning('No se encontró esa clase en el horario de la asignatura');
+      return;
+    }
+    try {
+      const hoy = fechaLocalISO();
+      if (!(horario.estado === 'realizada' && horario.fecha_ultima_actualizacion === hoy)) {
+        await this.asignaturasService.actualizarEstadoHorario(horarioId, 'realizada');
+        horario.estado = 'realizada';
+        horario.fecha_ultima_actualizacion = hoy;
+        this.horarios.set([...this.horarios()]);
+      }
+      this.claseSeleccionada.set({ horario, estado: 'realizada', esHoy: true });
+      await this.abrirTomarAsistencia();
+      if (conQr && this.registrosTrabajo.length > 0) this.mostrarQr = true;
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo abrir la toma de asistencia');
+    }
   }
 
   async load() {

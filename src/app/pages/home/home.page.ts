@@ -2,12 +2,32 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../core/services/supabase.service';
-import { AsignaturasService, Asignatura } from '../../core/services/asignaturas.service';
+import { AsignaturasService, Asignatura, Horario } from '../../core/services/asignaturas.service';
+import { AsistenciasService } from '../../core/services/asistencias.service';
+import { fechaLocalISO } from '../../shared/utils/fecha.util';
 import { ToastService } from '../../core/services/toast.service';
 import { EduBackgroundComponent } from '../../shared/components/edu-background/edu-background.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { SubjectIconComponent } from '../../shared/components/subject-icon/subject-icon.component';
 import { subjectGradientStyle, subjectShadowStyle } from '../../shared/utils/subject-theme.util';
+
+type EstadoClaseHoy = 'tomada' | 'realizada' | 'cancelada' | 'aplazada' | 'en_curso' | 'pendiente' | 'sin_registrar';
+
+export interface ClaseHoy {
+  horario: Horario;
+  asignatura: Asignatura;
+  estado: EstadoClaseHoy;
+}
+
+const ESTADOS_CLASE_HOY: Record<EstadoClaseHoy, { label: string; color: string }> = {
+  tomada: { label: 'Asistencia tomada', color: '#10b981' },
+  realizada: { label: 'Realizada', color: '#10b981' },
+  en_curso: { label: 'En curso', color: '#3b82f6' },
+  pendiente: { label: 'Más tarde', color: '#64748b' },
+  sin_registrar: { label: 'Sin registrar', color: '#f59e0b' },
+  cancelada: { label: 'Cancelada', color: '#ef4444' },
+  aplazada: { label: 'Aplazada', color: '#8b5cf6' },
+};
 
 @Component({
   selector: 'app-home-docente',
@@ -21,6 +41,11 @@ export class HomeDocentePage implements OnInit {
   loadingProfile = signal(true);
   loadingAsignaturas = signal(true);
 
+  /** "Mis clases de hoy": clases de las asignaturas activas que tocan hoy, en orden de hora. */
+  clasesHoy = signal<ClaseHoy[]>([]);
+  loadingClasesHoy = signal(true);
+  hoyTexto = new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+
   periodos = signal<string[]>([]);
   periodoSeleccionado = signal<string>('todos');
 
@@ -33,6 +58,7 @@ export class HomeDocentePage implements OnInit {
   constructor(
     private supabaseService: SupabaseService,
     private asignaturasService: AsignaturasService,
+    private asistenciasService: AsistenciasService,
     private router: Router,
     private toast: ToastService
   ) {}
@@ -44,6 +70,63 @@ export class HomeDocentePage implements OnInit {
   async loadAll() {
     await this.loadDocente();
     await this.loadAsignaturas();
+    await this.loadClasesHoy();
+  }
+
+  /** Misma lógica del calendario de la asignatura: horarios activos del día de la semana de hoy. */
+  async loadClasesHoy() {
+    this.loadingClasesHoy.set(true);
+    try {
+      const activas = this.asignaturas().filter((a) => a.activa && a.id);
+      const ids = activas.map((a) => a.id!) ;
+      const ahora = new Date();
+      const hoy = fechaLocalISO(ahora);
+      const hora = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+
+      const [horarios, tomadas] = await Promise.all([
+        this.asignaturasService.listarHorariosDeAsignaturas(ids),
+        this.asistenciasService.listarDeFecha(ids, hoy),
+      ]);
+      const clave = (asignaturaId: string, ini: string, fin: string) => `${asignaturaId}|${ini}|${fin}`;
+      const conAsistencia = new Set(tomadas.map((t) => clave(t.asignatura_id, t.hora_inicio, t.hora_fin)));
+
+      const clases: ClaseHoy[] = horarios
+        .filter((h) => h.dia_semana === ahora.getDay())
+        .map((h) => {
+          const asignatura = activas.find((a) => a.id === h.asignatura_id)!;
+          let estado: EstadoClaseHoy;
+          if (conAsistencia.has(clave(h.asignatura_id, h.hora_inicio, h.hora_fin))) estado = 'tomada';
+          else if (h.estado && h.estado !== 'pendiente' && h.fecha_ultima_actualizacion === hoy) estado = h.estado as EstadoClaseHoy;
+          else if (hora < h.hora_inicio.slice(0, 5)) estado = 'pendiente';
+          else if (hora <= h.hora_fin.slice(0, 5)) estado = 'en_curso';
+          else estado = 'sin_registrar';
+          return { horario: h, asignatura, estado };
+        })
+        .sort((a, b) => a.horario.hora_inicio.localeCompare(b.horario.hora_inicio));
+      this.clasesHoy.set(clases);
+    } catch (e) {
+      console.error('Error cargando las clases de hoy:', e);
+      this.clasesHoy.set([]);
+    } finally {
+      this.loadingClasesHoy.set(false);
+    }
+  }
+
+  infoEstadoHoy(estado: EstadoClaseHoy) {
+    return ESTADOS_CLASE_HOY[estado] ?? ESTADOS_CLASE_HOY.pendiente;
+  }
+
+  /** Se puede tomar asistencia salvo que la clase se haya cancelado o aplazado. */
+  puedeTomarAsistencia(c: ClaseHoy): boolean {
+    return c.estado !== 'cancelada' && c.estado !== 'aplazada';
+  }
+
+  abrirClaseHoy(c: ClaseHoy, accion: 'asistencia' | 'qr') {
+    this.router.navigate(['/asignaturas/detalle', c.asignatura.id], { queryParams: { clase: c.horario.id, accion } });
+  }
+
+  horaCorta(h: string): string {
+    return h.slice(0, 5);
   }
 
   async loadDocente() {

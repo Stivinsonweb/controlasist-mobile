@@ -125,6 +125,19 @@ export class AsignaturasService {
     return (data || []) as Horario[];
   }
 
+  /** Horarios activos de varias asignaturas a la vez (para "Mis clases de hoy" del inicio). */
+  async listarHorariosDeAsignaturas(asignaturaIds: string[]) {
+    if (asignaturaIds.length === 0) return [] as Horario[];
+    const { data, error } = await this.supabase
+      .from('horarios')
+      .select('*')
+      .in('asignatura_id', asignaturaIds)
+      .eq('activo', true)
+      .order('hora_inicio', { ascending: true });
+    if (error) throw error;
+    return (data || []) as Horario[];
+  }
+
   async agregarHorario(payload: Horario) {
     const { data, error } = await this.supabase.from('horarios').insert([payload]).select().single();
     if (error) throw error;

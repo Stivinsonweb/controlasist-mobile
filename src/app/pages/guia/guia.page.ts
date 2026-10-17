@@ -45,7 +45,8 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     titulo: 'Tomar asistencia',
     descripcion: 'En cada clase, marca a cada estudiante con botones claros (Presente, Tarde, Justificado, Ausente) y escribe el motivo de las justificaciones.',
     pasos: [
-      'En el detalle de la asignatura, haz clic en la clase del día que quieres registrar dentro del calendario de clases.',
+      'Atajo: en tu "Inicio", la tarjeta "Mis clases de hoy" muestra las clases del día con los botones "Tomar asistencia" y "QR" — un toque y quedas en la lista (la clase se marca como realizada).',
+      'También puedes entrar al detalle de la asignatura y hacer clic en la clase del día dentro del calendario de clases.',
       'Marca primero el estado de la clase: si fue realizada se abre la toma de asistencia; si fue cancelada o aplazada no se toma asistencia y los estudiantes no tienen falla.',
       'Arriba verás un resumen en vivo con cuántos van presentes, tarde, justificados y ausentes. Si tienes muchos estudiantes, usa el buscador para encontrar a alguien rápido.',
       'Marca a cada estudiante con los botones "Presente", "Tarde", "Justificado" o "Ausente" — o usa "Todos presentes" y ajusta solo las excepciones.',
@@ -123,7 +124,8 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     descripcion: 'Revisa en un solo lugar los recordatorios de tus clases y los avisos de Premium y de tu cuenta.',
     pasos: [
       'Entra a "Notificaciones" desde el menú lateral o toca la campana en la parte superior del panel — el número rojo indica cuántas tienes sin leer.',
-      'Las notificaciones se agrupan por día (Hoy, Ayer...) y cada tipo tiene su color: Clases, Premium y Cuenta. Usa los filtros "Todas", "No leídas" o por tipo.',
+      'Las notificaciones se agrupan por día (Hoy, Ayer...) y cada tipo tiene su color: Alertas, Clases, Premium y Cuenta. Usa los filtros "Todas", "No leídas" o por tipo.',
+      'Recibirás una "Alerta" cuando un estudiante baje del 75% de asistencia en una de tus asignaturas (desde la 3.ª clase registrada), para que puedas hablar con él a tiempo.',
       'Toca una notificación para marcarla como leída, o "Ver →" para ir a la sección relacionada. Con "Marcar todas como leídas" quedas al día de un toque, y con la "×" la eliminas.',
       'Para recibirlas también en tu celular o navegador (incluso con la app cerrada), activa "Recordatorios de clase" en la parte superior de Notificaciones o en "Mi perfil" y acepta el permiso del navegador.',
     ],
@@ -207,6 +209,7 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
     pasos: [
       'Entra a "Notificaciones" desde el menú lateral o toca la campana en la parte superior — el número rojo indica cuántas tienes sin leer.',
       'Las notificaciones se agrupan por día (Hoy, Ayer...). Usa los filtros "Todas" o "No leídas".',
+      'Si tu asistencia en una asignatura baja del 75%, te llega una "Alerta" de riesgo de pérdida por fallas con cuántas clases has faltado — revisa "Mi asistencia" y habla con tu docente.',
       'Toca una notificación para marcarla como leída, usa "Marcar todas como leídas" para quedar al día, o la "×" para eliminarla.',
       'Para recibir los recordatorios en tu celular o navegador antes de cada clase (incluso con la app cerrada), activa "Recordatorios de clase" en la parte superior de Notificaciones o en "Mi perfil" y acepta el permiso del navegador.',
     ],
