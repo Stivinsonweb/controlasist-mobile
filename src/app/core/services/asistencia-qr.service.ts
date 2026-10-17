@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 
-/** Cada cuánto cambia el QR. Debe coincidir con la ventana de 10 s de marcar_asistencia_qr. */
-export const QR_VENTANA_MS = 10_000;
+/** Cada cuánto cambia el QR. Debe coincidir con la ventana de 20 s de marcar_asistencia_qr. */
+export const QR_VENTANA_MS = 20_000;
 
 export interface SesionQr {
   id: string;
@@ -21,7 +21,7 @@ export interface MarcaQr {
 export type ResultadoMarcaQr = 'marcado' | 'ya-marcado' | 'vencido' | 'cerrada' | 'no-inscrito' | 'no-encontrada' | 'no-estudiante';
 
 /**
- * Asistencia con QR: el docente proyecta un código que cambia cada 10 s y el estudiante lo
+ * Asistencia con QR: el docente proyecta un código que cambia cada 20 s y el estudiante lo
  * escanea. El token es HMAC-SHA256(secreto de la sesión, número de ventana) — el mismo cálculo
  * que hace token_qr() en la base, que es quien valida.
  */

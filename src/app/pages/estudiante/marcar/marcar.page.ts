@@ -9,7 +9,7 @@ type Vista = 'escanear' | 'enviando' | 'resultado';
 const MENSAJES: Record<ResultadoMarcaQr, { titulo: string; texto: string; ok: boolean }> = {
   marcado: { titulo: '¡Asistencia registrada!', texto: 'Tu docente ya te ve en la lista.', ok: true },
   'ya-marcado': { titulo: 'Ya habías marcado', texto: 'Tu asistencia de esta clase ya estaba registrada.', ok: true },
-  vencido: { titulo: 'El código ya cambió', texto: 'El QR se renueva cada 10 segundos. Escanea el que está en pantalla ahora.', ok: false },
+  vencido: { titulo: 'El código ya cambió', texto: 'El QR se renueva cada 20 segundos. Escanea el que está en pantalla ahora.', ok: false },
   cerrada: { titulo: 'La toma de asistencia terminó', texto: 'Tu docente ya cerró el QR de esta clase. Si estás en clase, avísale.', ok: false },
   'no-inscrito': { titulo: 'No estás inscrito en esta asignatura', texto: 'Inscríbete con el código de acceso de la asignatura y vuelve a escanear.', ok: false },
   'no-encontrada': { titulo: 'Código no reconocido', texto: 'Este QR no corresponde a una toma de asistencia de ControlAsist.', ok: false },

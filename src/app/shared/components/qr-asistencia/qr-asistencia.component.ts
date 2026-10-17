@@ -11,7 +11,7 @@ export interface EstudianteQr {
 }
 
 /**
- * Pantalla completa para "Pasar lista con QR": muestra un código que cambia cada 10 s (para
+ * Pantalla completa para "Pasar lista con QR": muestra un código que cambia cada 20 s (para
  * proyectarlo en el aula) y la lista en vivo de quién ya marcó. Al terminar devuelve las marcas;
  * la página de la asignatura las aplica a la lista de "Tomar asistencia" para que el docente
  * revise y guarde como siempre.
@@ -55,7 +55,7 @@ export interface EstudianteQr {
             <div class="h-full rounded-full transition-[width] duration-200 ease-linear" [style.width.%]="progreso()"
                  [style.backgroundColor]="marcarComo() === 'tarde' ? '#f59e0b' : '#10b981'"></div>
           </div>
-          <p class="mt-2 text-xs text-slate-500">El código cambia cada 10 segundos. También pueden escanearlo desde la app: <b>Inicio → Escanear QR</b>.</p>
+          <p class="mt-2 text-xs text-slate-500">El código cambia cada {{ segundosVentana }} segundos. También pueden escanearlo desde la app: <b>Inicio → Escanear QR</b>.</p>
         </div>
 
         <!-- Panel lateral -->
@@ -103,6 +103,7 @@ export class QrAsistenciaComponent implements OnInit, OnDestroy {
 
   @ViewChild('contenedor') contenedor?: ElementRef<HTMLElement>;
 
+  readonly segundosVentana = QR_VENTANA_MS / 1000;
   cargando = signal(true);
   terminando = signal(false);
   qrDataUrl = signal<string | null>(null);

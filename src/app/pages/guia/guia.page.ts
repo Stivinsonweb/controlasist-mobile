@@ -60,7 +60,7 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     descripcion: 'Proyecta un código QR en clase: tus estudiantes lo escanean con su celular y la lista se llena sola.',
     pasos: [
       'Abre "Tomar asistencia" en la clase del día y presiona "Pasar lista con QR".',
-      'Se abre un QR a pantalla completa (usa "Pantalla completa" para proyectarlo). El código cambia cada 10 segundos, así una foto vieja no sirve para marcar después.',
+      'Se abre un QR a pantalla completa (usa "Pantalla completa" para proyectarlo). El código cambia cada 20 segundos, así una foto vieja no sirve para marcar después.',
       'Tus estudiantes lo escanean con la cámara del celular o desde la app ("Escanear QR"). A la derecha ves en vivo cuántos y quiénes ya marcaron.',
       'Si la clase ya empezó, cambia a "Los que escaneen desde ahora quedan como: Tarde".',
       'Presiona "Terminar y revisar": el QR se cierra, quien escaneó queda presente o tarde y quien no, ausente (los justificados no se tocan).',
@@ -176,7 +176,7 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
       'Opción 1: abre la cámara de tu celular, apunta al QR y toca el enlace que aparece — se abre ControlAsist y tu asistencia queda registrada.',
       'Opción 2: dentro de la app, toca "Escanear QR de asistencia" en tu inicio (o "Escanear QR" en el menú), permite el uso de la cámara y apunta al código. En iPhone con la app instalada, usa esta opción.',
       'Si no tenías la sesión abierta, inicia sesión con tu cuenta de estudiante y volverás directo a marcar.',
-      'Verás "¡Asistencia registrada!" con el nombre de la asignatura. Si dice "El código ya cambió", vuelve a escanear el que está en pantalla: el QR se renueva cada 10 segundos.',
+      'Verás "¡Asistencia registrada!" con el nombre de la asignatura. Si dice "El código ya cambió", vuelve a escanear el que está en pantalla: el QR se renueva cada 20 segundos.',
       'Solo puedes marcar en asignaturas en las que estás inscrito y mientras tu docente tenga el QR abierto.',
     ],
   },
