@@ -60,9 +60,13 @@ export class HomeDocentePage implements OnInit {
   periodos = signal<string[]>([]);
   periodoSeleccionado = signal<string>('todos');
 
+  /** Las archivadas tienen su propio botón ("Archivadas"); los filtros de periodo muestran solo las activas. */
+  archivadas = computed(() => this.asignaturas().filter((a) => !a.activa));
+
   asignaturasFiltradas = computed(() => {
     const periodo = this.periodoSeleccionado();
-    const lista = this.asignaturas();
+    if (periodo === 'archivadas') return this.archivadas();
+    const lista = this.asignaturas().filter((a) => a.activa);
     return periodo === 'todos' ? lista : lista.filter((a) => a.periodo === periodo);
   });
 
@@ -223,7 +227,7 @@ export class HomeDocentePage implements OnInit {
       const data = await this.asignaturasService.listarPorDocente(docenteId);
       this.asignaturas.set(data);
 
-      const periodosUnicos = [...new Set(data.map((a) => a.periodo))].sort().reverse();
+      const periodosUnicos = [...new Set(data.filter((a) => a.activa).map((a) => a.periodo))].sort().reverse();
       this.periodos.set(periodosUnicos);
       if (periodosUnicos.length > 0 && this.periodoSeleccionado() === 'todos') {
         this.periodoSeleccionado.set(periodosUnicos[0]);

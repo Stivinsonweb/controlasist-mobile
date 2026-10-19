@@ -39,6 +39,9 @@
               [style.background]="i === activo() ? 'linear-gradient(135deg, var(--accent-from), var(--accent-to))' : 'var(--bg-surface-2)'"
               [style.color]="i === activo() ? '#fff' : 'var(--text-secondary)'">
         {{ tema.titulo }}
+        <span *ngIf="tema.nuevo" class="ml-1 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none"
+              [style.background]="i === activo() ? 'rgba(255,255,255,0.25)' : 'linear-gradient(135deg, var(--accent-from), var(--accent-to))'"
+              style="color: #fff;">Nuevo</span>
       </button>
     </div>
 

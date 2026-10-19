@@ -11,6 +11,8 @@ interface GuiaTema {
   descripcion: string;
   /** Instrucciones numeradas, estilo manual — se muestran debajo de la descripción corta. */
   pasos: string[];
+  /** Función nueva o recién actualizada: se marca con la etiqueta "Nuevo". */
+  nuevo?: boolean;
 }
 
 type Rol = 'docente' | 'estudiante';
@@ -26,6 +28,8 @@ const TEMAS_DOCENTE: GuiaTema[] = [
       'Elige un color y un ícono para identificarla en tu lista de asignaturas.',
       'Presiona "Crear asignatura" — el sistema genera automáticamente un código de acceso único para tus estudiantes.',
       'Entra al detalle de la asignatura para copiar ese código y compartirlo con tu grupo.',
+      'Si la clase es por Meet, Zoom o Teams, elige la modalidad "Virtual" o "Híbrida": así se activan las opciones de clase virtual.',
+      'Al terminar el semestre puedes "Desactivar asignatura" (al final del detalle): queda archivada, sin borrar su historial. Para volver a usarla, presiona el botón "Archivadas" en tu inicio, entra a ella y presiona "Reactivar asignatura".',
     ],
   },
   {
@@ -35,7 +39,8 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     pasos: [
       'Entra al detalle de la asignatura y ubica la sección "Horarios de clase".',
       'Presiona "+ Horario" para un solo horario, o "Agregar varios" para cargar varios días de una vez.',
-      'Si usas "Agregar varios", marca los días de la semana en que dictas la clase y define hora de inicio y fin para cada uno (hay atajos de horas rápidas).',
+      'Toca "Hora inicio" u "Hora fin" y elige la hora en el reloj: primero la hora (con a. m. / p. m.) y luego los minutos. Al terminar la hora de inicio, "Siguiente" pasa a la de fin.',
+      'Si usas "Agregar varios", marca los días de la semana en que dictas la clase y define hora de inicio y fin para cada uno (hay atajos de horas rápidas). La hora de fin debe ser posterior a la de inicio.',
       'Indica el aula si aplica, o una fecha específica si es una sesión puntual (no recurrente).',
       'Guarda — los horarios quedan listados y arman el calendario de clases de la asignatura.',
     ],
@@ -70,6 +75,36 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     ],
   },
   {
+    variant: 'reportes',
+    titulo: 'Actividades de clase',
+    nuevo: true,
+    descripcion: 'Publica tareas, talleres y quizzes; tus estudiantes reciben el aviso, entregan desde la app y tú calificas con retroalimentación.',
+    pasos: [
+      'Entra a "Actividades" desde el menú lateral (o con el botón "Actividades" en el detalle de una asignatura) y presiona "Nueva actividad".',
+      'Elige la asignatura y el tipo (tarea, taller, quiz, lectura, exposición, proyecto u otro), escribe el título y las instrucciones, y adjunta un archivo (hasta 20 MB) o un enlace si lo necesitas.',
+      'Opcional: en "Para la clase" liga la actividad a una clase de tu horario; ese día aparecerá en "Mis clases de hoy" de tu inicio.',
+      'Marca "Tiene fecha de entrega" y elige el día en el calendario y la hora límite en el reloj. Indica si los estudiantes entregan por la app y si es calificable (con su nota máxima).',
+      'Presiona "Publicar": tus estudiantes reciben una notificación al instante y un recordatorio 24 horas antes de la entrega si aún no han entregado.',
+      'Toca una actividad para ver quién entregó, quién entregó tarde y quién no; abre cada archivo o enlace, escribe la nota y la retroalimentación y presiona "Calificar". El estudiante recibe un aviso con su nota.',
+      'También puedes calificar a quien no entregó por la app (por ejemplo, un quiz presencial): escribe su nota directamente en la lista.',
+      'Filtra por una asignatura para ver el "Seguimiento de estudiantes": asistencia, actividades vencidas sin entregar y promedio de cada uno. Se marca en riesgo a quien tiene menos del 75% de asistencia o 2 o más actividades vencidas sin entregar.',
+    ],
+  },
+  {
+    variant: 'horarios',
+    titulo: 'Clases virtuales',
+    nuevo: true,
+    descripcion: 'Guarda el link de tu clase de Meet, Zoom o Teams: tus estudiantes se unen desde la app y su ingreso cuenta como asistencia.',
+    pasos: [
+      'En una asignatura con modalidad "Virtual" o "Híbrida", entra al detalle y pega el link fijo en la tarjeta "Link de la clase virtual". Presiona "Guardar link".',
+      'Si un día la reunión cambia, en "Mis clases de hoy" de tu inicio presiona "Link de hoy", pega el nuevo link y "Publicar y avisar": vale solo para ese día y todos tus estudiantes reciben el aviso.',
+      'Antes de cada clase virtual, el recordatorio que reciben tus estudiantes les dice que es virtual y los lleva directo al botón "Unirme".',
+      'Quien entra con "Unirme" desde 15 minutos antes y hasta 15 minutos después del inicio queda como presente; si entra más tarde, mientras dure la clase, queda como tarde.',
+      'En "Mis clases de hoy" ves cuántos estudiantes ya entraron.',
+      'Al "Tomar asistencia" de esa clase verás "N estudiantes entraron a la clase virtual": presiona "Aplicar a la lista" (quien entró queda presente o tarde y el resto ausente), revisa y guarda como siempre.',
+    ],
+  },
+  {
     variant: 'gestionar-estudiantes',
     titulo: 'Gestionar estudiantes',
     descripcion: 'Comparte el código de inscripción de tu asignatura o carga tu lista de estudiantes en bloque desde una plantilla.',
@@ -96,6 +131,7 @@ const TEMAS_DOCENTE: GuiaTema[] = [
   {
     variant: 'reportes',
     titulo: 'Plantillas de reporte',
+    nuevo: true,
     descripcion: 'Elige el diseño de tus reportes institucionales: formatos profesionales en blanco y negro para colegio o universidad.',
     pasos: [
       'Entra a "Premium" desde el menú lateral — ahí está la página "Plantillas de reporte".',
@@ -104,6 +140,8 @@ const TEMAS_DOCENTE: GuiaTema[] = [
       'Con Premium, toca una plantilla para elegirla y presiona "Configurar plantilla" para ajustarla: tipo de institución, posición y tamaño del logo, título, subtítulo, segunda firma, secciones (arrastra para reordenar), tipo de tabla, columnas y tamaño de letra.',
       'Los cambios NO se guardan solos: cuando la vista previa te guste, presiona "Guardar plantilla" en la barra inferior. Si ves "Tienes cambios sin guardar", aún no se aplicaron.',
       'La plantilla marcada "En uso" es la que usan tus reportes institucionales en PDF y Excel.',
+      'Plantilla por asignatura: arriba de la página, en "¿Para qué asignaturas es esta plantilla?", deja "Plantilla general" para todas o elige una asignatura. Configúrala y presiona "Guardar para esta asignatura": esa asignatura usará su propia plantilla (con su título y segunda firma) y las demás seguirán con la general.',
+      'Para que una asignatura vuelva a la plantilla general, elígela en ese selector y presiona "Usar la plantilla general". En "Reportes" verás qué plantilla usa cada asignatura.',
     ],
   },
   {
@@ -125,7 +163,7 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     pasos: [
       'Entra a "Notificaciones" desde el menú lateral o toca la campana en la parte superior del panel — el número rojo indica cuántas tienes sin leer.',
       'Las notificaciones se agrupan por día (Hoy, Ayer...) y cada tipo tiene su color: Alertas, Clases, Premium y Cuenta. Usa los filtros "Todas", "No leídas" o por tipo.',
-      'Recibirás una "Alerta" cuando un estudiante baje del 75% de asistencia en una de tus asignaturas (desde la 3.ª clase registrada), para que puedas hablar con él a tiempo.',
+      'Recibirás una "Alerta" cuando un estudiante baje del 75% de asistencia en una de tus asignaturas (desde la 3.ª clase registrada), para que puedas hablar con él a tiempo. Si además tiene actividades vencidas sin entregar, la alerta te dice cuántas.',
       'Toca una notificación para marcarla como leída, o "Ver →" para ir a la sección relacionada. Con "Marcar todas como leídas" quedas al día de un toque, y con la "×" la eliminas.',
       'Para recibirlas también en tu celular o navegador (incluso con la app cerrada), activa "Recordatorios de clase" en la parte superior de Notificaciones o en "Mi perfil" y acepta el permiso del navegador.',
     ],
@@ -183,6 +221,34 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
     ],
   },
   {
+    variant: 'horarios',
+    titulo: 'Unirme a una clase virtual',
+    nuevo: true,
+    descripcion: 'Entra a tus clases de Meet, Zoom o Teams desde la app: tu ingreso cuenta como asistencia.',
+    pasos: [
+      'Si hoy tienes una clase virtual, en tu "Inicio" aparece la tarjeta "Tus clases virtuales de hoy".',
+      'Desde 15 minutos antes de la clase, presiona "Unirme a la clase": se abre la reunión y tu asistencia queda registrada.',
+      'Si entras hasta 15 minutos después del inicio quedas como presente; si entras más tarde, como tarde. Fuera del horario el botón abre la reunión, pero no cuenta como asistencia.',
+      'Cuando tu docente publica el link del día o se acerca la clase, te llega una notificación: tócala y llegarás directo al botón "Unirme".',
+      'También encuentras el botón "Unirme" en el detalle de la asignatura.',
+      'Entra siempre con el botón de la app: si abres el link por otro lado, tu asistencia no queda registrada.',
+    ],
+  },
+  {
+    variant: 'reportes',
+    titulo: 'Mis actividades',
+    nuevo: true,
+    descripcion: 'Consulta las tareas y talleres de tus asignaturas, entrégalos desde la app y revisa tus notas.',
+    pasos: [
+      'Entra a "Mis actividades" desde el menú lateral. Te llega una notificación cada vez que tu docente publica una actividad, y un recordatorio 24 horas antes de la entrega si aún no has entregado.',
+      'En la pestaña "Pendientes" verás lo que debes entregar, ordenado por fecha y con cuánto tiempo te queda (ej: "Vence en 3 h").',
+      'Toca una actividad para leer las instrucciones y descargar el archivo o abrir el enlace de tu docente.',
+      'Para entregar, adjunta tu archivo (hasta 20 MB), pega un enlace (Drive, GitHub, video...) o escribe un comentario y presiona "Enviar entrega".',
+      'Puedes cambiar tu entrega hasta que tu docente la califique. Si la fecha ya pasó, aún puedes entregar, pero quedará marcada como tarde.',
+      'Cuando tu docente califique, te llega un aviso y verás tu nota y su retroalimentación en la actividad (pestaña "Entregadas").',
+    ],
+  },
+  {
     variant: 'ver-horario',
     titulo: 'Ver mis asignaturas y horario',
     descripcion: 'Desde "Inicio" consulta todas tus asignaturas inscritas y el horario de cada una.',
@@ -209,7 +275,8 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
     pasos: [
       'Entra a "Notificaciones" desde el menú lateral o toca la campana en la parte superior — el número rojo indica cuántas tienes sin leer.',
       'Las notificaciones se agrupan por día (Hoy, Ayer...). Usa los filtros "Todas" o "No leídas".',
-      'Si tu asistencia en una asignatura baja del 75%, te llega una "Alerta" de riesgo de pérdida por fallas con cuántas clases has faltado — revisa "Mi asistencia" y habla con tu docente.',
+      'Si tu asistencia en una asignatura baja del 75%, te llega una "Alerta" de riesgo de pérdida por fallas con cuántas clases has faltado (y cuántas actividades vencidas tienes sin entregar) — revisa "Mi asistencia" y habla con tu docente.',
+      'También te llegan avisos de actividades nuevas, recordatorios de entrega, notas de tus actividades y links de clases virtuales.',
       'Toca una notificación para marcarla como leída, usa "Marcar todas como leídas" para quedar al día, o la "×" para eliminarla.',
       'Para recibir los recordatorios en tu celular o navegador antes de cada clase (incluso con la app cerrada), activa "Recordatorios de clase" en la parte superior de Notificaciones o en "Mi perfil" y acepta el permiso del navegador.',
     ],
