@@ -31,7 +31,7 @@
       <button type="button" (click)="abrir(i)" class="card flex w-full items-start gap-3 p-4 text-left transition-transform hover:-translate-y-0.5">
         <span class="mt-1.5 h-3 w-3 shrink-0 rounded-full" [style.backgroundColor]="i.asignatura?.color"></span>
         <div class="min-w-0 flex-1">
-          <p class="text-xs font-semibold" style="color: var(--text-muted);">{{ i.asignatura?.nombre }} · {{ tipoLabel(i.actividad.tipo) }}</p>
+          <p class="text-xs font-semibold" style="color: var(--text-muted);">{{ i.asignatura?.nombre }} · {{ tipoLabel(i.actividad) }}</p>
           <p class="mt-0.5 truncate text-base font-bold" style="color: var(--text-primary);">{{ i.actividad.titulo }}</p>
           <p class="mt-1 text-xs" style="color: var(--text-secondary);">
             {{ fechaEntregaTexto(i.actividad) }}
@@ -50,7 +50,7 @@
 <!-- Detalle / entrega -->
 <app-dialog [open]="!!seleccionada()" size="md" (closed)="cerrar()">
   <ng-container *ngIf="seleccionada() as i">
-    <p class="text-xs font-semibold text-slate-500">{{ i.asignatura?.nombre }} · {{ tipoLabel(i.actividad.tipo) }}</p>
+    <p class="text-xs font-semibold text-slate-500">{{ i.asignatura?.nombre }} · {{ tipoLabel(i.actividad) }}</p>
     <h3 class="mt-0.5 text-lg font-bold text-slate-900">{{ i.actividad.titulo }}</h3>
     <div class="mt-1 flex flex-wrap items-center gap-2">
       <span class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold" [ngClass]="infoEstado(i.estado).clase">{{ infoEstado(i.estado).label }}</span>

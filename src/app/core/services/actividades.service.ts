@@ -21,6 +21,8 @@ export interface Actividad {
   titulo: string;
   descripcion: string | null;
   tipo: TipoActividad;
+  /** Tipo escrito por el docente cuando elige "Otro" (p. ej. "Laboratorio", "Foro"). */
+  tipo_personalizado: string | null;
   fecha_entrega: string | null;
   permite_entregas: boolean;
   calificable: boolean;
@@ -60,8 +62,9 @@ function nombreSeguro(nombre: string): string {
     .slice(-80);
 }
 
-export function tipoActividadLabel(tipo: string): string {
-  return TIPOS_ACTIVIDAD.find((t) => t.valor === tipo)?.label ?? tipo;
+export function tipoActividadLabel(a: Pick<Actividad, 'tipo' | 'tipo_personalizado'>): string {
+  if (a.tipo === 'otro' && a.tipo_personalizado?.trim()) return a.tipo_personalizado.trim();
+  return TIPOS_ACTIVIDAD.find((t) => t.valor === a.tipo)?.label ?? a.tipo;
 }
 
 export function actividadVencida(a: Pick<Actividad, 'fecha_entrega'>): boolean {

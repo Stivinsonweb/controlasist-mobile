@@ -81,11 +81,11 @@ const TEMAS_DOCENTE: GuiaTema[] = [
     descripcion: 'Publica tareas, talleres y quizzes; tus estudiantes reciben el aviso, entregan desde la app y tú calificas con retroalimentación.',
     pasos: [
       'Entra a "Actividades" desde el menú lateral (o con el botón "Actividades" en el detalle de una asignatura) y presiona "Nueva actividad".',
-      'Elige la asignatura y el tipo (tarea, taller, quiz, lectura, exposición, proyecto u otro), escribe el título y las instrucciones, y adjunta un archivo (hasta 20 MB) o un enlace si lo necesitas.',
+      'Elige la asignatura y el tipo (tarea, taller, quiz, lectura, exposición o proyecto; con "Otro (escribir)" pones tu propio tipo, como Laboratorio o Foro), escribe el título y las instrucciones, y adjunta un archivo (hasta 20 MB) o un enlace si lo necesitas.',
       'Opcional: en "Para la clase" liga la actividad a una clase de tu horario; ese día aparecerá en "Mis clases de hoy" de tu inicio.',
       'Marca "Tiene fecha de entrega" y elige el día en el calendario y la hora límite en el reloj. Indica si los estudiantes entregan por la app y si es calificable (con su nota máxima).',
       'Presiona "Publicar": tus estudiantes reciben una notificación al instante y un recordatorio 24 horas antes de la entrega si aún no han entregado.',
-      'Toca una actividad para ver quién entregó, quién entregó tarde y quién no; abre cada archivo o enlace, escribe la nota y la retroalimentación y presiona "Calificar". El estudiante recibe un aviso con su nota.',
+      'Para calificar, toca la actividad (o su botón "Calificar"): se abre la lista de estudiantes con quién entregó, quién entregó tarde y quién no; abre cada archivo o enlace, escribe la nota y la retroalimentación y presiona "Calificar". El estudiante recibe un aviso con su nota.',
       'También puedes calificar a quien no entregó por la app (por ejemplo, un quiz presencial): escribe su nota directamente en la lista.',
       'Filtra por una asignatura para ver el "Seguimiento de estudiantes": asistencia, actividades vencidas sin entregar y promedio de cada uno. Se marca en riesgo a quien tiene menos del 75% de asistencia o 2 o más actividades vencidas sin entregar.',
     ],

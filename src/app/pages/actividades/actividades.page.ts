@@ -52,6 +52,7 @@ interface FilaRiesgo {
 interface FormActividad {
   asignatura_id: string;
   tipo: TipoActividad;
+  tipo_personalizado: string;
   titulo: string;
   descripcion: string;
   horario_id: string;
@@ -72,6 +73,7 @@ function formVacio(asignaturaId = ''): FormActividad {
   return {
     asignatura_id: asignaturaId,
     tipo: 'tarea',
+    tipo_personalizado: '',
     titulo: '',
     descripcion: '',
     horario_id: '',
@@ -214,8 +216,10 @@ export class ActividadesPage implements OnInit {
   resumenEntregas(a: Actividad) {
     const propias = this.entregas().filter((e) => e.actividad_id === a.id);
     const notas = propias.map((e) => e.nota).filter((n): n is number => n !== null).map(Number);
+    const entregadas = propias.filter((e) => e.archivo_path || e.enlace || e.comentario);
     return {
-      entregadas: propias.filter((e) => e.archivo_path || e.enlace || e.comentario).length,
+      entregadas: entregadas.length,
+      porCalificar: entregadas.filter((e) => !e.calificada_en).length,
       calificadas: propias.filter((e) => e.calificada_en).length,
       promedio: notas.length ? notas.reduce((s, n) => s + n, 0) / notas.length : null,
     };
@@ -242,6 +246,7 @@ export class ActividadesPage implements OnInit {
     this.form = {
       asignatura_id: a.asignatura_id,
       tipo: a.tipo,
+      tipo_personalizado: a.tipo_personalizado ?? '',
       titulo: a.titulo,
       descripcion: a.descripcion ?? '',
       horario_id: a.horario_id ?? '',
@@ -286,6 +291,7 @@ export class ActividadesPage implements OnInit {
   async guardar() {
     const f = this.form;
     if (!f.asignatura_id) return this.toast.warning('Elige la asignatura');
+    if (f.tipo === 'otro' && !f.tipo_personalizado.trim()) return this.toast.warning('Escribe el tipo de actividad (ej: Laboratorio, Foro)');
     if (!f.titulo.trim()) return this.toast.warning('Escribe el título de la actividad');
     if (f.tiene_entrega && (!f.fecha_entrega || !f.hora_entrega)) return this.toast.warning('Indica la fecha y hora de entrega');
     if (f.calificable && !(Number(f.nota_maxima) > 0)) return this.toast.warning('La nota máxima debe ser mayor que 0');
@@ -293,6 +299,7 @@ export class ActividadesPage implements OnInit {
     const payload: Omit<ActividadPayload, 'archivo_path' | 'archivo_nombre'> = {
       asignatura_id: f.asignatura_id,
       tipo: f.tipo,
+      tipo_personalizado: f.tipo === 'otro' ? f.tipo_personalizado.trim().slice(0, 40) : null,
       titulo: f.titulo.trim(),
       descripcion: f.descripcion.trim() || null,
       horario_id: f.horario_id || null,
@@ -319,6 +326,8 @@ export class ActividadesPage implements OnInit {
         this.toast.success('Actividad publicada. Tus estudiantes recibirán un aviso.');
       }
       this.showForm = false;
+      // Se abre la actividad: ahí está la lista de estudiantes para revisar entregas y calificar.
+      if (!this.editando) await this.abrirDetalle(guardada);
     } catch (e: any) {
       console.error('Error guardando la actividad:', e);
       this.toast.error(e.message || 'No se pudo guardar la actividad');
