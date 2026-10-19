@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Flyer ControlAsist</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#10B981}a:hover{color:#34D399}
+</style>
+
+</head>
+<body>
+
+<div style="width: 1080px; height: 1350px; box-sizing: border-box; padding: 60px 72px 60px; display: flex; flex-direction: column; justify-content: space-between; gap: 22px; background: #0B1220; font-family: 'DM Sans', sans-serif; color: #F1F5F9; overflow: hidden">
+
+  <!-- Marca -->
+  <div style="display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 18px">
+      <img src="../public/icons/icon-512.png" alt="Logo de ControlAsist" style="width: 64px; height: 64px; border-radius: 17px; box-shadow: 0 0 0 1px #1E293B">
+      <span style="font-family: 'Sora', sans-serif; font-size: 34px; font-weight: 800; letter-spacing: -0.5px">ControlAsist</span>
+    </div>
+    <span style="border: 2px solid #334155; border-radius: 999px; padding: 10px 22px; font-size: 20px; font-weight: 700; color: #CBD5E1">Para docentes</span>
+  </div>
+
+  <!-- Titular -->
+  <div style="display: flex; flex-direction: column; gap: 14px">
+    <h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 62px; line-height: 1.04; font-weight: 800; letter-spacing: -1.8px">Control de asistencia, <span style="color: #10B981">sin fricción.</span></h1>
+    <p style="margin: 0; font-size: 24px; line-height: 1.4; color: #A7B3C4; max-width: 900px">Toma lista en segundos, comparte tu código con los estudiantes y descarga tus reportes listos para entregar.</p>
+  </div>
+
+  <!-- Imagen principal: portátil + celular con la app -->
+  <div style="position: relative; height: 450px; flex-shrink: 0">
+
+    <!-- Portátil -->
+    <div style="position: absolute; left: 0; top: 46px; width: 640px">
+      <div style="background: #1E293B; border-radius: 22px 22px 0 0; padding: 14px 14px 16px">
+        <div style="background: #F8FAFC; border-radius: 10px; height: 290px; overflow: hidden; color: #0F172A; display: flex">
+          <div style="width: 104px; background: #0B1220; padding: 16px 14px; display: flex; flex-direction: column; gap: 13px">
+            <img src="../public/icons/icon-512.png" alt="" style="width: 32px; height: 32px; border-radius: 9px">
+            <div style="height: 9px; border-radius: 5px; background: #10B981; width: 64px"></div>
+            <div style="height: 9px; border-radius: 5px; background: #334155; width: 56px"></div>
+            <div style="height: 9px; border-radius: 5px; background: #334155; width: 70px"></div>
+            <div style="height: 9px; border-radius: 5px; background: #334155; width: 50px"></div>
+          </div>
+          <div style="flex-grow: 1; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: baseline">
+              <span style="font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700">Reporte de asistencia</span>
+              <span style="font-size: 12px; color: #64748B">Cálculo Diferencial</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+              <div style="border-radius: 10px; background: #ECFDF5; padding: 8px; text-align: center"><p style="margin: 0; font-size: 19px; font-weight: 800; color: #047857">92%</p><p style="margin: 0; font-size: 11px; color: #047857">Presente</p></div>
+              <div style="border-radius: 10px; background: #FFFBEB; padding: 8px; text-align: center"><p style="margin: 0; font-size: 19px; font-weight: 800; color: #B45309">3%</p><p style="margin: 0; font-size: 11px; color: #B45309">Tarde</p></div>
+              <div style="border-radius: 10px; background: #EFF6FF; padding: 8px; text-align: center"><p style="margin: 0; font-size: 19px; font-weight: 800; color: #1D4ED8">2%</p><p style="margin: 0; font-size: 11px; color: #1D4ED8">Justif.</p></div>
+              <div style="border-radius: 10px; background: #FEF2F2; padding: 8px; text-align: center"><p style="margin: 0; font-size: 19px; font-weight: 800; color: #B91C1C">3%</p><p style="margin: 0; font-size: 11px; color: #B91C1C">Ausente</p></div>
+            </div>
+            <div style="border-radius: 12px; background: #ffffff; box-shadow: 0 0 0 1px #E2E8F0; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1">
+              <span style="font-size: 12px; font-weight: 700; color: #475569">Asistencia por semana</span>
+              <div style="display: flex; align-items: flex-end; gap: 12px; flex-grow: 1">
+                <div style="flex: 1; height: 62%; border-radius: 6px 6px 2px 2px; background: #3B82F6"></div>
+                <div style="flex: 1; height: 78%; border-radius: 6px 6px 2px 2px; background: #10B981"></div>
+                <div style="flex: 1; height: 70%; border-radius: 6px 6px 2px 2px; background: #3B82F6"></div>
+                <div style="flex: 1; height: 88%; border-radius: 6px 6px 2px 2px; background: #10B981"></div>
+                <div style="flex: 1; height: 82%; border-radius: 6px 6px 2px 2px; background: #3B82F6"></div>
+                <div style="flex: 1; height: 95%; border-radius: 6px 6px 2px 2px; background: #10B981"></div>
+                <div style="flex: 1; height: 90%; border-radius: 6px 6px 2px 2px; background: #3B82F6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height: 18px; margin: 0 -36px; background: #334155; border-radius: 0 0 20px 20px"></div>
+    </div>
+
+    <!-- Celular -->
+    <div style="position: absolute; right: 8px; top: 0; width: 270px; height: 450px; box-sizing: border-box; border-radius: 44px; background: #020617; padding: 11px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55), 0 0 0 2px #334155">
+      <div style="width: 100%; height: 100%; border-radius: 34px; background: #ffffff; overflow: hidden; color: #0F172A; padding: 24px 15px 15px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px">
+        <span style="font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700">Tomar asistencia</span>
+        <span style="font-size: 12px; color: #64748B">Cálculo Diferencial · Lun 8:00</span>
+        <div style="display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 12px; background: #F1F5F9">
+          <span style="width: 28px; height: 28px; border-radius: 999px; background: #C7E8DA; color: #065F46; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">AM</span>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 500">Ana Martínez</span>
+          <span style="border-radius: 7px; padding: 4px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700">P</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 12px; background: #F1F5F9">
+          <span style="width: 28px; height: 28px; border-radius: 999px; background: #DBE4F5; color: #1E3A8A; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">CR</span>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 500">Carlos Ruiz</span>
+          <span style="border-radius: 7px; padding: 4px 8px; background: #B45309; color: #ffffff; font-size: 11px; font-weight: 700">T</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 12px; background: #F1F5F9">
+          <span style="width: 28px; height: 28px; border-radius: 999px; background: #F2DCE3; color: #831843; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">LG</span>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 500">Laura Gómez</span>
+          <span style="border-radius: 7px; padding: 4px 8px; background: #047857; color: #ffffff; font-size: 11px; font-weight: 700">P</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 12px; background: #F1F5F9">
+          <span style="width: 28px; height: 28px; border-radius: 999px; background: #E6E1F4; color: #4C1D95; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">JP</span>
+          <span style="flex-grow: 1; font-size: 14px; font-weight: 500">Juan Pérez</span>
+          <span style="border-radius: 7px; padding: 4px 8px; background: #B91C1C; color: #ffffff; font-size: 11px; font-weight: 700">A</span>
+        </div>
+        <div style="margin-top: auto; border-radius: 12px; padding: 11px; background: #047857; color: #ffffff; font-size: 14px; font-weight: 700; text-align: center">Guardar asistencia</div>
+      </div>
+    </div>
+
+    <!-- Aviso flotante: código de acceso -->
+    <div style="position: absolute; left: 150px; top: 0; display: flex; align-items: center; gap: 12px; background: #ffffff; color: #0F172A; border-radius: 16px; padding: 12px 16px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45)">
+      <span style="width: 36px; height: 36px; border-radius: 10px; background: #D1FAE5; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M10.85 12.15L19 4"></path><path d="M18 5l2 2"></path><path d="M15 8l2 2"></path></svg>
+      </span>
+      <span style="display: flex; flex-direction: column">
+        <span style="font-size: 12px; color: #475569">Código de acceso</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: #047857; letter-spacing: 0.5px">CALC-MAT101-6PVL</span>
+      </span>
+    </div>
+
+    <!-- Aviso flotante: asistencia guardada -->
+    <div style="position: absolute; right: 220px; top: 200px; display: flex; align-items: center; gap: 12px; background: #ffffff; color: #0F172A; border-radius: 16px; padding: 12px 16px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45)">
+      <span style="width: 36px; height: 36px; border-radius: 999px; background: #10B981; display: flex; align-items: center; justify-content: center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>
+      </span>
+      <span style="display: flex; flex-direction: column">
+        <span style="font-size: 15px; font-weight: 700">Asistencia guardada</span>
+        <span style="font-size: 12px; color: #475569">28 estudiantes · 12 segundos</span>
+      </span>
+    </div>
+
+    <!-- Aviso flotante: recordatorio de clase -->
+    <div style="position: absolute; right: 296px; bottom: 6px; display: flex; align-items: center; gap: 12px; background: #ffffff; color: #0F172A; border-radius: 16px; padding: 12px 16px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45)">
+      <span style="width: 36px; height: 36px; border-radius: 10px; background: #FEF3C7; display: flex; align-items: center; justify-content: center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      </span>
+      <span style="display: flex; flex-direction: column">
+        <span style="font-size: 15px; font-weight: 700">Tu clase empieza en 10 min</span>
+        <span style="font-size: 12px; color: #475569">Cálculo Diferencial · Aula 204</span>
+      </span>
+    </div>
+
+    <!-- Aviso flotante: reporte listo -->
+    <div style="position: absolute; left: 20px; bottom: 6px; display: flex; align-items: center; gap: 12px; background: #ffffff; color: #0F172A; border-radius: 16px; padding: 12px 16px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45)">
+      <span style="width: 36px; height: 36px; border-radius: 10px; background: #DBEAFE; display: flex; align-items: center; justify-content: center">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 12v6"></path><path d="M9 15l3 3 3-3"></path></svg>
+      </span>
+      <span style="display: flex; flex-direction: column">
+        <span style="font-size: 15px; font-weight: 700">Reporte PDF y Excel listo</span>
+        <span style="font-size: 12px; color: #475569">Con el formato de tu institución</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Beneficios ilustrados -->
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+
+    <div style="border-radius: 22px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 12px 12px 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="border-radius: 14px; background: #F8FAFC; height: 128px; display: flex; align-items: center; justify-content: center">
+        <svg width="160" height="124" viewBox="0 0 220 170" role="img" aria-label="Docente marcando la lista">
+          <ellipse cx="110" cy="152" rx="70" ry="10" fill="#E2E8F0"></ellipse>
+          <g stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="62" cy="58" r="20" fill="#fde68a"></circle><path d="M62 78 v10"></path><path d="M45 132 C45 100 50 88 62 88 C74 88 79 100 79 132" fill="#10b981"></path><path d="M79 100 C95 100 104 92 112 82"></path><path d="M45 100 C36 100 30 106 26 116"></path></g>
+          <g transform="translate(112,32)"><rect x="0" y="0" width="60" height="60" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2.5"></rect><g transform="translate(8,8)"><rect width="14" height="14" rx="4" fill="#10b981"></rect><path d="M3 7l3 3 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g><g transform="translate(8,26)"><rect width="14" height="14" rx="4" fill="#10b981"></rect><path d="M3 7l3 3 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g><g transform="translate(8,44)"><rect width="14" height="14" rx="4" fill="#10b981"></rect><path d="M3 7l3 3 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g><line x1="30" y1="15" x2="52" y2="15" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round"></line><line x1="30" y1="33" x2="52" y2="33" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round"></line><line x1="30" y1="51" x2="52" y2="51" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round"></line></g>
+        </svg>
+      </div>
+      <span style="font-size: 19px; font-weight: 700; line-height: 1.25; padding: 0 6px">Asistencia con un toque</span>
+    </div>
+
+    <div style="border-radius: 22px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 12px 12px 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="border-radius: 14px; background: #F8FAFC; height: 128px; display: flex; align-items: center; justify-content: center">
+        <svg width="160" height="124" viewBox="0 0 220 170" role="img" aria-label="Estudiante inscribiéndose con un código">
+          <ellipse cx="110" cy="152" rx="70" ry="10" fill="#E2E8F0"></ellipse>
+          <g stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="62" cy="58" r="20" fill="#fde68a"></circle><path d="M62 78 v10"></path><path d="M45 132 C45 100 50 88 62 88 C74 88 79 100 79 132" fill="#3b82f6"></path><path d="M79 100 C95 100 104 92 112 82"></path><path d="M45 100 C36 100 30 106 26 116"></path></g>
+          <g transform="translate(108,38)"><rect x="0" y="0" width="68" height="34" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2.5"></rect><text x="34" y="22" text-anchor="middle" font-size="14" letter-spacing="3" fill="#10b981" font-weight="700" font-family="sans-serif">A3F9</text><g transform="translate(50,-6)"><circle cx="10" cy="10" r="11" fill="#3b82f6"></circle><path d="M5 10.5l3.5 3.5L15 7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></g></g>
+        </svg>
+      </div>
+      <span style="font-size: 19px; font-weight: 700; line-height: 1.25; padding: 0 6px">Inscripción con código</span>
+    </div>
+
+    <div style="border-radius: 22px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 12px 12px 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="border-radius: 14px; background: #F8FAFC; height: 128px; display: flex; align-items: center; justify-content: center">
+        <svg width="160" height="124" viewBox="0 0 220 170" role="img" aria-label="Docente revisando estadísticas">
+          <ellipse cx="110" cy="152" rx="70" ry="10" fill="#E2E8F0"></ellipse>
+          <g stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="62" cy="58" r="20" fill="#fde68a"></circle><path d="M62 78 v10"></path><path d="M45 132 C45 100 50 88 62 88 C74 88 79 100 79 132" fill="#10b981"></path><path d="M79 100 C95 100 104 92 112 82"></path><path d="M45 100 C36 100 30 106 26 116"></path></g>
+          <g transform="translate(110,34)"><rect x="0" y="0" width="70" height="60" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2.5"></rect><rect x="10" y="42" width="10" height="10" rx="2" fill="#3b82f6"></rect><rect x="28" y="30" width="10" height="22" rx="2" fill="#10b981"></rect><rect x="46" y="18" width="10" height="34" rx="2" fill="#3b82f6"></rect></g>
+        </svg>
+      </div>
+      <span style="font-size: 19px; font-weight: 700; line-height: 1.25; padding: 0 6px">Estadísticas y reportes</span>
+    </div>
+
+    <div style="border-radius: 22px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 12px 12px 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="border-radius: 14px; background: #F8FAFC; height: 128px; display: flex; align-items: center; justify-content: center">
+        <svg width="160" height="124" viewBox="0 0 220 170" role="img" aria-label="Docente consultando su horario de clases">
+          <ellipse cx="110" cy="152" rx="70" ry="10" fill="#E2E8F0"></ellipse>
+          <g stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="62" cy="58" r="20" fill="#fde68a"></circle><path d="M62 78 v10"></path><path d="M45 132 C45 100 50 88 62 88 C74 88 79 100 79 132" fill="#f59e0b"></path><path d="M79 100 C95 100 104 92 112 82"></path><path d="M45 100 C36 100 30 106 26 116"></path></g>
+          <g transform="translate(105,34)"><rect x="0" y="6" width="76" height="56" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2.5"></rect><line x1="0" y1="22" x2="76" y2="22" stroke="#94a3b8" stroke-width="2"></line><rect x="10" y="0" width="6" height="14" rx="2" fill="#3b82f6"></rect><rect x="60" y="0" width="6" height="14" rx="2" fill="#3b82f6"></rect><rect x="10" y="32" width="16" height="14" rx="3" fill="#e2e8f0"></rect><rect x="32" y="32" width="16" height="14" rx="3" fill="#10b981"></rect><rect x="54" y="32" width="16" height="14" rx="3" fill="#e2e8f0"></rect><rect x="10" y="48" width="16" height="10" rx="3" fill="#e2e8f0"></rect></g>
+        </svg>
+      </div>
+      <span style="font-size: 19px; font-weight: 700; line-height: 1.25; padding: 0 6px">Horario y recordatorios</span>
+    </div>
+  </div>
+
+  <!-- Llamado a la acción -->
+  <div style="border-radius: 26px; background: #F8FAFC; color: #0F172A; padding: 22px 30px; display: flex; align-items: center; gap: 22px">
+    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -0.5px; white-space: nowrap">Empieza gratis hoy</span>
+      <span style="font-size: 19px; line-height: 1.35; color: #475569">Prueba Premium 1 mes sin costo. En tu celular o computador.</span>
+    </div>
+    <span style="flex-shrink: 0; border-radius: 16px; background: #047857; color: #ffffff; padding: 16px 22px; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800">controlasistencia.co</span>
+  </div>
+
+</div>
+
+</body>
+</html>
