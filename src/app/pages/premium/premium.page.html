@@ -23,6 +23,34 @@
     </div>
   </div>
 
+  <!-- Plantilla general o propia de una asignatura -->
+  <div class="card mb-5 p-4">
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="min-w-[220px] flex-1">
+        <label class="mb-1.5 flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
+          ¿Para qué asignaturas es esta plantilla?
+          <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">Nuevo</span>
+        </label>
+        <select [ngModel]="destino()" (ngModelChange)="cambiarDestino($event)" class="input-field text-sm">
+          <option value="general">Plantilla general (todas las asignaturas)</option>
+          <option *ngFor="let a of asignaturas()" [value]="a.id">
+            {{ a.nombre }} · Grupo {{ a.grupo }} ({{ a.periodo }}){{ a.plantilla_reporte ? ' — plantilla propia' : '' }}{{ a.activa ? '' : ' — archivada' }}
+          </option>
+        </select>
+      </div>
+      <button *ngIf="destinoTienePropia()" type="button" (click)="quitarPlantillaAsignatura()" [disabled]="guardando()" class="btn-outline btn-sm">
+        Usar la plantilla general
+      </button>
+    </div>
+    <p class="mt-2 text-xs" style="color: var(--text-muted);">
+      <ng-container *ngIf="destino() === 'general'">La usan todas tus asignaturas, excepto las que tengan una plantilla propia.</ng-container>
+      <ng-container *ngIf="asignaturaDestino() as a">
+        <ng-container *ngIf="destinoTienePropia()">{{ a.nombre }} tiene su propia plantilla: los cambios que guardes aquí solo afectan a esta asignatura.</ng-container>
+        <ng-container *ngIf="!destinoTienePropia()">{{ a.nombre }} usa ahora tu plantilla general. Elige o configura una y guárdala para que esta asignatura tenga la suya.</ng-container>
+      </ng-container>
+    </p>
+  </div>
+
   <!-- ============================================================ -->
   <!-- Slider: Plantilla gratis / Plantilla Premium                  -->
   <!-- ============================================================ -->
@@ -68,7 +96,7 @@
       </button>
 
       <button type="button" (click)="guardarPlantillaGratis()" [disabled]="guardando()" class="btn-primary w-full">
-        {{ guardando() ? 'Guardando...' : 'Guardar plantilla' }}
+        {{ guardando() ? 'Guardando...' : (asignaturaDestino() ? 'Guardar para esta asignatura' : 'Guardar plantilla') }}
       </button>
 
       <div class="card p-5">
@@ -206,7 +234,7 @@
         <div class="min-w-0">
           <p class="text-sm font-bold" style="color: var(--text-primary);">{{ labelPlantillaActual() }}</p>
           <p class="text-xs" [style.color]="hayCambios() ? '#d97706' : 'var(--text-muted)'">
-            {{ hayCambios() ? 'Tienes cambios sin guardar' : 'Esta es la plantilla que usan tus reportes' }}
+            {{ hayCambios() ? 'Tienes cambios sin guardar' : (asignaturaDestino() ? 'Plantilla propia de ' + asignaturaDestino()!.nombre : 'Esta es tu plantilla general') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -215,7 +243,7 @@
             {{ mostrarConfig() ? 'Ocultar configuración' : 'Configurar plantilla' }}
           </button>
           <button type="button" (click)="guardarPlantilla()" [disabled]="guardando() || !hayCambios()" class="btn-primary btn-sm">
-            {{ guardando() ? 'Guardando...' : 'Guardar plantilla' }}
+            {{ guardando() ? 'Guardando...' : (asignaturaDestino() ? 'Guardar para esta asignatura' : 'Guardar plantilla') }}
           </button>
         </div>
       </div>

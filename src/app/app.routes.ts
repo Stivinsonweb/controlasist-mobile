@@ -57,11 +57,13 @@ export const routes: Routes = [
       { path: 'asignaturas/crear', canActivate: [roleGuard('docente')], loadComponent: () => import('./pages/asignaturas/crear/crear.page').then((m) => m.CrearAsignaturaPage) },
       { path: 'asignaturas/detalle/:id', canActivate: [roleGuard('docente')], loadComponent: () => import('./pages/asignaturas/detalle/detalle.page').then((m) => m.DetalleAsignaturaPage) },
       { path: 'asignaturas/editar/:id', canActivate: [roleGuard('docente')], loadComponent: () => import('./pages/asignaturas/editar/editar.page').then((m) => m.EditarAsignaturaPage) },
+      { path: 'actividades', canActivate: [roleGuard('docente')], loadComponent: () => import('./pages/actividades/actividades.page').then((m) => m.ActividadesPage) },
       { path: 'reportes/:id', canActivate: [roleGuard('docente')], loadComponent: () => import('./pages/reportes/reportes.page').then((m) => m.ReportesPage) },
 
       // Estudiante
       { path: 'estudiante/home', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/home/home.page').then((m) => m.EstudianteHomePage) },
       { path: 'estudiante/asistencia', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/asistencia/asistencia.page').then((m) => m.EstudianteAsistenciaPage) },
+      { path: 'estudiante/actividades', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/actividades/actividades.page').then((m) => m.EstudianteActividadesPage) },
       { path: 'estudiante/perfil', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/perfil/perfil.page').then((m) => m.EstudiantePerfilPage) },
       { path: 'estudiante/inscribir', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/inscribir/inscribir.page').then((m) => m.InscribirPage) },
       { path: 'notificaciones', canActivate: [roleGuard('docente', 'estudiante')], loadComponent: () => import('./pages/notificaciones/notificaciones.page').then((m) => m.NotificacionesPage) },

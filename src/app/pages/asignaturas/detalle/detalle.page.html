@@ -23,6 +23,9 @@
       </div>
       <div class="ml-auto flex gap-2">
         <button (click)="irAReportes()" class="rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/25">Reportes</button>
+        <a [routerLink]="['/actividades']" [queryParams]="{ asignatura: a.id }" class="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold backdrop-blur transition-colors hover:bg-white/25">
+          Actividades <span class="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none" style="color: var(--accent-from);">Nuevo</span>
+        </a>
         <button (click)="irAEditar()" class="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-white/90">Editar</button>
       </div>
     </div>
@@ -86,6 +89,19 @@
 
     <!-- Panel lateral -->
     <div class="space-y-5">
+      <!-- Clase virtual: link fijo -->
+      <div *ngIf="esVirtual(a)" class="card p-6">
+        <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Link de la clase virtual <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">Nuevo</span></p>
+        <input [(ngModel)]="linkClaseEdit" type="url" class="input-field mt-3 text-sm" placeholder="https://meet.google.com/..." />
+        <button (click)="guardarLinkClase()" [disabled]="guardandoLink || linkClaseEdit.trim() === (a.link_clase || '')" class="btn-primary btn-sm mt-2 w-full">
+          {{ guardandoLink ? 'Guardando...' : 'Guardar link' }}
+        </button>
+        <p class="mt-2 text-xs" style="color: var(--text-muted);">
+          Tus estudiantes lo verán con el botón "Unirme a la clase", y entrar dentro del horario cuenta como asistencia.
+          Si un día cambia, publica el link de ese día desde "Mis clases de hoy" en tu inicio.
+        </p>
+      </div>
+
       <div class="card p-6 text-center">
         <p class="text-xs font-semibold uppercase tracking-wide" style="color: var(--text-muted);">Código de acceso</p>
         <p class="mt-2 break-all font-mono text-lg font-extrabold tracking-wider sm:text-xl" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); -webkit-background-clip: text; background-clip: text; color: transparent;">{{ a.codigo_acceso || '——————' }}</p>
@@ -116,7 +132,15 @@
         </ul>
       </div>
 
-      <div class="card p-6" style="background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.25);">
+      <div *ngIf="!a.activa" class="card p-6" style="background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.3);">
+        <p class="text-sm font-semibold text-emerald-500">Asignatura archivada</p>
+        <p class="mt-1 text-xs" style="color: var(--text-muted);">Al reactivarla vuelve a aparecer en "Mis clases de hoy" y los estudiantes podrán encontrarla de nuevo con su código de acceso. Su historial se conserva.</p>
+        <button (click)="reactivar()" [disabled]="reactivando" class="mt-3 w-full rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-60">
+          {{ reactivando ? 'Reactivando...' : 'Reactivar asignatura' }}
+        </button>
+      </div>
+
+      <div *ngIf="a.activa" class="card p-6" style="background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.25);">
         <p class="text-sm font-semibold text-red-400">Zona de riesgo</p>
         <p class="mt-1 text-xs" style="color: var(--text-muted);">Desactivar archiva la asignatura sin borrar su historial: seguirá visible en tu inicio filtrando por su periodo, marcada como "Archivada".</p>
         <button (click)="showConfirmDesactivar = true" class="mt-3 w-full rounded-xl border py-2.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10" style="border-color: rgba(239,68,68,0.3);">
@@ -166,7 +190,7 @@
 <!-- Modal confirmar desactivar -->
 <app-dialog [open]="showConfirmDesactivar" (closed)="showConfirmDesactivar = false">
   <h3 class="text-lg font-bold text-slate-900">¿Desactivar asignatura?</h3>
-  <p class="mt-1 text-sm text-slate-500">Quedará marcada como archivada en tu inicio (filtrando por su periodo) y ya no aparecerá en la búsqueda de estudiantes por código de acceso. Esta acción se puede revertir desde la base de datos.</p>
+  <p class="mt-1 text-sm text-slate-500">Quedará marcada como archivada en tu inicio (filtrando por su periodo) y ya no aparecerá en la búsqueda de estudiantes por código de acceso. Podrás reactivarla cuando quieras desde esta misma pantalla.</p>
   <div class="mt-5 flex gap-2">
     <button (click)="showConfirmDesactivar = false" class="btn-outline flex-1">Cancelar</button>
     <button (click)="confirmarDesactivar()" class="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700">Sí, desactivar</button>
@@ -183,16 +207,7 @@
         <option *ngFor="let d of [1,2,3,4,5,6,0]" [value]="d">{{ dias[d] }}</option>
       </select>
     </div>
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Hora inicio</label>
-        <input type="time" [(ngModel)]="nuevoHorario.hora_inicio" class="input-field" />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Hora fin</label>
-        <input type="time" [(ngModel)]="nuevoHorario.hora_fin" class="input-field" />
-      </div>
-    </div>
+    <app-selector-hora [(inicio)]="nuevoHorario.hora_inicio" [(fin)]="nuevoHorario.hora_fin"></app-selector-hora>
     <div>
       <label class="mb-1.5 block text-sm font-medium text-slate-700">Aula <span class="text-slate-400 font-normal">(opcional)</span></label>
       <input [(ngModel)]="nuevoHorario.aula" class="input-field" placeholder="Salón 204" />
@@ -229,16 +244,7 @@
       </button>
 
       <div *ngIf="d.seleccionado && diaExpandido === d.dia" class="space-y-3 border-t border-primary-100 px-4 py-3">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="mb-1 block text-xs font-medium text-slate-600">Hora inicio</label>
-            <input type="time" [(ngModel)]="d.hora_inicio" class="input-field" />
-          </div>
-          <div>
-            <label class="mb-1 block text-xs font-medium text-slate-600">Hora fin</label>
-            <input type="time" [(ngModel)]="d.hora_fin" class="input-field" />
-          </div>
-        </div>
+        <app-selector-hora [(inicio)]="d.hora_inicio" [(fin)]="d.hora_fin"></app-selector-hora>
         <div class="flex flex-wrap gap-1.5">
           <button *ngFor="let h of horasRapidas" type="button" (click)="seleccionarHoraRapida(d, h)"
                   class="rounded-lg px-2 py-1 text-xs font-medium transition-colors"
@@ -347,6 +353,12 @@
     </div>
 
     <ng-container *ngIf="registrosTrabajo.length > 0">
+      <!-- Ingresos por la clase virtual -->
+      <div *ngIf="ingresosVirtuales.length > 0" class="mt-3 flex flex-col gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 sm:flex-row sm:items-center">
+        <p class="flex-1 text-sm text-blue-900"><b>{{ ingresosVirtuales.length }}</b> estudiante(s) entraron a la clase virtual con "Unirme".</p>
+        <button type="button" (click)="aplicarIngresosVirtuales()" class="btn-primary btn-sm shrink-0">Aplicar a la lista</button>
+      </div>
+
       <!-- Resumen en vivo -->
       <div class="mt-3 grid grid-cols-4 gap-1.5">
         <div *ngFor="let e of estadosAsistencia" class="rounded-xl px-2 py-2 text-center" [style.backgroundColor]="e.color + '1a'">

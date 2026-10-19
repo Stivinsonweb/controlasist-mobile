@@ -12,6 +12,17 @@ import { AvatarComponent } from '../../../shared/components/avatar/avatar.compon
 import { SubjectIconComponent } from '../../../shared/components/subject-icon/subject-icon.component';
 import { VerificadoBadgeComponent } from '../../../shared/components/verificado-badge/verificado-badge.component';
 import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/subject-theme.util';
+import { ClaseVirtualService, esAsignaturaVirtual } from '../../../core/services/clase-virtual.service';
+import { fechaLocalISO } from '../../../shared/utils/fecha.util';
+
+/** Clase virtual de hoy del estudiante, con su link y si ya registró su ingreso. */
+interface ClaseVirtualHoy {
+  horario: Horario;
+  asignatura: AsignaturaConDocente;
+  link: string | null;
+  ingreso: 'presente' | 'tarde' | null;
+  uniendo: boolean;
+}
 
 @Component({
   selector: 'app-estudiante-home',
@@ -32,16 +43,22 @@ export class EstudianteHomePage implements OnInit {
 
   private estudianteId = '';
 
+  clasesVirtualesHoy = signal<ClaseVirtualHoy[]>([]);
+  private reloj = signal(Date.now());
+
   constructor(
     private supabaseService: SupabaseService,
     private asignaturasService: AsignaturasService,
     private portalService: EstudiantesPortalService,
+    private claseVirtualService: ClaseVirtualService,
     private router: Router,
     private toast: ToastService
   ) {}
 
   async ngOnInit() {
     await this.loadAll();
+    // Para que el botón "Unirme" se habilite solo cuando llegue la hora de la clase.
+    setInterval(() => this.reloj.set(Date.now()), 30_000);
   }
 
   async loadAll() {
@@ -59,12 +76,103 @@ export class EstudianteHomePage implements OnInit {
       ]);
       this.perfil.set(perfil);
       this.asignaturas.set(asignaturas);
+      await this.cargarClasesVirtualesHoy(asignaturas);
     } catch (e: any) {
       console.error('Error cargando inicio de estudiante:', e);
       this.toast.error('No se pudo cargar tu información');
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private async cargarClasesVirtualesHoy(asignaturas: AsignaturaConDocente[]) {
+    try {
+      const virtuales = asignaturas.filter((a) => a.activa && esAsignaturaVirtual(a));
+      if (virtuales.length === 0) {
+        this.clasesVirtualesHoy.set([]);
+        return;
+      }
+      const hoy = fechaLocalISO();
+      const dia = new Date().getDay();
+      const horarios = (await this.asignaturasService.listarHorariosDeAsignaturas(virtuales.map((a) => a.id))).filter(
+        (h) => h.dia_semana === dia && (!h.fecha_clase || h.fecha_clase === hoy)
+      );
+      const ids = horarios.map((h) => h.id!);
+      const [links, ingresos] = await Promise.all([this.claseVirtualService.linksDelDia(ids, hoy), this.claseVirtualService.ingresos(ids, hoy)]);
+      this.clasesVirtualesHoy.set(
+        horarios
+          .map((h) => {
+            const asignatura = virtuales.find((a) => a.id === h.asignatura_id)!;
+            return {
+              horario: h,
+              asignatura,
+              link: links.find((l) => l.horario_id === h.id)?.link || asignatura.link_clase || null,
+              ingreso: ingresos.find((i) => i.horario_id === h.id)?.estado ?? null,
+              uniendo: false,
+            };
+          })
+          .sort((a, b) => a.horario.hora_inicio.localeCompare(b.horario.hora_inicio))
+      );
+    } catch (e) {
+      console.error('Error cargando clases virtuales de hoy:', e);
+      this.clasesVirtualesHoy.set([]);
+    }
+  }
+
+  private minutos(hhmm: string) {
+    const [h, m] = hhmm.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  /** 'antes' (más de 15 min para empezar), 'abierta' (se puede entrar y cuenta), 'terminada'. */
+  momentoClase(c: ClaseVirtualHoy): 'antes' | 'abierta' | 'terminada' {
+    const d = new Date(this.reloj());
+    const ahora = d.getHours() * 60 + d.getMinutes();
+    if (ahora < this.minutos(c.horario.hora_inicio) - 15) return 'antes';
+    if (ahora > this.minutos(c.horario.hora_fin)) return 'terminada';
+    return 'abierta';
+  }
+
+  horaCorta(h: string) {
+    return h.slice(0, 5);
+  }
+
+  /** Abre la reunión y, si está dentro del horario, registra la asistencia. */
+  async unirme(c: ClaseVirtualHoy) {
+    // La pestaña se abre antes de esperar al servidor para que el navegador no la bloquee.
+    const ventana = window.open('', '_blank');
+    c.uniendo = true;
+    try {
+      const r = await this.claseVirtualService.unirse(c.horario.id!);
+      if (!r.link) {
+        ventana?.close();
+        this.toast.warning('Tu docente aún no ha publicado el link de esta clase');
+        return;
+      }
+      if (ventana) ventana.location.href = r.link;
+      else window.location.href = r.link;
+      if (r.resultado === 'marcado' || r.resultado === 'ya-marcado') {
+        c.ingreso = r.estado ?? 'presente';
+        this.clasesVirtualesHoy.update((l) => [...l]);
+        if (r.resultado === 'marcado') this.toast.success(r.estado === 'tarde' ? 'Ingreso registrado (llegaste tarde)' : 'Asistencia registrada');
+      } else if (r.resultado === 'fuera-de-horario') {
+        this.toast.info('Fuera del horario de la clase: el ingreso no cuenta como asistencia');
+      } else if (r.resultado === 'cancelada') {
+        this.toast.info('Esta clase fue cancelada o aplazada hoy');
+      }
+    } catch (e: any) {
+      ventana?.close();
+      this.toast.error(e.message || 'No se pudo abrir la clase');
+    } finally {
+      c.uniendo = false;
+    }
+  }
+
+  /** Desde el detalle de la asignatura: si hoy hay clase se registra el ingreso; si no, solo abre el link. */
+  async unirmeDesdeDetalle(a: AsignaturaConDocente) {
+    const deHoy = this.clasesVirtualesHoy().find((c) => c.asignatura.id === a.id && this.momentoClase(c) === 'abierta');
+    if (deHoy) return this.unirme(deHoy);
+    if (a.link_clase) window.open(a.link_clase, '_blank', 'noopener');
   }
 
   async verAsignatura(a: AsignaturaConDocente) {

@@ -245,10 +245,12 @@ export class ReportesPage implements OnInit {
     this.logoUrl.set(perfil.logo_institucional_url || null);
     this.formatoCodigo.set(perfil.formato_reporte_codigo || '');
     this.formatoVersion.set(perfil.formato_reporte_version || '');
-    this.formatoTitulo.set(perfil.formato_reporte_titulo || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
-    this.formatoSegundaFirma.set(perfil.formato_reporte_segunda_firma || '');
+    // Si la asignatura tiene plantilla propia se usa esa; si no, la general del docente.
+    const propia = this.asignatura()?.plantilla_reporte;
+    this.formatoTitulo.set((propia ? propia.titulo : perfil.formato_reporte_titulo) || 'FORMATO PARA REGISTRO DE CLASES Y ASISTENCIA DOCENTE');
+    this.formatoSegundaFirma.set((propia ? propia.segunda_firma : perfil.formato_reporte_segunda_firma) || '');
     // Sin Premium solo aplican las dos plantillas gratis, sin configuración propia.
-    this.plantillaReporte.set(plantillaEfectiva(normalizarPlantilla(perfil.plantilla_reporte), !!perfil.premium_activo));
+    this.plantillaReporte.set(plantillaEfectiva(normalizarPlantilla(propia ? propia.plantilla : perfil.plantilla_reporte), !!perfil.premium_activo));
   }
 
   toggleFormatoConfig() {
@@ -278,11 +280,19 @@ export class ReportesPage implements OnInit {
     if (!this.docenteId) return;
     this.guardandoFormato.set(true);
     try {
+      const a = this.asignatura();
+      if (a?.plantilla_reporte) {
+        // Título y segunda firma son parte de la plantilla propia de esta asignatura.
+        const propia = { ...a.plantilla_reporte, titulo: this.formatoTitulo(), segunda_firma: this.formatoSegundaFirma() };
+        await this.asignaturasService.actualizar(a.id, { plantilla_reporte: propia });
+        this.asignatura.set({ ...a, plantilla_reporte: propia });
+      }
       await this.adminService.actualizarFormatoReporte(this.docenteId, {
         formato_reporte_codigo: this.formatoCodigo() || undefined,
         formato_reporte_version: this.formatoVersion() || undefined,
-        formato_reporte_titulo: this.formatoTitulo() || undefined,
-        formato_reporte_segunda_firma: this.formatoSegundaFirma() || undefined,
+        ...(a?.plantilla_reporte
+          ? {}
+          : { formato_reporte_titulo: this.formatoTitulo() || undefined, formato_reporte_segunda_firma: this.formatoSegundaFirma() || undefined }),
       });
       this.toast.success('Configuración del formato guardada');
     } catch (e: any) {

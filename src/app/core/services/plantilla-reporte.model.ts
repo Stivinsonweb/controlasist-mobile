@@ -89,6 +89,15 @@ export interface PlantillaReporte {
   updated_at: string;
 }
 
+/** Plantilla propia de una asignatura (asignaturas.plantilla_reporte). Si una asignatura no tiene,
+ *  sus reportes usan la plantilla general del docente. Incluye título y segunda firma porque
+ *  también pueden cambiar de una asignatura a otra. */
+export interface PlantillaAsignatura {
+  titulo: string;
+  segunda_firma: string;
+  plantilla: PlantillaReporte;
+}
+
 export const SECCIONES_REPORTE: SeccionReporteDescriptor[] = [
   { id: 'info_general', label: 'Información general', opcional: false },
   { id: 'tabla_asistencia', label: 'Tabla de asistencia', opcional: false },

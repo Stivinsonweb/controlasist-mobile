@@ -1,9 +1,13 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { AsignaturasService, Asignatura, Horario } from '../../core/services/asignaturas.service';
 import { AsistenciasService } from '../../core/services/asistencias.service';
+import { ActividadesService, Actividad } from '../../core/services/actividades.service';
+import { ClaseVirtualService, esAsignaturaVirtual } from '../../core/services/clase-virtual.service';
+import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { fechaLocalISO } from '../../shared/utils/fecha.util';
 import { ToastService } from '../../core/services/toast.service';
 import { EduBackgroundComponent } from '../../shared/components/edu-background/edu-background.component';
@@ -17,6 +21,13 @@ export interface ClaseHoy {
   horario: Horario;
   asignatura: Asignatura;
   estado: EstadoClaseHoy;
+  /** Actividades ligadas a esta clase de hoy. */
+  actividades: Actividad[];
+  /** Clase virtual: link vigente hoy (el del día o el fijo) y cuántos entraron con "Unirme". */
+  virtual: boolean;
+  linkHoy: string | null;
+  linkDelDia: boolean;
+  ingresos: number;
 }
 
 const ESTADOS_CLASE_HOY: Record<EstadoClaseHoy, { label: string; color: string }> = {
@@ -32,7 +43,7 @@ const ESTADOS_CLASE_HOY: Record<EstadoClaseHoy, { label: string; color: string }
 @Component({
   selector: 'app-home-docente',
   standalone: true,
-  imports: [CommonModule, EduBackgroundComponent, AvatarComponent, SubjectIconComponent],
+  imports: [CommonModule, FormsModule, DialogComponent, EduBackgroundComponent, AvatarComponent, SubjectIconComponent],
   templateUrl: './home.page.html',
 })
 export class HomeDocentePage implements OnInit {
@@ -59,6 +70,8 @@ export class HomeDocentePage implements OnInit {
     private supabaseService: SupabaseService,
     private asignaturasService: AsignaturasService,
     private asistenciasService: AsistenciasService,
+    private actividadesService: ActividadesService,
+    private claseVirtualService: ClaseVirtualService,
     private router: Router,
     private toast: ToastService
   ) {}
@@ -83,15 +96,22 @@ export class HomeDocentePage implements OnInit {
       const hoy = fechaLocalISO(ahora);
       const hora = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
 
-      const [horarios, tomadas] = await Promise.all([
+      const [horarios, tomadas, actividadesHoy] = await Promise.all([
         this.asignaturasService.listarHorariosDeAsignaturas(ids),
         this.asistenciasService.listarDeFecha(ids, hoy),
+        this.actividadesService.listarDeClases(ids, hoy).catch(() => [] as Actividad[]),
       ]);
       const clave = (asignaturaId: string, ini: string, fin: string) => `${asignaturaId}|${ini}|${fin}`;
       const conAsistencia = new Set(tomadas.map((t) => clave(t.asignatura_id, t.hora_inicio, t.hora_fin)));
 
-      const clases: ClaseHoy[] = horarios
-        .filter((h) => h.dia_semana === ahora.getDay())
+      const deHoy = horarios.filter((h) => h.dia_semana === ahora.getDay());
+      const idsHoy = deHoy.map((h) => h.id!).filter(Boolean);
+      const [linksDia, ingresos] = await Promise.all([
+        this.claseVirtualService.linksDelDia(idsHoy, hoy).catch(() => []),
+        this.claseVirtualService.ingresos(idsHoy, hoy).catch(() => []),
+      ]);
+
+      const clases: ClaseHoy[] = deHoy
         .map((h) => {
           const asignatura = activas.find((a) => a.id === h.asignatura_id)!;
           let estado: EstadoClaseHoy;
@@ -100,7 +120,17 @@ export class HomeDocentePage implements OnInit {
           else if (hora < h.hora_inicio.slice(0, 5)) estado = 'pendiente';
           else if (hora <= h.hora_fin.slice(0, 5)) estado = 'en_curso';
           else estado = 'sin_registrar';
-          return { horario: h, asignatura, estado };
+          const linkDia = linksDia.find((l) => l.horario_id === h.id)?.link ?? null;
+          return {
+            horario: h,
+            asignatura,
+            estado,
+            actividades: actividadesHoy.filter((a) => a.horario_id === h.id),
+            virtual: esAsignaturaVirtual(asignatura),
+            linkHoy: linkDia || asignatura.link_clase || null,
+            linkDelDia: !!linkDia,
+            ingresos: ingresos.filter((i) => i.horario_id === h.id).length,
+          };
         })
         .sort((a, b) => a.horario.hora_inicio.localeCompare(b.horario.hora_inicio));
       this.clasesHoy.set(clases);
@@ -123,6 +153,41 @@ export class HomeDocentePage implements OnInit {
 
   abrirClaseHoy(c: ClaseHoy, accion: 'asistencia' | 'qr') {
     this.router.navigate(['/asignaturas/detalle', c.asignatura.id], { queryParams: { clase: c.horario.id, accion } });
+  }
+
+  // ===== Link de la clase virtual de hoy =====
+  claseLink: ClaseHoy | null = null;
+  linkEdit = '';
+  publicandoLink = false;
+
+  abrirLinkHoy(c: ClaseHoy) {
+    this.claseLink = c;
+    this.linkEdit = c.linkHoy || '';
+  }
+
+  async publicarLinkHoy() {
+    const c = this.claseLink;
+    if (!c) return;
+    const link = this.linkEdit.trim();
+    if (!/^https?:\/\//i.test(link)) {
+      this.toast.warning('El link debe empezar por http:// o https://');
+      return;
+    }
+    this.publicandoLink = true;
+    try {
+      await this.claseVirtualService.publicarLinkHoy(c.horario.id!, link);
+      this.clasesHoy.update((l) => l.map((x) => (x === c ? { ...x, linkHoy: link, linkDelDia: true } : x)));
+      this.claseLink = null;
+      this.toast.success('Link publicado. Tus estudiantes recibirán el aviso.');
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo publicar el link');
+    } finally {
+      this.publicandoLink = false;
+    }
+  }
+
+  verActividades(c: ClaseHoy) {
+    this.router.navigate(['/actividades'], { queryParams: { asignatura: c.asignatura.id } });
   }
 
   horaCorta(h: string): string {

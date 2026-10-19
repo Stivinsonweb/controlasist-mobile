@@ -42,13 +42,22 @@
             <p class="text-xs" style="color: var(--text-muted);">
               {{ horaCorta(c.horario.hora_inicio) }} - {{ horaCorta(c.horario.hora_fin) }} · Grupo {{ c.asignatura.grupo }}<span *ngIf="c.horario.aula"> · {{ c.horario.aula }}</span>
             </p>
+            <p *ngIf="c.virtual" class="mt-0.5 text-xs font-semibold" [style.color]="c.linkHoy ? '#3b82f6' : '#d97706'">
+              {{ c.linkHoy ? 'Clase virtual' + (c.linkDelDia ? ' · link de hoy publicado' : '') : 'Clase virtual sin link' }}<span *ngIf="c.ingresos > 0"> · {{ c.ingresos }} entraron</span>
+            </p>
+            <button *ngIf="c.actividades.length > 0" type="button" (click)="verActividades(c)" class="mt-0.5 text-xs font-semibold" style="color: var(--accent-from);">
+              {{ c.actividades.length }} actividad(es) para esta clase: {{ c.actividades[0].titulo }}{{ c.actividades.length > 1 ? '…' : '' }}
+            </button>
           </div>
           <span class="ml-auto shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:ml-0"
                 [style.backgroundColor]="infoEstadoHoy(c.estado).color + '1f'" [style.color]="infoEstadoHoy(c.estado).color">
             {{ infoEstadoHoy(c.estado).label }}
           </span>
         </div>
-        <div *ngIf="puedeTomarAsistencia(c)" class="flex shrink-0 gap-2">
+        <div *ngIf="puedeTomarAsistencia(c)" class="flex shrink-0 flex-wrap gap-2">
+          <button *ngIf="c.virtual" type="button" (click)="abrirLinkHoy(c)" class="btn-outline btn-sm flex flex-1 items-center justify-center gap-1.5 sm:flex-none">
+            Link de hoy <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">Nuevo</span>
+          </button>
           <button type="button" (click)="abrirClaseHoy(c, 'asistencia')" class="btn-outline btn-sm flex-1 sm:flex-none">
             {{ c.estado === 'tomada' ? 'Ver / editar' : 'Tomar asistencia' }}
           </button>
@@ -123,3 +132,20 @@
     </button>
   </div>
 </div>
+
+<!-- Publicar link de la clase virtual de hoy -->
+<app-dialog [open]="!!claseLink" size="md" (closed)="claseLink = null">
+  <ng-container *ngIf="claseLink as c">
+    <h3 class="text-lg font-bold text-slate-900">Link de la clase de hoy</h3>
+    <p class="mt-1 text-sm text-slate-500">{{ c.asignatura.nombre }} · {{ horaCorta(c.horario.hora_inicio) }} - {{ horaCorta(c.horario.hora_fin) }}</p>
+    <input [(ngModel)]="linkEdit" type="url" class="input-field mt-4" placeholder="https://meet.google.com/..." />
+    <p class="mt-2 text-xs text-slate-500">
+      Vale solo para hoy (si no, se usa el link fijo de la asignatura). Al publicarlo se avisa a todos los inscritos;
+      quien entre con "Unirme" dentro del horario queda con asistencia.
+    </p>
+    <div class="mt-5 flex gap-2">
+      <button (click)="claseLink = null" class="btn-outline flex-1">Cancelar</button>
+      <button (click)="publicarLinkHoy()" [disabled]="publicandoLink" class="btn-primary flex-1">{{ publicandoLink ? 'Publicando...' : 'Publicar y avisar' }}</button>
+    </div>
+  </ng-container>
+</app-dialog>

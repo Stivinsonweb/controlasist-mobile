@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { fechaLocalISO } from '../../shared/utils/fecha.util';
+import { PlantillaAsignatura } from './plantilla-reporte.model';
 
 export interface Asignatura {
   id: string;
@@ -21,6 +22,10 @@ export interface Asignatura {
   docente_id: string;
   codigo_acceso?: string;
   codigo_expira?: string | null;
+  /** Link fijo de la clase virtual (Meet, Zoom, Teams...). */
+  link_clase?: string | null;
+  /** Plantilla de reporte propia; null = usa la plantilla general del docente. */
+  plantilla_reporte?: PlantillaAsignatura | null;
   created_at?: string;
 }
 
@@ -110,6 +115,11 @@ export class AsignaturasService {
 
   async desactivar(id: string) {
     const { error } = await this.supabase.rpc('desactivar_asignatura', { asignatura_id: id });
+    if (error) throw error;
+  }
+
+  async reactivar(id: string) {
+    const { error } = await this.supabase.rpc('reactivar_asignatura', { asignatura_id: id });
     if (error) throw error;
   }
 

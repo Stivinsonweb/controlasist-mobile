@@ -9,6 +9,7 @@ import { ConfiguracionAppService } from '../../core/services/configuracion-app.s
 import { PremiumSuscripcionService, PagoPremium, SolicitudPremium, PeriodoPremium, referenciaPagoDocente } from '../../core/services/premium-suscripcion.service';
 import { NotificacionesService, Notificacion } from '../../core/services/notificaciones.service';
 import { ToastService } from '../../core/services/toast.service';
+import { AsignaturasService, Asignatura } from '../../core/services/asignaturas.service';
 import { formatearPesosCOP, parsearPesosCOP, validarPrecioCOP } from '../../shared/utils/moneda-cop.util';
 import { MetodoPagoConfig, MetodoPagoTipo, catalogoMetodo, normalizarMetodosPago } from '../../shared/utils/metodos-pago.util';
 import { MetodoPagoIconComponent } from '../../shared/components/metodo-pago-icon/metodo-pago-icon.component';
@@ -16,6 +17,7 @@ import {
   LogoPosicion,
   LogoTamano,
   PlantillaReporte,
+  PlantillaAsignatura,
   SECCIONES_REPORTE,
   SeccionReporteId,
   TipoTablaAsistencia,
@@ -109,6 +111,16 @@ export class PremiumPage implements OnInit {
   plantilla = signal<PlantillaReporte>(defaultPlantillaReporte());
   mostrarConfig = signal(false);
 
+  // ---------- Plantilla general o propia de una asignatura ----------
+  asignaturas = signal<Asignatura[]>([]);
+  /** 'general' = plantilla del docente para todas las asignaturas; si no, el id de la asignatura que se edita. */
+  destino = signal<string>('general');
+  /** Plantilla general guardada: punto de partida de las asignaturas que aún no tienen una propia. */
+  private general = signal<{ titulo: string; segundaFirma: string; plantilla: PlantillaReporte } | null>(null);
+  asignaturaDestino = computed(() => this.asignaturas().find((a) => a.id === this.destino()) ?? null);
+  /** La asignatura elegida ya tiene plantilla propia guardada (si no, sus reportes usan la general). */
+  destinoTienePropia = computed(() => !!this.asignaturaDestino()?.plantilla_reporte);
+
   /** Lo último guardado en la base — sirve para saber si hay cambios sin guardar y cuál está en uso. */
   private guardado = signal<{ titulo: string; segundaFirma: string; plantilla: PlantillaReporte } | null>(null);
   plantillaEnUsoId = computed(() => this.guardado()?.plantilla.plantilla_id ?? null);
@@ -195,6 +207,7 @@ export class PremiumPage implements OnInit {
     private configuracionAppService: ConfiguracionAppService,
     private premiumService: PremiumSuscripcionService,
     private notificacionesService: NotificacionesService,
+    private asignaturasService: AsignaturasService,
     private toast: ToastService
   ) {}
 
@@ -212,11 +225,14 @@ export class PremiumPage implements OnInit {
       if (this.premiumActivo()) this.vista.set('premium');
 
       this.logoUrl.set(perfil.logo_institucional_url || null);
-      this.titulo.set(perfil.formato_reporte_titulo || TITULO_FORMATO_DEFAULT);
-      this.segundaFirma.set(perfil.formato_reporte_segunda_firma || '');
-      this.plantilla.set(normalizarPlantilla(perfil.plantilla_reporte));
-      this.guardado.set(perfil.plantilla_reporte ? { titulo: this.titulo(), segundaFirma: this.segundaFirma(), plantilla: this.plantilla() } : null);
-      if (this.plantillasGratis.some((c) => c.id === this.plantilla().plantilla_id)) this.seleccionGratis.set(this.plantilla().plantilla_id);
+      const general = {
+        titulo: perfil.formato_reporte_titulo || TITULO_FORMATO_DEFAULT,
+        segundaFirma: perfil.formato_reporte_segunda_firma || '',
+        plantilla: normalizarPlantilla(perfil.plantilla_reporte),
+      };
+      this.general.set(perfil.plantilla_reporte ? general : null);
+      this.cargarEnEditor(general, this.general());
+      this.asignaturas.set(await this.asignaturasService.listarPorDocente(perfil.id).catch(() => []));
       for (const c of this.catalogo) this.miniaturas[c.id] = aplicarPlantillaCatalogo(defaultPlantillaReporte(), c);
 
       await Promise.all([this.cargarEstadoSuscripcion(), this.cargarNotificaciones()]);
@@ -411,6 +427,58 @@ export class PremiumPage implements OnInit {
   }
 
   /** Plantilla gratis: se guarda tal cual viene del catálogo. */
+  private cargarEnEditor(
+    valores: { titulo: string; segundaFirma: string; plantilla: PlantillaReporte },
+    guardado: { titulo: string; segundaFirma: string; plantilla: PlantillaReporte } | null
+  ) {
+    this.titulo.set(valores.titulo);
+    this.segundaFirma.set(valores.segundaFirma);
+    this.plantilla.set(valores.plantilla);
+    this.guardado.set(guardado);
+    if (this.plantillasGratis.some((c) => c.id === valores.plantilla.plantilla_id)) this.seleccionGratis.set(valores.plantilla.plantilla_id);
+  }
+
+  /** Valores de la plantilla general para usar como punto de partida (o los de fábrica si no hay). */
+  private valoresGenerales() {
+    return this.general() ?? { titulo: TITULO_FORMATO_DEFAULT, segundaFirma: '', plantilla: normalizarPlantilla(null) };
+  }
+
+  cambiarDestino(id: string) {
+    if (id === this.destino()) return;
+    if (this.hayCambios() && this.guardado() && !confirm('Tienes cambios sin guardar en esta plantilla. ¿Descartarlos?')) return;
+    this.destino.set(id);
+    if (id === 'general') {
+      this.cargarEnEditor(this.valoresGenerales(), this.general());
+      return;
+    }
+    const propia = this.asignaturas().find((a) => a.id === id)?.plantilla_reporte;
+    if (propia) {
+      const valores = { titulo: propia.titulo || TITULO_FORMATO_DEFAULT, segundaFirma: propia.segunda_firma || '', plantilla: normalizarPlantilla(propia.plantilla) };
+      this.cargarEnEditor(valores, valores);
+    } else {
+      // Sin plantilla propia: se parte de la general y queda pendiente de guardar.
+      this.cargarEnEditor(this.valoresGenerales(), null);
+    }
+  }
+
+  async quitarPlantillaAsignatura() {
+    const a = this.asignaturaDestino();
+    if (!a || this.guardando()) return;
+    if (!confirm(`"${a.nombre}" volverá a usar tu plantilla general. ¿Continuar?`)) return;
+    this.guardando.set(true);
+    try {
+      await this.asignaturasService.actualizar(a.id, { plantilla_reporte: null });
+      this.asignaturas.update((lista) => lista.map((x) => (x.id === a.id ? { ...x, plantilla_reporte: null } : x)));
+      this.cargarEnEditor(this.valoresGenerales(), null);
+      this.toast.success(`${a.nombre} ahora usa la plantilla general`);
+    } catch (e: any) {
+      console.error('Error quitando la plantilla de la asignatura:', e);
+      this.toast.error('No se pudo quitar la plantilla de la asignatura');
+    } finally {
+      this.guardando.set(false);
+    }
+  }
+
   async guardarPlantillaGratis() {
     const c = plantillaDelCatalogo(this.seleccionGratis());
     if (!c) return;
@@ -459,16 +527,28 @@ export class PremiumPage implements OnInit {
     this.guardando.set(true);
     try {
       const plantilla = { ...this.plantilla(), updated_at: new Date().toISOString() };
-      await this.adminService.actualizarPlantillaPremium(this.docenteId, {
-        formato_reporte_titulo: this.titulo(),
-        formato_reporte_segunda_firma: this.segundaFirma(),
-        plantilla_reporte: plantilla,
-      });
+      const asignatura = this.asignaturaDestino();
+      if (asignatura) {
+        const propia: PlantillaAsignatura = { titulo: this.titulo(), segunda_firma: this.segundaFirma(), plantilla };
+        await this.asignaturasService.actualizar(asignatura.id, { plantilla_reporte: propia });
+        this.asignaturas.update((lista) => lista.map((x) => (x.id === asignatura.id ? { ...x, plantilla_reporte: propia } : x)));
+      } else {
+        await this.adminService.actualizarPlantillaPremium(this.docenteId, {
+          formato_reporte_titulo: this.titulo(),
+          formato_reporte_segunda_firma: this.segundaFirma(),
+          plantilla_reporte: plantilla,
+        });
+        this.general.set({ titulo: this.titulo(), segundaFirma: this.segundaFirma(), plantilla });
+        // Reportes lee la plantilla del perfil en memoria: se refresca para que el próximo PDF ya la use.
+        if (this.userId) await this.authService.resolveProfile(this.userId).catch(() => null);
+      }
       this.plantilla.set(plantilla);
       this.guardado.set({ titulo: this.titulo(), segundaFirma: this.segundaFirma(), plantilla });
-      // Reportes lee la plantilla del perfil en memoria: se refresca para que el próximo PDF ya la use.
-      if (this.userId) await this.authService.resolveProfile(this.userId).catch(() => null);
-      this.toast.success('Plantilla guardada. Tus reportes institucionales ya usan este formato.');
+      this.toast.success(
+        asignatura
+          ? `Plantilla guardada solo para ${asignatura.nombre}.`
+          : 'Plantilla general guardada. Las asignaturas sin plantilla propia ya usan este formato.'
+      );
     } catch (e: any) {
       console.error('Error guardando la plantilla Premium:', e);
       this.toast.error('No se pudo guardar la plantilla');

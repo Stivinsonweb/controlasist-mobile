@@ -9,10 +9,12 @@ import { AsistenciasService, Asistencia, EstadoAsistencia, ESTADOS_ASISTENCIA, T
 import { ToastService } from '../../../core/services/toast.service';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { CalendarioSelectorComponent } from '../../../shared/components/calendario-selector/calendario-selector.component';
+import { SelectorHoraComponent } from '../../../shared/components/selector-hora/selector-hora.component';
 import { CalendarioClasesComponent } from '../../../shared/components/calendario-clases/calendario-clases.component';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { QrAsistenciaComponent } from '../../../shared/components/qr-asistencia/qr-asistencia.component';
 import { MarcaQr } from '../../../core/services/asistencia-qr.service';
+import { ClaseVirtualService, IngresoClaseVirtual, esAsignaturaVirtual } from '../../../core/services/clase-virtual.service';
 import { SubjectIconComponent } from '../../../shared/components/subject-icon/subject-icon.component';
 import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/subject-theme.util';
 import { fechaLocalISO } from '../../../shared/utils/fecha.util';
@@ -90,7 +92,7 @@ interface FilaCargaPreview extends FilaCargaMasiva {
 @Component({
   selector: 'app-detalle-asignatura',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, DialogComponent, CalendarioSelectorComponent, CalendarioClasesComponent, AvatarComponent, SubjectIconComponent, QrAsistenciaComponent],
+  imports: [CommonModule, RouterLink, FormsModule, DialogComponent, CalendarioSelectorComponent, SelectorHoraComponent, CalendarioClasesComponent, AvatarComponent, SubjectIconComponent, QrAsistenciaComponent],
   templateUrl: './detalle.page.html',
 })
 export class DetalleAsignaturaPage implements OnInit {
@@ -101,6 +103,13 @@ export class DetalleAsignaturaPage implements OnInit {
   totalEstudiantes = signal(0);
   loading = signal(true);
   showConfirmDesactivar = false;
+  reactivando = false;
+
+  // Clase virtual: link fijo y estudiantes que entraron con "Unirme" a la clase que se está tomando.
+  esVirtual = esAsignaturaVirtual;
+  linkClaseEdit = '';
+  guardandoLink = false;
+  ingresosVirtuales: IngresoClaseVirtual[] = [];
   dias = DIAS_SEMANA;
   horasRapidas = HORAS_RAPIDAS;
 
@@ -181,6 +190,7 @@ export class DetalleAsignaturaPage implements OnInit {
     private asignaturasService: AsignaturasService,
     private adminService: AdminService,
     private asistenciasService: AsistenciasService,
+    private claseVirtualService: ClaseVirtualService,
     private toast: ToastService
   ) {}
 
@@ -229,6 +239,7 @@ export class DetalleAsignaturaPage implements OnInit {
         this.asignaturasService.listarEstudiantesInscritos(this.asignaturaId).catch(() => []),
       ]);
       this.asignatura.set(asignatura);
+      this.linkClaseEdit = asignatura.link_clase || '';
       this.horarios.set(horarios);
       this.roster.set(roster as EstudianteInscrito[]);
       this.totalEstudiantes.set(roster.length);
@@ -296,6 +307,19 @@ export class DetalleAsignaturaPage implements OnInit {
     }
   }
 
+  async reactivar() {
+    this.reactivando = true;
+    try {
+      await this.asignaturasService.reactivar(this.asignaturaId);
+      this.toast.success('Asignatura reactivada');
+      await this.load();
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo reactivar la asignatura');
+    } finally {
+      this.reactivando = false;
+    }
+  }
+
   horarioLabel(h: Horario) {
     return `${this.dias[h.dia_semana] ?? '—'} · ${h.hora_inicio} - ${h.hora_fin}${h.aula ? ' · ' + h.aula : ''}`;
   }
@@ -309,6 +333,10 @@ export class DetalleAsignaturaPage implements OnInit {
   async guardarHorario() {
     if (!this.nuevoHorario.hora_inicio || !this.nuevoHorario.hora_fin) {
       this.toast.warning('Indica la hora de inicio y de fin');
+      return;
+    }
+    if (this.nuevoHorario.hora_fin <= this.nuevoHorario.hora_inicio) {
+      this.toast.warning('La hora fin debe ser posterior a la hora inicio');
       return;
     }
     this.savingHorario = true;
@@ -360,6 +388,11 @@ export class DetalleAsignaturaPage implements OnInit {
     const seleccionados = this.diasMultiples.filter((d) => d.seleccionado && d.hora_inicio && d.hora_fin);
     if (seleccionados.length === 0) {
       this.toast.warning('Debes configurar al menos un día con hora de inicio y fin');
+      return;
+    }
+    const invalido = seleccionados.find((d) => d.hora_fin <= d.hora_inicio);
+    if (invalido) {
+      this.toast.warning(`${invalido.nombre}: la hora fin debe ser posterior a la hora inicio`);
       return;
     }
     this.savingMultiples = true;
@@ -475,6 +508,9 @@ export class DetalleAsignaturaPage implements OnInit {
       this.tipoClaseSeleccionada = asistencia?.tipo_clase || '';
 
       await this.cargarRegistrosTrabajo(asistencia?.id);
+      this.ingresosVirtuales = esAsignaturaVirtual(a)
+        ? await this.claseVirtualService.ingresos([seleccion.horario.id!], fechaHoy).catch(() => [])
+        : [];
     } catch (e: any) {
       this.toast.error(e.message || 'No se pudo abrir la toma de asistencia');
       this.showTomarAsistencia = false;
@@ -490,6 +526,7 @@ export class DetalleAsignaturaPage implements OnInit {
     this.temasTratadosInvalid = false;
     this.tipoClaseInvalid = false;
     this.pendienteAsistenciaPayload = null;
+    this.ingresosVirtuales = [];
     this.asistenciaActual = a;
     this.temasTratados = a.temas_tratados || '';
     this.observacionesClase = a.observaciones || '';
@@ -542,6 +579,42 @@ export class DetalleAsignaturaPage implements OnInit {
     }
     this.mostrarQr = false;
     this.toast.success(`${marcas.length} marcaron con QR y ${ausentes} quedaron ausentes. Revisa la lista y guarda.`);
+  }
+
+  /** Quien entró con "Unirme" queda presente/tarde; quien no, ausente. Las notas se conservan. */
+  aplicarIngresosVirtuales() {
+    const porEstudiante = new Map(this.ingresosVirtuales.map((i) => [i.estudiante_id, i.estado]));
+    let ausentes = 0;
+    for (const r of this.registrosTrabajo) {
+      const estado = porEstudiante.get(r.estudiante_id);
+      if (estado) {
+        r.estado = estado;
+      } else if (r.estado !== 'justificado') {
+        r.estado = 'ausente';
+        ausentes++;
+      }
+    }
+    this.toast.success(`${this.ingresosVirtuales.length} entraron a la clase virtual y ${ausentes} quedaron ausentes. Revisa la lista y guarda.`);
+  }
+
+  async guardarLinkClase() {
+    const a = this.asignatura();
+    if (!a) return;
+    const link = this.linkClaseEdit.trim();
+    if (link && !/^https?:\/\//i.test(link)) {
+      this.toast.warning('El link debe empezar por http:// o https://');
+      return;
+    }
+    this.guardandoLink = true;
+    try {
+      const actualizada = await this.asignaturasService.actualizar(a.id, { link_clase: link || null });
+      this.asignatura.set(actualizada);
+      this.toast.success(link ? 'Link de la clase guardado. Tus estudiantes ya lo ven.' : 'Link de la clase quitado');
+    } catch (e: any) {
+      this.toast.error(e.message || 'No se pudo guardar el link');
+    } finally {
+      this.guardandoLink = false;
+    }
   }
 
   get registrosFiltrados(): RegistroTrabajo[] {

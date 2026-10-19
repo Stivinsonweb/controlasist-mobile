@@ -28,6 +28,9 @@ function urlParaTipo(tipo: string | null): string {
   if (!tipo) return '/';
   if (tipo.startsWith('admin_')) return '/admin/premium';
   if (tipo.startsWith('premium_')) return '/premium';
+  // Clase virtual: la pantalla de inicio del estudiante tiene el botón "Unirme" (que registra la asistencia).
+  if (tipo === 'link_clase' || tipo === 'recordatorio_clase_virtual') return '/estudiante/home';
+  if (tipo.startsWith('actividad_')) return '/estudiante/actividades';
   return '/';
 }
 

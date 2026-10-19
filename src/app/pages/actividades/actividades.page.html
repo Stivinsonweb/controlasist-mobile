@@ -1,0 +1,275 @@
+<div class="mx-auto max-w-6xl animate-fade-in">
+
+  <!-- Encabezado -->
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="text-xl font-bold" style="color: var(--text-primary);">Actividades de <span class="text-gradient-accent">clase</span></h1>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">Publica tareas, talleres y quizzes; recibe entregas y califica desde un solo lugar.</p>
+    </div>
+    <button type="button" (click)="abrirNueva()" [disabled]="asignaturas().length === 0" class="btn-primary">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+      Nueva actividad
+    </button>
+  </div>
+
+  <!-- Filtro por asignatura -->
+  <div class="mb-5 flex items-center gap-2 overflow-x-auto pb-1">
+    <button (click)="setFiltro('todas')" class="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+            [ngClass]="filtroAsignatura() === 'todas' ? '' : 'border'"
+            [style]="filtroAsignatura() === 'todas' ? 'background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); color: #fff;' : 'background: var(--bg-surface-2); border-color: var(--border-subtle-2); color: var(--text-secondary);'">
+      Todas
+    </button>
+    <button *ngFor="let a of asignaturas()" (click)="setFiltro(a.id)" class="shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors"
+            [ngClass]="filtroAsignatura() === a.id ? '' : 'border'"
+            [style]="filtroAsignatura() === a.id ? 'background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); color: #fff;' : 'background: var(--bg-surface-2); border-color: var(--border-subtle-2); color: var(--text-secondary);'">
+      {{ a.nombre }} · {{ a.grupo }}
+    </button>
+  </div>
+
+  <div *ngIf="loading()" class="space-y-3">
+    <div *ngFor="let i of [1,2,3]" class="card skeleton h-24"></div>
+  </div>
+
+  <ng-container *ngIf="!loading()">
+    <!-- Seguimiento: asistencia + entregas -->
+    <div *ngIf="filtroAsignatura() !== 'todas'" class="card mb-5 p-5">
+      <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 class="text-base font-bold" style="color: var(--text-primary);">Seguimiento de estudiantes</h2>
+        <p class="text-xs" style="color: var(--text-muted);">En riesgo: asistencia bajo {{ umbral }}% o 2+ actividades vencidas sin entregar</p>
+      </div>
+      <div *ngIf="loadingRiesgo()" class="mt-3 skeleton h-16 rounded-xl"></div>
+      <p *ngIf="!loadingRiesgo() && riesgo().length === 0" class="mt-2 text-sm" style="color: var(--text-muted);">Aún no hay estudiantes inscritos.</p>
+      <ng-container *ngIf="!loadingRiesgo() && riesgo().length > 0">
+        <p class="mt-2 text-sm font-semibold" [style.color]="enRiesgoCount > 0 ? '#ef4444' : '#10b981'">
+          {{ enRiesgoCount > 0 ? enRiesgoCount + ' estudiante(s) en riesgo' : 'Ningún estudiante en riesgo' }}
+        </p>
+        <div class="mt-3 max-h-72 overflow-auto rounded-xl border" style="border-color: var(--border-subtle-2);">
+          <table class="w-full text-left text-sm">
+            <thead class="sticky top-0 text-xs" style="background: var(--bg-surface-2); color: var(--text-muted);">
+              <tr>
+                <th class="px-3 py-2 font-semibold">Estudiante</th>
+                <th class="px-3 py-2 text-center font-semibold">Asistencia</th>
+                <th class="px-3 py-2 text-center font-semibold">Vencidas sin entregar</th>
+                <th class="px-3 py-2 text-center font-semibold">Promedio (sobre 5)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of riesgo()" class="border-t" style="border-color: var(--border-subtle-2);">
+                <td class="px-3 py-2" style="color: var(--text-primary);">
+                  <span class="inline-flex items-center gap-2">
+                    <span *ngIf="r.enRiesgo" class="h-2 w-2 shrink-0 rounded-full bg-red-500"></span>
+                    {{ r.estudiante.nombres }} {{ r.estudiante.apellidos }}
+                  </span>
+                </td>
+                <td class="px-3 py-2 text-center font-semibold" [style.color]="r.porcentajeAsistencia !== null && r.porcentajeAsistencia < umbral ? '#ef4444' : 'var(--text-secondary)'">
+                  {{ r.porcentajeAsistencia !== null ? r.porcentajeAsistencia + '%' : '—' }}
+                </td>
+                <td class="px-3 py-2 text-center font-semibold" [style.color]="r.vencidasSinEntregar >= 2 ? '#ef4444' : 'var(--text-secondary)'">{{ r.vencidasSinEntregar }}</td>
+                <td class="px-3 py-2 text-center" style="color: var(--text-secondary);">{{ r.promedio !== null ? (r.promedio | number: '1.1-1') : '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Vacío -->
+    <div *ngIf="actividadesFiltradas().length === 0" class="card flex flex-col items-center justify-center py-14 text-center">
+      <svg class="h-12 w-12" style="color: var(--text-muted);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" /></svg>
+      <p class="mt-4 text-sm font-semibold" style="color: var(--text-secondary);">{{ asignaturas().length === 0 ? 'Primero crea una asignatura' : 'Aún no has publicado actividades' }}</p>
+      <p class="mt-1 text-sm" style="color: var(--text-muted);">Tus estudiantes recibirán un aviso cada vez que publiques una.</p>
+      <button *ngIf="asignaturas().length > 0" (click)="abrirNueva()" class="btn-primary mt-5">Publicar actividad</button>
+    </div>
+
+    <!-- Lista -->
+    <div *ngIf="actividadesFiltradas().length > 0" class="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <button *ngFor="let a of actividadesFiltradas()" type="button" (click)="abrirDetalle(a)" class="card block w-full p-4 text-left transition-transform hover:-translate-y-0.5">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="flex items-center gap-1.5 text-xs font-semibold" style="color: var(--text-muted);">
+              <span class="h-2.5 w-2.5 shrink-0 rounded-full" [style.backgroundColor]="asignaturaDe(a.asignatura_id)?.color"></span>
+              <span class="truncate">{{ asignaturaDe(a.asignatura_id)?.nombre }} · {{ asignaturaDe(a.asignatura_id)?.grupo }}</span>
+            </p>
+            <p class="mt-1 line-clamp-2 text-base font-bold" style="color: var(--text-primary);">{{ a.titulo }}</p>
+          </div>
+          <span class="badge-neutral shrink-0 text-[11px] font-semibold">{{ tipoLabel(a.tipo) }}</span>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs" style="color: var(--text-secondary);">
+          <span [style.color]="vencida(a) ? '#ef4444' : null">{{ vencida(a) ? 'Venció: ' : 'Entrega: ' }}{{ fechaEntregaTexto(a) }}</span>
+          <span *ngIf="claseLabel(a) as c">{{ c }}</span>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2 border-t pt-3 text-xs font-semibold" style="border-color: var(--border-subtle-2); color: var(--text-secondary);">
+          <ng-container *ngIf="resumenEntregas(a) as r">
+            <span *ngIf="a.permite_entregas">{{ r.entregadas }} entrega(s)</span>
+            <span *ngIf="a.calificable">· {{ r.calificadas }} calificada(s)</span>
+            <span *ngIf="a.calificable && r.promedio !== null">· promedio {{ r.promedio | number: '1.1-1' }} / {{ a.nota_maxima }}</span>
+            <span *ngIf="!a.permite_entregas && !a.calificable">Solo informativa</span>
+          </ng-container>
+        </div>
+      </button>
+    </div>
+  </ng-container>
+</div>
+
+<!-- ============ Crear / editar ============ -->
+<app-dialog [open]="showForm" size="lg" (closed)="showForm = false">
+  <h3 class="text-lg font-bold text-slate-900">{{ editando ? 'Editar actividad' : 'Nueva actividad' }}</h3>
+  <p *ngIf="!editando" class="mt-1 text-sm text-slate-500">Al publicarla, los estudiantes inscritos reciben un aviso y un recordatorio 24 h antes de la entrega.</p>
+
+  <div class="mt-4 space-y-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Asignatura</label>
+        <select [ngModel]="form.asignatura_id" (ngModelChange)="onAsignaturaForm($event)" [disabled]="!!editando" class="input-field">
+          <option *ngFor="let a of asignaturas()" [value]="a.id">{{ a.nombre }} · Grupo {{ a.grupo }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Tipo</label>
+        <select [(ngModel)]="form.tipo" class="input-field">
+          <option *ngFor="let t of tipos" [value]="t.valor">{{ t.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Título</label>
+      <input [(ngModel)]="form.titulo" class="input-field" maxlength="150" placeholder="Ej: Taller 3 — Derivadas" />
+    </div>
+
+    <div>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Instrucciones <span class="font-normal text-slate-400">(opcional)</span></label>
+      <textarea [(ngModel)]="form.descripcion" rows="4" class="input-field" placeholder="Qué deben hacer, cómo entregarlo, criterios de evaluación..."></textarea>
+    </div>
+
+    <!-- Clase ligada -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Para la clase <span class="font-normal text-slate-400">(opcional)</span></label>
+        <select [ngModel]="form.horario_id" (ngModelChange)="onHorarioForm($event)" class="input-field">
+          <option value="">No ligar a una clase</option>
+          <option *ngFor="let h of horariosDe(form.asignatura_id)" [value]="h.id">{{ horarioLabel(h) }}</option>
+        </select>
+      </div>
+      <div *ngIf="form.horario_id">
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Fecha de esa clase</label>
+        <input type="date" [(ngModel)]="form.fecha_clase" class="input-field" />
+      </div>
+    </div>
+    <p *ngIf="form.horario_id" class="-mt-2 text-xs text-slate-500">Aparecerá en "Mis clases de hoy" el día de esa clase.</p>
+
+    <!-- Entrega -->
+    <div class="rounded-xl border border-slate-200 p-4">
+      <label class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+        <input type="checkbox" [(ngModel)]="form.tiene_entrega" /> Tiene fecha de entrega
+      </label>
+      <div *ngIf="form.tiene_entrega" class="mt-3 space-y-3">
+        <app-calendario-selector [fechaSeleccionada]="form.fecha_entrega" (fechaSeleccionadaChange)="form.fecha_entrega = $event"></app-calendario-selector>
+        <app-selector-hora [soloInicio]="true" etiquetaInicio="Hora límite" [(inicio)]="form.hora_entrega"></app-selector-hora>
+      </div>
+      <label class="mt-4 flex items-center gap-2 text-sm text-slate-700">
+        <input type="checkbox" [(ngModel)]="form.permite_entregas" /> Los estudiantes entregan desde la app (archivo, enlace o comentario)
+      </label>
+      <div class="mt-2 flex flex-wrap items-center gap-3">
+        <label class="flex items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" [(ngModel)]="form.calificable" /> Calificable
+        </label>
+        <label *ngIf="form.calificable" class="flex items-center gap-2 text-sm text-slate-700">
+          Nota máxima
+          <input type="number" min="1" step="0.5" [(ngModel)]="form.nota_maxima" class="input-field w-24 py-1.5" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Material -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Enlace <span class="font-normal text-slate-400">(opcional)</span></label>
+        <input [(ngModel)]="form.enlace" type="url" class="input-field" placeholder="https://..." />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Archivo adjunto <span class="font-normal text-slate-400">(máx. 20 MB)</span></label>
+        <input type="file" (change)="onArchivo($event)" class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold" />
+        <div *ngIf="editando?.archivo_nombre && !archivo" class="mt-1.5 flex items-center gap-2 text-xs text-slate-500">
+          <span class="truncate" [class.line-through]="quitarArchivo">Actual: {{ editando?.archivo_nombre }}</span>
+          <button type="button" (click)="quitarArchivo = !quitarArchivo" class="shrink-0 font-semibold text-red-600">{{ quitarArchivo ? 'Conservar' : 'Quitar' }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-5 flex gap-2">
+    <button (click)="showForm = false" class="btn-outline flex-1">Cancelar</button>
+    <button (click)="guardar()" [disabled]="guardando" class="btn-primary flex-1">{{ guardando ? 'Guardando...' : (editando ? 'Guardar cambios' : 'Publicar') }}</button>
+  </div>
+</app-dialog>
+
+<!-- ============ Detalle y entregas ============ -->
+<app-dialog [open]="!!detalle() && !showForm" size="lg" (closed)="cerrarDetalle()">
+  <ng-container *ngIf="detalle() as a">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-xs font-semibold text-slate-500">{{ tipoLabel(a.tipo) }} · {{ asignaturaDe(a.asignatura_id)?.nombre }} · {{ asignaturaDe(a.asignatura_id)?.grupo }}</p>
+        <h3 class="mt-0.5 text-lg font-bold text-slate-900">{{ a.titulo }}</h3>
+        <p class="mt-1 text-sm" [ngClass]="vencida(a) ? 'text-red-600' : 'text-slate-500'">{{ vencida(a) ? 'Venció: ' : 'Entrega: ' }}{{ fechaEntregaTexto(a) }}</p>
+        <p *ngIf="claseLabel(a) as c" class="text-sm text-slate-500">{{ c }}</p>
+      </div>
+      <button type="button" (click)="abrirEditar(a)" class="btn-outline btn-sm shrink-0">Editar</button>
+    </div>
+
+    <p *ngIf="a.descripcion" class="mt-3 whitespace-pre-line rounded-xl bg-slate-50 p-3 text-sm text-slate-700">{{ a.descripcion }}</p>
+    <div *ngIf="a.enlace || a.archivo_path" class="mt-3 flex flex-wrap gap-2">
+      <a *ngIf="a.enlace" [href]="a.enlace" target="_blank" rel="noopener" class="btn-outline btn-sm">Abrir enlace</a>
+      <button *ngIf="a.archivo_path" type="button" (click)="abrirArchivo(a.archivo_path)" class="btn-outline btn-sm">Ver adjunto: {{ a.archivo_nombre }}</button>
+    </div>
+
+    <h4 class="mt-5 text-sm font-bold text-slate-900">
+      Estudiantes
+      <span *ngIf="!loadingDetalle()" class="font-normal text-slate-500">· {{ resumenEntregas(a).entregadas }} de {{ filas().length }} entregaron</span>
+    </h4>
+    <div *ngIf="loadingDetalle()" class="mt-2 space-y-2">
+      <div class="skeleton h-14"></div>
+      <div class="skeleton h-14"></div>
+    </div>
+    <p *ngIf="!loadingDetalle() && filas().length === 0" class="mt-2 text-sm text-slate-500">No hay estudiantes inscritos en esta asignatura.</p>
+
+    <ul *ngIf="!loadingDetalle() && filas().length > 0" class="mt-2 space-y-2">
+      <li *ngFor="let f of filas()" class="rounded-xl border border-slate-200 p-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <app-avatar [fotoUrl]="f.estudiante.foto_url" [iniciales]="iniciales(f.estudiante)" colorFondo="#dbeafe" textColor="#1d4ed8" sizeClass="h-8 w-8 text-xs" />
+          <p class="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{{ f.estudiante.nombres }} {{ f.estudiante.apellidos }}</p>
+          <span *ngIf="a.permite_entregas" class="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                [ngClass]="entrego(f) ? (tardia(f) ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700') : (vencida(a) ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600')">
+            {{ entrego(f) ? (tardia(f) ? 'Entregó tarde' : 'Entregó') : (vencida(a) ? 'No entregó' : 'Pendiente') }}
+          </span>
+        </div>
+
+        <div *ngIf="entrego(f)" class="mt-2 space-y-1 text-sm text-slate-700">
+          <p *ngIf="f.entrega?.comentario" class="whitespace-pre-line rounded-lg bg-slate-50 px-3 py-2">{{ f.entrega?.comentario }}</p>
+          <div class="flex flex-wrap gap-2">
+            <a *ngIf="f.entrega?.enlace" [href]="f.entrega?.enlace" target="_blank" rel="noopener" class="text-xs font-semibold text-primary-600">Abrir enlace</a>
+            <button *ngIf="f.entrega?.archivo_path" type="button" (click)="abrirArchivo(f.entrega!.archivo_path)" class="text-xs font-semibold text-primary-600">Ver archivo: {{ f.entrega?.archivo_nombre }}</button>
+            <span class="text-xs text-slate-400">· {{ f.entrega?.entregada_en | date: 'd MMM, h:mm a' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="a.calificable" class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+          <input [(ngModel)]="f.nota" inputmode="decimal" class="input-field py-1.5 sm:w-24" [placeholder]="'Nota / ' + a.nota_maxima" />
+          <input [(ngModel)]="f.retro" class="input-field flex-1 py-1.5" placeholder="Retroalimentación (opcional)" />
+          <button type="button" (click)="guardarNota(f)" [disabled]="f.guardando" class="btn-primary btn-sm shrink-0">{{ f.guardando ? '...' : (f.entrega?.calificada_en ? 'Actualizar' : 'Calificar') }}</button>
+        </div>
+      </li>
+    </ul>
+
+    <div class="mt-6 border-t border-slate-100 pt-4">
+      <button *ngIf="!confirmarEliminar" type="button" (click)="confirmarEliminar = true" class="w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50">Eliminar actividad</button>
+      <div *ngIf="confirmarEliminar" class="space-y-2">
+        <p class="text-sm text-slate-600">Se borrarán también las entregas y notas de esta actividad. ¿Continuar?</p>
+        <div class="flex gap-2">
+          <button type="button" (click)="confirmarEliminar = false" class="btn-outline flex-1">Cancelar</button>
+          <button type="button" (click)="eliminar()" class="flex-1 rounded-xl bg-red-600 py-3 text-sm font-semibold text-white hover:bg-red-700">Sí, eliminar</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</app-dialog>

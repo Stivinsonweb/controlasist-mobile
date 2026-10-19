@@ -47,6 +47,10 @@
           </label>
         </div>
 
+        <p class="text-xs" style="color: var(--text-muted);">
+          {{ asignatura()?.plantilla_reporte ? 'Esta asignatura tiene su propia plantilla: el título y la segunda firma solo cambian para ella.' : 'Esta asignatura usa tu plantilla general.' }}
+          <a routerLink="/premium" class="font-semibold" style="color: var(--accent-from);">Cambiar plantilla</a>
+        </p>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label class="mb-1 block text-xs font-semibold" style="color: var(--text-muted);">Título del formato</label>
