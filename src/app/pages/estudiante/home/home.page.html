@@ -32,6 +32,31 @@
     <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
   </a>
 
+  <!-- Mi horario de la semana -->
+  <div *ngIf="!loading() && semana().length > 0" class="card mb-6 p-5">
+    <h2 class="text-base font-bold" style="color: var(--text-primary);">Mi horario de la semana</h2>
+    <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div *ngFor="let d of semana()" class="rounded-xl p-3" style="background: var(--bg-surface-2);"
+           [style.box-shadow]="d.dia === hoyDia ? '0 0 0 2px var(--accent-from)' : null">
+        <p class="flex items-center justify-between text-sm font-bold" [style.color]="d.dia === hoyDia ? 'var(--accent-from)' : 'var(--text-primary)'">
+          {{ d.nombre }}
+          <span *ngIf="d.dia === hoyDia" class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">Hoy</span>
+        </p>
+        <ul class="mt-2 space-y-1.5">
+          <li *ngFor="let c of d.horarios" class="flex items-start gap-2">
+            <span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" [style.backgroundColor]="c.asignatura.color"></span>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold" style="color: var(--text-primary);">{{ c.asignatura.nombre }}</p>
+              <p class="text-xs" style="color: var(--text-muted);">
+                <span class="tabular-nums">{{ horaCorta(c.hora_inicio) }} – {{ horaCorta(c.hora_fin) }}</span><span *ngIf="c.aula"> · {{ c.aula }}</span><span *ngIf="fechaUnica(c) as f"> · {{ f }}</span>
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <!-- Clases virtuales de hoy -->
   <div *ngIf="!loading() && clasesVirtualesHoy().length > 0" class="card mb-6 p-5">
     <h2 class="flex items-center gap-2 text-base font-bold" style="color: var(--text-primary);">Tus clases virtuales de hoy <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">Nuevo</span></h2>
@@ -140,12 +165,18 @@
     <div *ngIf="!loadingDetalle() && horariosSeleccionada().length === 0" class="mt-2 rounded-xl border border-dashed border-slate-200 p-3 text-sm text-slate-400">
       Aún no hay horarios registrados.
     </div>
-    <ul *ngIf="!loadingDetalle() && horariosSeleccionada().length > 0" class="mt-2 space-y-2">
-      <li *ngFor="let h of horariosSeleccionada()" class="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5 text-sm text-slate-700">
-        <svg class="h-4 w-4 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        {{ horarioLabel(h) }}
-      </li>
-    </ul>
+    <div *ngIf="!loadingDetalle() && horariosSeleccionada().length > 0" class="mt-2 divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200">
+      <div *ngFor="let d of horariosPorDia()" class="flex gap-3 px-4 py-2.5" [ngClass]="d.dia === hoyDia ? 'bg-primary-50/60' : 'bg-white'">
+        <span class="w-24 shrink-0 text-sm font-semibold" [ngClass]="d.dia === hoyDia ? 'text-primary-700' : 'text-slate-800'">{{ d.nombre }}<span *ngIf="d.dia === hoyDia" class="block text-[11px] font-medium">Hoy</span></span>
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+          <span *ngFor="let h of d.horarios" class="text-sm text-slate-700">
+            <b class="font-semibold tabular-nums">{{ horaCorta(h.hora_inicio) }} – {{ horaCorta(h.hora_fin) }}</b>
+            <span *ngIf="h.aula" class="text-slate-500"> · {{ h.aula }}</span>
+            <span *ngIf="fechaUnica(h) as f" class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">{{ f }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
 
     <div class="mt-6 border-t border-slate-100 pt-4" *ngIf="!showConfirmDesinscribir">
       <button (click)="showConfirmDesinscribir = true" class="w-full rounded-xl border border-red-200 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50">

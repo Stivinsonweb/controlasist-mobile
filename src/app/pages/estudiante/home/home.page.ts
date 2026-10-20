@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { SupabaseService } from '../../../core/services/supabase.service';
@@ -14,6 +14,12 @@ import { VerificadoBadgeComponent } from '../../../shared/components/verificado-
 import { subjectGradientStyle, subjectShadowStyle } from '../../../shared/utils/subject-theme.util';
 import { ClaseVirtualService, esAsignaturaVirtual } from '../../../core/services/clase-virtual.service';
 import { fechaLocalISO } from '../../../shared/utils/fecha.util';
+import { agruparPorDia, horaCorta as horaCortaUtil, DiaConHorarios } from '../../../shared/utils/horario.util';
+
+/** Clase de la semana del estudiante: el horario con su asignatura. */
+interface ClaseSemana extends Horario {
+  asignatura: AsignaturaConDocente;
+}
 
 /** Clase virtual de hoy del estudiante, con su link y si ya registró su ingreso. */
 interface ClaseVirtualHoy {
@@ -44,6 +50,11 @@ export class EstudianteHomePage implements OnInit {
   private estudianteId = '';
 
   clasesVirtualesHoy = signal<ClaseVirtualHoy[]>([]);
+  /** "Mi horario de la semana": todas las clases de sus asignaturas, por día (lunes a domingo). */
+  semana = signal<DiaConHorarios<ClaseSemana>[]>([]);
+  hoyDia = new Date().getDay();
+  /** Horarios de la asignatura abierta en el detalle, agrupados por día. */
+  horariosPorDia = computed(() => agruparPorDia(this.horariosSeleccionada()));
   private reloj = signal(Date.now());
 
   constructor(
@@ -76,7 +87,7 @@ export class EstudianteHomePage implements OnInit {
       ]);
       this.perfil.set(perfil);
       this.asignaturas.set(asignaturas);
-      await this.cargarClasesVirtualesHoy(asignaturas);
+      await Promise.all([this.cargarClasesVirtualesHoy(asignaturas), this.cargarSemana(asignaturas)]);
     } catch (e: any) {
       console.error('Error cargando inicio de estudiante:', e);
       this.toast.error('No se pudo cargar tu información');
@@ -119,6 +130,29 @@ export class EstudianteHomePage implements OnInit {
     }
   }
 
+  private async cargarSemana(asignaturas: AsignaturaConDocente[]) {
+    try {
+      const activas = asignaturas.filter((a) => a.activa);
+      const hoy = fechaLocalISO();
+      const horarios = await this.asignaturasService.listarHorariosDeAsignaturas(activas.map((a) => a.id));
+      const clases: ClaseSemana[] = horarios
+        // Las sesiones de una sola fecha solo se muestran si aún no han pasado.
+        .filter((h) => !h.fecha_clase || h.fecha_clase >= hoy)
+        .map((h) => ({ ...h, asignatura: activas.find((a) => a.id === h.asignatura_id)! }))
+        .filter((c) => !!c.asignatura);
+      this.semana.set(agruparPorDia(clases));
+    } catch (e) {
+      console.error('Error cargando el horario de la semana:', e);
+      this.semana.set([]);
+    }
+  }
+
+  /** "Solo el 24 oct" para sesiones de una sola fecha. */
+  fechaUnica(h: Horario): string | null {
+    if (!h.fecha_clase) return null;
+    return 'Solo el ' + new Date(h.fecha_clase + 'T00:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+  }
+
   private minutos(hhmm: string) {
     const [h, m] = hhmm.split(':').map(Number);
     return h * 60 + m;
@@ -134,7 +168,7 @@ export class EstudianteHomePage implements OnInit {
   }
 
   horaCorta(h: string) {
-    return h.slice(0, 5);
+    return horaCortaUtil(h);
   }
 
   /** Abre la reunión y, si está dentro del horario, registra la asistencia. */
