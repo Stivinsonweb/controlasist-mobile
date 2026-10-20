@@ -19,6 +19,20 @@ type Rol = 'docente' | 'estudiante';
 
 const TEMAS_DOCENTE: GuiaTema[] = [
   {
+    variant: 'perfil',
+    titulo: 'Iniciar sesión y recordar mis datos',
+    nuevo: true,
+    descripcion: 'Entra con tu correo y contraseña y, si quieres, deja que tu navegador o celular los recuerde.',
+    pasos: [
+      'En la pantalla de inicio de sesión elige "Docente", escribe tu correo y tu contraseña.',
+      'Deja marcada la casilla "Recordar mi correo y contraseña en este dispositivo" y presiona "Iniciar sesión".',
+      'Tu navegador o celular te ofrecerá guardar la contraseña ("¿Guardar contraseña?" en Chrome y Android, o el llavero en iPhone): acepta.',
+      'La próxima vez tu correo aparecerá escrito y la contraseña se completará sola (en iPhone, toca el campo y elige la sugerida).',
+      'Tu contraseña la guarda de forma segura tu navegador o celular, no ControlAsist. En un computador compartido, desmarca la casilla.',
+      '¿Olvidaste tu contraseña? Toca "¿Olvidaste tu contraseña?", escribe tu correo y sigue el enlace que te llega.',
+    ],
+  },
+  {
     variant: 'crear-asignatura',
     titulo: 'Registrar una asignatura',
     descripcion: 'Desde "Inicio", crea una asignatura nueva, ponle un nombre y elige un color para identificarla fácilmente.',
@@ -166,6 +180,7 @@ const TEMAS_DOCENTE: GuiaTema[] = [
       'Recibirás una "Alerta" cuando un estudiante baje del 75% de asistencia en una de tus asignaturas (desde la 3.ª clase registrada), para que puedas hablar con él a tiempo. Si además tiene actividades vencidas sin entregar, la alerta te dice cuántas.',
       'Toca una notificación para marcarla como leída, o "Ver →" para ir a la sección relacionada. Con "Marcar todas como leídas" quedas al día de un toque, y con la "×" la eliminas.',
       'Para recibirlas también en tu celular o navegador (incluso con la app cerrada), activa "Recordatorios de clase" en la parte superior de Notificaciones o en "Mi perfil" y acepta el permiso del navegador.',
+      'Cada dispositivo se activa por separado: si usas la app en el computador y en el celular, activa "Recordatorios de clase" en los dos. En iPhone funciona con la app instalada en la pantalla de inicio.',
     ],
   },
   {
@@ -184,6 +199,18 @@ const TEMAS_DOCENTE: GuiaTema[] = [
   },
   {
     variant: 'perfil',
+    titulo: 'Asis, tu asistente',
+    nuevo: true,
+    descripcion: 'Asis es la mascota del asistente inteligente de ControlAsist. Muy pronto podrás hacerle preguntas.',
+    pasos: [
+      'Asis es el búho que flota en la esquina inferior derecha del login y de tu panel. Te saluda por tu nombre al entrar.',
+      'Tócalo para abrir el chat. Por ahora está bloqueado con un candado y el aviso "Muy pronto": el asistente inteligente está en camino.',
+      'Muy pronto podrás preguntarle, por ejemplo, cómo tomar asistencia, cómo exportar un reporte o qué estudiantes están en riesgo.',
+      'Para cerrarlo, toca la "×" del chat o vuelve a tocar a Asis.',
+    ],
+  },
+  {
+    variant: 'perfil',
     titulo: 'Soporte',
     descripcion: '¿Tienes un problema o una pregunta? Escríbenos desde tu panel y te respondemos por correo.',
     pasos: [
@@ -196,6 +223,20 @@ const TEMAS_DOCENTE: GuiaTema[] = [
 ];
 
 const TEMAS_ESTUDIANTE: GuiaTema[] = [
+  {
+    variant: 'perfil',
+    titulo: 'Iniciar sesión y recordar mis datos',
+    nuevo: true,
+    descripcion: 'Entra con tu correo y contraseña y, si quieres, deja que tu navegador o celular los recuerde.',
+    pasos: [
+      'En la pantalla de inicio de sesión elige "Estudiante", escribe tu correo y tu contraseña.',
+      'Deja marcada la casilla "Recordar mi correo y contraseña en este dispositivo" y presiona "Iniciar sesión".',
+      'Tu navegador o celular te ofrecerá guardar la contraseña ("¿Guardar contraseña?" en Chrome y Android, o el llavero en iPhone): acepta.',
+      'La próxima vez tu correo aparecerá escrito y la contraseña se completará sola (en iPhone, toca el campo y elige la sugerida).',
+      'Tu contraseña la guarda de forma segura tu navegador o celular, no ControlAsist. En un computador compartido, desmarca la casilla.',
+      '¿Olvidaste tu contraseña? Toca "¿Olvidaste tu contraseña?", escribe tu correo y sigue el enlace que te llega.',
+    ],
+  },
   {
     variant: 'inscribir',
     titulo: 'Inscribirme a una asignatura',
@@ -251,10 +292,12 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
   {
     variant: 'ver-horario',
     titulo: 'Ver mis asignaturas y horario',
-    descripcion: 'Desde "Inicio" consulta todas tus asignaturas inscritas y el horario de cada una.',
+    nuevo: true,
+    descripcion: 'Desde "Inicio" consulta tu horario de la semana, tus asignaturas inscritas y el horario de cada una.',
     pasos: [
+      'En tu "Inicio", la tarjeta "Mi horario de la semana" reúne todas tus clases organizadas por día (de lunes a domingo) y por hora, con el color de cada asignatura y el aula. El día de hoy aparece resaltado.',
       'Desde "Inicio" verás una tarjeta por cada asignatura en la que estás inscrito, con su docente y modalidad.',
-      'Haz clic en una tarjeta para ver su detalle: la foto y el nombre del docente (con insignia si está verificado), horarios de clase, aula y créditos.',
+      'Haz clic en una tarjeta para ver su detalle: la foto y el nombre del docente (con insignia si está verificado), aula, créditos y sus horarios agrupados por día. Las sesiones de una sola fecha aparecen marcadas (ej: "Solo el 24 oct").',
       'Si ya no quieres seguir inscrito, puedes desinscribirte desde ese mismo detalle — podrás volver a inscribirte con el mismo código más adelante.',
     ],
   },
@@ -279,6 +322,7 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
       'También te llegan avisos de actividades nuevas, recordatorios de entrega, notas de tus actividades y links de clases virtuales.',
       'Toca una notificación para marcarla como leída, usa "Marcar todas como leídas" para quedar al día, o la "×" para eliminarla.',
       'Para recibir los recordatorios en tu celular o navegador antes de cada clase (incluso con la app cerrada), activa "Recordatorios de clase" en la parte superior de Notificaciones o en "Mi perfil" y acepta el permiso del navegador.',
+      'Cada dispositivo se activa por separado (computador y celular). En iPhone funciona con la app instalada en la pantalla de inicio.',
     ],
   },
   {
@@ -291,6 +335,18 @@ const TEMAS_ESTUDIANTE: GuiaTema[] = [
       'Actualiza tus datos personales (documento, teléfono, programa, fecha de nacimiento, ciudad, dirección) y presiona "Guardar cambios".',
       'Para cambiar tu contraseña, usa la sección "Cambiar contraseña" al final de la página.',
       'Para cambiar la apariencia, usa el ícono de sol/luna en la parte superior del panel y elige Oscuro, Claro o Sistema.',
+    ],
+  },
+  {
+    variant: 'perfil',
+    titulo: 'Asis, tu asistente',
+    nuevo: true,
+    descripcion: 'Asis es la mascota del asistente inteligente de ControlAsist. Muy pronto podrás hacerle preguntas.',
+    pasos: [
+      'Asis es el búho que flota en la esquina inferior derecha del login y de tu panel. Te saluda por tu nombre al entrar.',
+      'Tócalo para abrir el chat. Por ahora está bloqueado con un candado y el aviso "Muy pronto": el asistente inteligente está en camino.',
+      'Muy pronto podrás preguntarle, por ejemplo, cuántas faltas llevas, cómo marcar con el QR o qué actividades tienes pendientes.',
+      'Para cerrarlo, toca la "×" del chat o vuelve a tocar a Asis.',
     ],
   },
   {
