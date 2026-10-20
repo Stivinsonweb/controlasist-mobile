@@ -14,6 +14,8 @@ import { ThemeService, TemaPreferencia } from '../core/services/theme.service';
 import { LogoComponent } from '../shared/components/logo/logo.component';
 import { NotificacionesService } from '../core/services/notificaciones.service';
 import { fechaLocalISO } from '../shared/utils/fecha.util';
+import { PresenciaService } from '../core/services/presencia.service';
+import { PushNotificationsService } from '../core/services/push-notifications.service';
 
 interface NavItem {
   label: string;
@@ -235,7 +237,9 @@ export class LayoutComponent implements OnInit {
     private accentTheme: AccentThemeService,
     private themeService: ThemeService,
     private swUpdate: SwUpdate,
-    private notificacionesService: NotificacionesService
+    private notificacionesService: NotificacionesService,
+    private presenciaService: PresenciaService,
+    private pushService: PushNotificationsService
   ) {}
 
   noLeidas() {
@@ -281,6 +285,31 @@ export class LayoutComponent implements OnInit {
     };
     document.addEventListener('visibilitychange', refrescarCampana);
     setInterval(refrescarCampana, 2 * 60 * 1000);
+
+    this.iniciarPresencia();
+
+    // Si se cambiaron las llaves de notificaciones, este dispositivo se re-suscribe solo.
+    let pushSincronizado = false;
+    this.auth.currentProfile$.subscribe((p) => {
+      if (!p || pushSincronizado) return;
+      pushSincronizado = true;
+      this.pushService.sincronizar(p.rol).catch((e) => console.warn('No se pudo actualizar la suscripción push:', e));
+    });
+  }
+
+  /** Marca que el usuario está en línea (y en qué sección) mientras la app esté visible. */
+  private iniciarPresencia() {
+    let ultimoEnvio = 0;
+    const latido = (forzar = false) => {
+      if (!this.profile() || document.visibilityState !== 'visible') return;
+      if (!forzar && Date.now() - ultimoEnvio < 50_000) return;
+      ultimoEnvio = Date.now();
+      this.presenciaService.registrar(this.currentTitle()).catch(() => {});
+    };
+    this.auth.currentProfile$.subscribe((p) => p && latido(true));
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => setTimeout(() => latido(true)));
+    document.addEventListener('visibilitychange', () => latido());
+    setInterval(() => latido(), 60_000);
   }
 
   /**

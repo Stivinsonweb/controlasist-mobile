@@ -47,6 +47,56 @@
     </a>
   </div>
 
+  <!-- En línea ahora -->
+  <div class="card mt-8 p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h3 class="flex items-center gap-2 text-base font-bold" style="color: var(--text-primary);">
+        <span class="relative flex h-2.5 w-2.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span><span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span></span>
+        En línea ahora · {{ enLinea().length }} <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white" style="background: linear-gradient(135deg, var(--accent-from), var(--accent-to));">Nuevo</span>
+      </h3>
+      <span class="text-xs" style="color: var(--text-muted);">Se actualiza cada 30 s · cuenta quien tuvo la app abierta en los últimos 2 min</span>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button *ngFor="let f of [
+                { v: 'todos', l: 'Todos', n: enLinea().length },
+                { v: 'docente', l: 'Docentes', n: conteo().docente },
+                { v: 'estudiante', l: 'Estudiantes', n: conteo().estudiante },
+                { v: 'administrador', l: 'Admins', n: conteo().administrador }]"
+              type="button" (click)="filtroRol.set($any(f.v))"
+              class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors"
+              [ngClass]="filtroRol() === f.v ? '' : 'border'"
+              [style]="filtroRol() === f.v ? 'background: linear-gradient(135deg, var(--accent-from), var(--accent-to)); color: #fff;' : 'background: var(--bg-surface-2); border-color: var(--border-subtle-2); color: var(--text-secondary);'">
+        {{ f.l }} ({{ f.n }})
+      </button>
+    </div>
+
+    <div *ngIf="loadingPresencia()" class="mt-4 skeleton h-16 rounded-xl"></div>
+    <p *ngIf="!loadingPresencia() && enLineaFiltrados().length === 0" class="mt-4 text-sm" style="color: var(--text-muted);">No hay nadie en línea en este momento.</p>
+    <ul *ngIf="!loadingPresencia() && enLineaFiltrados().length > 0" class="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+      <li *ngFor="let p of enLineaFiltrados()" class="flex items-center gap-3 rounded-xl px-3 py-2.5" style="background: var(--bg-surface-2);">
+        <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-emerald-500"></span>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-semibold" style="color: var(--text-primary);">{{ p.nombre }}</p>
+          <p class="truncate text-xs" style="color: var(--text-muted);">En {{ p.seccion || '—' }} · {{ p.dispositivo || '—' }} · conectado {{ hace(p.conectado_desde) }}</p>
+        </div>
+        <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold" [style.backgroundColor]="colorRol(p.rol) + '22'" [style.color]="colorRol(p.rol)">{{ etiquetaRol(p.rol) }}</span>
+      </li>
+    </ul>
+
+    <details *ngIf="recientes().length > 0" class="mt-5">
+      <summary class="cursor-pointer text-sm font-semibold" style="color: var(--text-secondary);">Activos en las últimas 24 horas ({{ recientes().length }})</summary>
+      <ul class="mt-3 space-y-1.5">
+        <li *ngFor="let p of recientes()" class="flex items-center gap-3 text-sm">
+          <span class="h-2 w-2 shrink-0 rounded-full" style="background: var(--border-subtle-2);"></span>
+          <span class="min-w-0 flex-1 truncate" style="color: var(--text-secondary);">{{ p.nombre }}</span>
+          <span class="shrink-0 text-xs" [style.color]="colorRol(p.rol)">{{ etiquetaRol(p.rol) }}</span>
+          <span class="w-28 shrink-0 text-right text-xs" style="color: var(--text-muted);">{{ hace(p.ultima_actividad) }}</span>
+        </li>
+      </ul>
+    </details>
+  </div>
+
   <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
     <div class="card p-6">
       <h3 class="text-base font-bold" style="color: var(--text-primary);">Accesos rápidos</h3>

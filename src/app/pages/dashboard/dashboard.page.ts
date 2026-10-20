@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PresenciaService, PresenciaUsuario, MINUTOS_EN_LINEA } from '../../core/services/presencia.service';
 
 interface StatCard {
   label: string;
@@ -19,19 +20,77 @@ interface StatCard {
   imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.page.html',
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage implements OnInit, OnDestroy {
   loading = signal(true);
   error = signal(false);
   stats = signal<StatCard[]>([]);
   nombre = signal('Administrador');
 
-  constructor(private supabaseService: SupabaseService, private auth: AuthService) {}
+  // ===== En línea =====
+  presencia = signal<PresenciaUsuario[]>([]);
+  loadingPresencia = signal(true);
+  filtroRol = signal<'todos' | 'docente' | 'estudiante' | 'administrador'>('todos');
+  private ahora = signal(Date.now());
+  private intervalo: ReturnType<typeof setInterval> | null = null;
+
+  enLinea = computed(() => {
+    const limite = this.ahora() - MINUTOS_EN_LINEA * 60_000;
+    return this.presencia().filter((p) => new Date(p.ultima_actividad).getTime() >= limite);
+  });
+  enLineaFiltrados = computed(() => {
+    const r = this.filtroRol();
+    return r === 'todos' ? this.enLinea() : this.enLinea().filter((p) => p.rol === r);
+  });
+  /** Activos en las últimas 24 h que ya no están en línea. */
+  recientes = computed(() => {
+    const ids = new Set(this.enLinea().map((p) => p.usuario_id));
+    return this.presencia().filter((p) => !ids.has(p.usuario_id)).slice(0, 15);
+  });
+  conteo = computed(() => {
+    const l = this.enLinea();
+    return { docente: l.filter((p) => p.rol === 'docente').length, estudiante: l.filter((p) => p.rol === 'estudiante').length, administrador: l.filter((p) => p.rol === 'administrador').length };
+  });
+
+  constructor(private supabaseService: SupabaseService, private auth: AuthService, private presenciaService: PresenciaService) {}
 
   ngOnInit() {
     this.auth.currentProfile$.subscribe((p) => {
       if (p?.nombres) this.nombre.set(p.nombres);
     });
     this.loadStats();
+    this.cargarPresencia();
+    this.intervalo = setInterval(() => this.cargarPresencia(), 30_000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalo) clearInterval(this.intervalo);
+  }
+
+  async cargarPresencia() {
+    try {
+      this.presencia.set(await this.presenciaService.listarRecientes());
+      this.ahora.set(Date.now());
+    } catch (e) {
+      console.error('Error cargando usuarios en línea', e);
+    } finally {
+      this.loadingPresencia.set(false);
+    }
+  }
+
+  hace(fecha: string): string {
+    const min = Math.floor((this.ahora() - new Date(fecha).getTime()) / 60_000);
+    if (min < 1) return 'ahora';
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.floor(min / 60);
+    return h < 24 ? `hace ${h} h` : 'hace más de un día';
+  }
+
+  etiquetaRol(rol: string) {
+    return rol === 'docente' ? 'Docente' : rol === 'estudiante' ? 'Estudiante' : 'Admin';
+  }
+
+  colorRol(rol: string) {
+    return rol === 'docente' ? '#10b981' : rol === 'estudiante' ? '#3b82f6' : '#8b5cf6';
   }
 
   async loadStats() {

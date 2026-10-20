@@ -60,6 +60,10 @@ export class PushNotificationsService {
     const config = await this.configuracionAppService.obtener();
     if (!config?.vapid_public_key) throw new Error('El servidor aún no tiene configurada la llave pública VAPID');
 
+    // Si este dispositivo quedó suscrito con otra llave (se cambiaron las llaves VAPID), el
+    // navegador no deja suscribirse de nuevo hasta cancelar la anterior.
+    await this.cancelarSiOtraLlave(config.vapid_public_key);
+
     let subscription;
     try {
       subscription = await this.swPush.requestSubscription({ serverPublicKey: config.vapid_public_key });
@@ -80,6 +84,40 @@ export class PushNotificationsService {
       { onConflict: 'usuario_id,endpoint' }
     );
     if (error) throw error;
+  }
+
+  /**
+   * Al abrir la app: si este dispositivo ya tenía las notificaciones activadas pero con una llave
+   * VAPID distinta a la del servidor, se vuelve a suscribir solo (el permiso ya está dado, así que
+   * no aparece ningún aviso) y queda guardado con la llave nueva.
+   */
+  async sincronizar(rol: 'docente' | 'estudiante' | 'administrador'): Promise<void> {
+    if (!this.soportado || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    // Mismo id que usa el botón de notificaciones: el usuario de la sesión (auth.uid()).
+    const usuarioId = (await this.supabaseService.getCurrentUser())?.id;
+    if (!usuarioId) return;
+    const registration = await navigator.serviceWorker.getRegistration();
+    const sub = await registration?.pushManager.getSubscription();
+    if (!sub) return;
+    const config = await this.configuracionAppService.obtener();
+    if (!config?.vapid_public_key || this.mismaLlave(sub, config.vapid_public_key)) return;
+    await this.activar(usuarioId, rol);
+  }
+
+  private mismaLlave(sub: PushSubscription, llavePublica: string): boolean {
+    const actual = sub.options?.applicationServerKey;
+    if (!actual) return true; // El navegador no la expone: no se puede comparar, se deja como está.
+    const b64 = btoa(String.fromCharCode(...new Uint8Array(actual))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return b64 === llavePublica.replace(/=+$/, '');
+  }
+
+  private async cancelarSiOtraLlave(llavePublica: string) {
+    const registration = await navigator.serviceWorker.getRegistration();
+    const sub = await registration?.pushManager.getSubscription();
+    if (sub && !this.mismaLlave(sub, llavePublica)) {
+      await this.supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+      await sub.unsubscribe().catch(() => false);
+    }
   }
 
   /** Cancela la suscripción del navegador y borra el registro en Supabase. */
