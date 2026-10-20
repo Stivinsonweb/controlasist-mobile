@@ -12,6 +12,9 @@ import { DecorBlobsComponent } from '../../../shared/components/decor-blobs/deco
 import { BrandHeaderComponent } from '../../../shared/components/brand-header/brand-header.component';
 import { InstallPwaButtonComponent } from '../../../shared/components/install-pwa-button/install-pwa-button.component';
 
+/** Solo se guarda el correo y el tipo de usuario; la contraseña la guarda el navegador/celular. */
+const CLAVE_RECORDAR = 'controlasist_recordar_login';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -27,6 +30,7 @@ export class LoginPage implements OnInit {
   recoveryEmail = '';
   isRecovering = false;
   mantenimiento = signal<{ titulo: string; mensaje: string } | null>(null);
+  recordar = true;
 
   constructor(
     private fb: FormBuilder,
@@ -47,8 +51,43 @@ export class LoginPage implements OnInit {
     if (this.route.snapshot.queryParamMap.get('forgot') === '1') {
       this.showForgotModal = true;
     }
+    this.cargarRecordado();
     // Viene de un enlace de estudiante (p. ej. el QR de asistencia): se preselecciona "Estudiante".
     if (this.returnUrl?.startsWith('/estudiante')) this.tipoUsuario = 'estudiante';
+  }
+
+  /** Rellena el correo (y, si el navegador la tiene guardada, la contraseña) de la última vez. */
+  private async cargarRecordado() {
+    let guardado: { email?: string; tipo?: 'docente' | 'estudiante'; recordar?: boolean } | null = null;
+    try {
+      guardado = JSON.parse(localStorage.getItem(CLAVE_RECORDAR) || 'null');
+    } catch {}
+    if (guardado?.recordar === false) this.recordar = false;
+    if (!guardado?.email) return;
+    this.loginForm.patchValue({ email: guardado.email });
+    if (guardado.tipo) this.tipoUsuario = guardado.tipo;
+
+    // Chrome/Edge/Android: pide la contraseña guardada sin mostrar ventanas (si el usuario ya la guardó).
+    try {
+      const cred: any = await (navigator as any).credentials?.get?.({ password: true, mediation: 'silent' });
+      if (cred?.password && cred.id === guardado.email) this.loginForm.patchValue({ password: cred.password });
+    } catch {}
+  }
+
+  /** Después de entrar: recuerda el correo y le pide al navegador que guarde la contraseña. */
+  private async recordarDatos(email: string, password: string, nombre: string) {
+    try {
+      if (this.recordar) localStorage.setItem(CLAVE_RECORDAR, JSON.stringify({ email, tipo: this.tipoUsuario, recordar: true }));
+      else localStorage.setItem(CLAVE_RECORDAR, JSON.stringify({ recordar: false }));
+    } catch {}
+    if (!this.recordar) return;
+    // En Safari/iPhone no existe esta API: ahí el propio sistema ofrece guardarla al enviar el formulario.
+    try {
+      const PasswordCredentialCtor = (window as any).PasswordCredential;
+      if (PasswordCredentialCtor && (navigator as any).credentials?.store) {
+        await (navigator as any).credentials.store(new PasswordCredentialCtor({ id: email, password, name: nombre }));
+      }
+    } catch {}
   }
 
   private async verificarDisponibilidad() {
@@ -111,6 +150,7 @@ export class LoginPage implements OnInit {
             return;
           }
           this.toast.success(`Bienvenido ${nombre}`);
+          await this.recordarDatos(email, password, nombre);
           const destino = this.returnUrl?.startsWith('/estudiante') ? this.returnUrl : '/estudiante/home';
           this.router.navigateByUrl(destino);
         } else {
@@ -121,6 +161,7 @@ export class LoginPage implements OnInit {
             return;
           }
           this.toast.success(`Bienvenido ${nombre}`);
+          await this.recordarDatos(email, password, nombre);
           const destinoDocente = rol === 'docente' && this.returnUrl && !this.returnUrl.startsWith('/estudiante') && !this.returnUrl.startsWith('/admin') ? this.returnUrl : null;
           this.router.navigateByUrl(destinoDocente || (rol === 'administrador' ? '/admin/dashboard' : '/home'));
         }
