@@ -12,6 +12,7 @@ import { InstallPwaButtonComponent } from '../shared/components/install-pwa-butt
 import { AccentThemeService } from '../core/services/accent-theme.service';
 import { ThemeService, TemaPreferencia } from '../core/services/theme.service';
 import { LogoComponent } from '../shared/components/logo/logo.component';
+import { MascotaAsistenteComponent } from '../shared/components/mascota-asistente/mascota-asistente.component';
 import { NotificacionesService } from '../core/services/notificaciones.service';
 import { fechaLocalISO } from '../shared/utils/fecha.util';
 import { PresenciaService } from '../core/services/presencia.service';
@@ -35,7 +36,7 @@ const CLAVE_NUEVOS_VISTOS = 'controlasist_nuevos_vistos';
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, AvatarComponent, InstallPwaButtonComponent, LogoComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, AvatarComponent, InstallPwaButtonComponent, LogoComponent, MascotaAsistenteComponent],
   template: `
     <div class="flex h-screen w-full overflow-hidden" style="background: var(--bg-app);">
       <!-- Sidebar -->
@@ -175,6 +176,8 @@ const CLAVE_NUEVOS_VISTOS = 'controlasist_nuevos_vistos';
         <main class="flex-1 overflow-y-auto p-4 lg:p-8">
           <router-outlet></router-outlet>
         </main>
+        <!-- Asis, el asistente inteligente (muy pronto) — solo docentes y estudiantes -->
+        <app-mascota-asistente *ngIf="role() === 'docente' || role() === 'estudiante'" [nombre]="profile()?.nombres" [rol]="$any(role())" />
       </div>
     </div>
   `,

@@ -11,6 +11,7 @@ import { EduBackgroundComponent } from '../../../shared/components/edu-backgroun
 import { DecorBlobsComponent } from '../../../shared/components/decor-blobs/decor-blobs.component';
 import { BrandHeaderComponent } from '../../../shared/components/brand-header/brand-header.component';
 import { InstallPwaButtonComponent } from '../../../shared/components/install-pwa-button/install-pwa-button.component';
+import { MascotaAsistenteComponent } from '../../../shared/components/mascota-asistente/mascota-asistente.component';
 
 /** Solo se guarda el correo y el tipo de usuario; la contraseña la guarda el navegador/celular. */
 const CLAVE_RECORDAR = 'controlasist_recordar_login';
@@ -18,7 +19,7 @@ const CLAVE_RECORDAR = 'controlasist_recordar_login';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, DialogComponent, EduBackgroundComponent, DecorBlobsComponent, BrandHeaderComponent, InstallPwaButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterLink, DialogComponent, EduBackgroundComponent, DecorBlobsComponent, BrandHeaderComponent, InstallPwaButtonComponent, MascotaAsistenteComponent],
   templateUrl: './login.page.html',
 })
 export class LoginPage implements OnInit {
@@ -31,6 +32,8 @@ export class LoginPage implements OnInit {
   isRecovering = false;
   mantenimiento = signal<{ titulo: string; mensaje: string } | null>(null);
   recordar = true;
+  /** Nombre de quien entró la última vez en este dispositivo (solo si marcó "Recordar"), para que Asis lo salude. */
+  nombreRecordado: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -58,12 +61,13 @@ export class LoginPage implements OnInit {
 
   /** Rellena el correo (y, si el navegador la tiene guardada, la contraseña) de la última vez. */
   private async cargarRecordado() {
-    let guardado: { email?: string; tipo?: 'docente' | 'estudiante'; recordar?: boolean } | null = null;
+    let guardado: { email?: string; tipo?: 'docente' | 'estudiante'; recordar?: boolean; nombre?: string } | null = null;
     try {
       guardado = JSON.parse(localStorage.getItem(CLAVE_RECORDAR) || 'null');
     } catch {}
     if (guardado?.recordar === false) this.recordar = false;
     if (!guardado?.email) return;
+    this.nombreRecordado = guardado.nombre || null;
     this.loginForm.patchValue({ email: guardado.email });
     if (guardado.tipo) this.tipoUsuario = guardado.tipo;
 
@@ -77,7 +81,7 @@ export class LoginPage implements OnInit {
   /** Después de entrar: recuerda el correo y le pide al navegador que guarde la contraseña. */
   private async recordarDatos(email: string, password: string, nombre: string) {
     try {
-      if (this.recordar) localStorage.setItem(CLAVE_RECORDAR, JSON.stringify({ email, tipo: this.tipoUsuario, recordar: true }));
+      if (this.recordar) localStorage.setItem(CLAVE_RECORDAR, JSON.stringify({ email, tipo: this.tipoUsuario, recordar: true, nombre }));
       else localStorage.setItem(CLAVE_RECORDAR, JSON.stringify({ recordar: false }));
     } catch {}
     if (!this.recordar) return;
