@@ -1,20 +1,28 @@
 import { Component, Input, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AsisChatComponent } from './asis-chat.component';
 
 /**
  * "Asis", la mascota del asistente inteligente (chatbot). Flota abajo a la derecha, parpadea,
- * mira alrededor y saluda con el ala. Al tocarla abre el panel del chat, que por ahora está
- * bloqueado con un candado y el aviso "Muy pronto". Se usa en el login y en los paneles de
- * docente y estudiante. Respeta "reducir movimiento" del sistema.
+ * mira alrededor y saluda con el ala. En los paneles de docente y estudiante (`chat`) abre el chat
+ * real (AsisChatComponent, con historial); en el login invita a iniciar sesión.
+ * Respeta "reducir movimiento" del sistema.
  */
 @Component({
   selector: 'app-mascota-asistente',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AsisChatComponent],
   template: `
     <div class="mascota-raiz" [class.abierta]="abierto()">
-      <!-- Panel del chat (bloqueado) -->
-      <div *ngIf="abierto()" class="panel" role="dialog" aria-label="Asistente inteligente de ControlAsist">
+      <!-- Chat de Asis (con sesión iniciada) -->
+      <div *ngIf="abierto() && chat" class="panel" role="dialog" aria-label="Asis, asistente inteligente de ControlAsist">
+        <app-asis-chat [rol]="rol" [nombre]="nombre" (cerrar)="cerrar()">
+          <div avatar class="panel-avatar"><ng-container *ngTemplateOutlet="buho; context: { tam: 40 }"></ng-container></div>
+        </app-asis-chat>
+      </div>
+
+      <!-- Sin sesión (login): invita a entrar -->
+      <div *ngIf="abierto() && !chat" class="panel" role="dialog" aria-label="Asistente inteligente de ControlAsist">
         <div class="panel-cabecera">
           <div class="panel-avatar">
             <ng-container *ngTemplateOutlet="buho; context: { tam: 40 }"></ng-container>
@@ -32,9 +40,9 @@ import { CommonModule } from '@angular/common';
           <div class="candado">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.3" fill="currentColor"/></svg>
           </div>
-          <p class="pronto">Muy pronto</p>
+          <p class="pronto">Inicia sesión</p>
           <p class="descripcion">
-            Estoy aprendiendo para ayudarte: podrás preguntarme cómo tomar asistencia, cuántas faltas llevas,
+            Entra con tu cuenta y pregúntame cómo tomar asistencia, cuántas faltas llevas,
             qué actividades tienes pendientes y mucho más.
           </p>
           <div class="burbujas">
@@ -47,7 +55,7 @@ import { CommonModule } from '@angular/common';
         <div class="panel-pie">
           <div class="entrada-bloqueada" aria-disabled="true">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
-            <span>Escribe tu pregunta… (muy pronto)</span>
+            <span>Inicia sesión para escribirme</span>
           </div>
         </div>
       </div>
@@ -61,11 +69,11 @@ import { CommonModule } from '@angular/common';
       </div>
 
       <!-- Mascota -->
-      <button type="button" class="mascota" (click)="alternar()" [attr.aria-expanded]="abierto()" aria-label="Abrir asistente inteligente (muy pronto)">
+      <button type="button" class="mascota" (click)="alternar()" [attr.aria-expanded]="abierto()" [attr.aria-label]="chat ? 'Abrir el chat de Asis' : 'Asis, asistente inteligente'">
         <span class="sombra"></span>
         <span class="cuerpo-flotante">
           <ng-container *ngTemplateOutlet="buho; context: { tam: 74 }"></ng-container>
-          <span class="insignia" title="Muy pronto">
+          <span *ngIf="!chat" class="insignia" title="Inicia sesión para hablar con Asis">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
           </span>
         </span>
@@ -182,6 +190,8 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class MascotaAsistenteComponent implements OnInit, OnDestroy {
+  /** true en los paneles (con sesión): el globo abre el chat real. En el login queda el aviso para iniciar sesión. */
+  @Input() chat = false;
   /** Muestra el globo "¡Hola! Soy Asis" unos segundos al cargar. */
   @Input() saludar = true;
   /** Nombre de la persona para saludarla ("¡Hola, Ana!"). */
@@ -196,9 +206,9 @@ export class MascotaAsistenteComponent implements OnInit, OnDestroy {
   }
 
   get mensaje(): string {
-    if (this.rol === 'docente') return 'Muy pronto te ayudaré con tus clases y reportes.';
-    if (this.rol === 'estudiante') return 'Muy pronto te ayudaré con tus clases y actividades.';
-    return 'Muy pronto podré ayudarte.';
+    if (!this.chat) return 'Inicia sesión y pregúntame lo que necesites.';
+    if (this.rol === 'docente') return 'Tócame: te ayudo con tus clases, reportes y asignaturas.';
+    return 'Tócame: te digo tus faltas, tu horario y tus pendientes.';
   }
 
   abierto = signal(false);
