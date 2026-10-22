@@ -66,6 +66,7 @@ export const routes: Routes = [
       { path: 'estudiante/actividades', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/actividades/actividades.page').then((m) => m.EstudianteActividadesPage) },
       { path: 'estudiante/perfil', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/perfil/perfil.page').then((m) => m.EstudiantePerfilPage) },
       { path: 'estudiante/inscribir', canActivate: [roleGuard('estudiante')], loadComponent: () => import('./pages/estudiante/inscribir/inscribir.page').then((m) => m.InscribirPage) },
+      { path: 'asistente', canActivate: [roleGuard('docente', 'estudiante')], loadComponent: () => import('./pages/asistente/asistente.page').then((m) => m.AsistentePage) },
       { path: 'notificaciones', canActivate: [roleGuard('docente', 'estudiante')], loadComponent: () => import('./pages/notificaciones/notificaciones.page').then((m) => m.NotificacionesPage) },
       // Soporte dentro del panel (la misma página pública /soporte, en modo embebido).
       { path: 'docente/soporte', canActivate: [roleGuard('docente')], data: { embebido: true }, loadComponent: () => import('./pages/soporte/soporte.page').then((m) => m.SoportePage) },

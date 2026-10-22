@@ -1,17 +1,19 @@
 import { Component, Input, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AsisChatComponent } from './asis-chat.component';
+import { AsisAnimalComponent } from './asis-animal.component';
+import { AsisPreferenciasService } from '../../../core/services/asis-preferencias.service';
 
 /**
  * "Asis", la mascota del asistente inteligente (chatbot). Flota abajo a la derecha, parpadea,
- * mira alrededor y saluda con el ala. En los paneles de docente y estudiante (`chat`) abre el chat
+ * mira alrededor y saluda con el ala. El animal y su sonido se personalizan (AsisPreferenciasService). En los paneles de docente y estudiante (`chat`) abre el chat
  * real (AsisChatComponent, con historial); en el login invita a iniciar sesión.
  * Respeta "reducir movimiento" del sistema.
  */
 @Component({
   selector: 'app-mascota-asistente',
   standalone: true,
-  imports: [CommonModule, AsisChatComponent],
+  imports: [CommonModule, AsisChatComponent, AsisAnimalComponent],
   template: `
     <div class="mascota-raiz" [class.abierta]="abierto()">
       <!-- Chat de Asis (con sesión iniciada) -->
@@ -80,52 +82,9 @@ import { AsisChatComponent } from './asis-chat.component';
       </button>
     </div>
 
-    <!-- Búho -->
+    <!-- Mascota (el animal que eligió el usuario) -->
     <ng-template #buho let-tam="tam">
-      <svg [attr.width]="tam" [attr.height]="tam" viewBox="0 0 120 120" aria-hidden="true">
-        <defs>
-          <linearGradient id="asis-cuerpo" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0D9488"/>
-          </linearGradient>
-          <linearGradient id="asis-panza" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ECFDF5"/><stop offset="1" stop-color="#A7F3D0"/>
-          </linearGradient>
-        </defs>
-        <!-- Alas -->
-        <path class="ala ala-izq" d="M30 62c-12 4-17 18-13 30 8-2 15-9 18-18z" fill="#0F766E"/>
-        <path class="ala ala-der" d="M90 62c12 4 17 18 13 30-8-2-15-9-18-18z" fill="#0F766E"/>
-        <!-- Cuerpo -->
-        <ellipse cx="60" cy="68" rx="32" ry="36" fill="url(#asis-cuerpo)"/>
-        <ellipse cx="60" cy="82" rx="20" ry="20" fill="url(#asis-panza)"/>
-        <path d="M52 78q4 3 8 0q4 3 8 0M52 86q4 3 8 0q4 3 8 0" stroke="#6EE7B7" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <!-- Orejas -->
-        <path d="M34 40l4-14 10 10z" fill="#10B981"/>
-        <path d="M86 40l-4-14-10 10z" fill="#10B981"/>
-        <!-- Birrete -->
-        <g class="birrete">
-          <path d="M40 30l20-9 20 9-20 9z" fill="#1E293B"/>
-          <rect x="52" y="33" width="16" height="6" rx="2" fill="#1E293B"/>
-          <path d="M78 30v9" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="78" cy="40" r="2.4" fill="#FBBF24"/>
-        </g>
-        <!-- Ojos -->
-        <circle cx="47" cy="56" r="13" fill="#FFFFFF"/>
-        <circle cx="73" cy="56" r="13" fill="#FFFFFF"/>
-        <g class="pupilas">
-          <circle cx="48" cy="57" r="6" fill="#0F172A"/><circle cx="74" cy="57" r="6" fill="#0F172A"/>
-          <circle cx="50" cy="55" r="2" fill="#FFFFFF"/><circle cx="76" cy="55" r="2" fill="#FFFFFF"/>
-        </g>
-        <g class="parpados">
-          <rect x="33" y="42" width="28" height="28" rx="14" fill="#10B981"/>
-          <rect x="59" y="42" width="28" height="28" rx="14" fill="#10B981"/>
-        </g>
-        <!-- Pico y mejillas -->
-        <path d="M56 66l4 6 4-6z" fill="#F59E0B"/>
-        <circle cx="38" cy="68" r="3.5" fill="#F472B6" opacity=".45"/>
-        <circle cx="82" cy="68" r="3.5" fill="#F472B6" opacity=".45"/>
-        <!-- Patas -->
-        <path d="M50 102v5M54 102v5M66 102v5M70 102v5" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
-      </svg>
+      <app-asis-animal [animal]="prefs.animal()" [tam]="tam"></app-asis-animal>
     </ng-template>
   `,
   styles: [
@@ -180,6 +139,7 @@ import { AsisChatComponent } from './asis-chat.component';
       @media (max-width: 640px) {
         :host { right: 10px; bottom: 10px; }
         .mascota { width: 68px; height: 76px; }
+        .cuerpo-flotante :is(svg, app-asis-animal) { width: 60px; height: 60px; }
         .cuerpo-flotante svg { width: 60px; height: 60px; }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -215,7 +175,10 @@ export class MascotaAsistenteComponent implements OnInit, OnDestroy {
   saludo = signal(false);
   private temporizadores: ReturnType<typeof setTimeout>[] = [];
 
+  constructor(public prefs: AsisPreferenciasService) {}
+
   ngOnInit() {
+    if (this.chat) this.prefs.cargar().catch(() => {});
     if (!this.saludar) return;
     this.temporizadores.push(setTimeout(() => this.saludo.set(true), 1500));
     this.temporizadores.push(setTimeout(() => this.saludo.set(false), 9000));
@@ -232,6 +195,8 @@ export class MascotaAsistenteComponent implements OnInit, OnDestroy {
   abrir() {
     this.saludo.set(false);
     this.abierto.set(true);
+    // Abrir es un toque del usuario: el navegador deja reproducir el sonido de Asis.
+    if (this.chat) this.prefs.reproducir();
   }
 
   cerrar() {

@@ -343,7 +343,9 @@ async function ejecutarAccion(ctx: Contexto, accion: string, datos: Record<strin
 }
 
 // ---------------------------------------------------------------- instrucciones
-function instrucciones(ctx: Contexto): string {
+const NOMBRE_ANIMAL: Record<string, string> = { buho: 'el búho', gato: 'el gato', perro: 'el perro', pinguino: 'el pingüino' };
+
+function instrucciones(ctx: Contexto, animal: string): string {
   const { fecha, hora, dia } = ahoraBogota();
   const lista = ctx.asignaturas.length
     ? ctx.asignaturas.map((a) => `- ${a.nombre} · grupo ${a.grupo ?? '-'} · ${a.periodo} · ${a.modalidad ?? ''}${a.activa ? '' : ' · ARCHIVADA'} (id: ${a.id})`).join('\n')
@@ -352,7 +354,7 @@ function instrucciones(ctx: Contexto): string {
   const acciones = ctx.rol === 'docente'
     ? `Puedes PROPONER cambios con crear_asignatura, editar_asignatura, agregar_horario y crear_actividad. Esas herramientas NO hacen el cambio: muestran al docente una tarjeta con Confirmar/Cancelar. Antes de proponer, pide en una sola pregunta los datos obligatorios que falten (no los inventes). Después de proponer, di en una frase que revise y confirme la tarjeta.`
     : `El estudiante solo puede consultar; no puedes cambiar datos por él. Los estudiantes no crean asignaturas: se inscriben con el código de acceso que les da su docente. Si pide hacer algo (inscribirse, entregar), explícale cómo hacerlo en la app según la guía.`;
-  return `Eres Asis, el búho asistente de ControlAsist, una app colombiana de control de asistencia para docentes y estudiantes.
+  return `Eres Asis, ${NOMBRE_ANIMAL[animal] ?? 'el búho'} asistente de ControlAsist (cada usuario elige el animal y el sonido de Asis con el botón de la paleta del chat), una app colombiana de control de asistencia para docentes y estudiantes.
 Hablas en español de Colombia, con calidez y de forma breve (máximo unas 6 líneas, salvo que pidan detalle). Puedes usar **negrita** y listas con "- ".
 
 Usuario: ${ctx.nombre} (${ctx.rol}). Hoy es ${DIAS[dia]} ${fecha}, son las ${hora} (hora de Colombia).
@@ -463,7 +465,8 @@ serve(async (req) => {
     const historial = (previos || []).reverse().map((m: any) => ({ role: m.rol, content: m.contenido }));
 
     const herramientas = ctx.rol === 'docente' ? HERRAMIENTAS_DOCENTE : HERRAMIENTAS_ESTUDIANTE;
-    const mensajes: any[] = [{ role: 'system', content: instrucciones(ctx) }, ...historial];
+    const { data: pref } = await sb.from('asistente_preferencias').select('animal').maybeSingle();
+    const mensajes: any[] = [{ role: 'system', content: instrucciones(ctx, pref?.animal ?? 'buho') }, ...historial];
     let textoFinal = 'Me enredé con esa consulta 😅. ¿Me la preguntas de otra forma?';
     let propuesta: Propuesta | null = null;
 
