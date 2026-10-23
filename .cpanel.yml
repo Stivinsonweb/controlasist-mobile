@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/termina1/controlasist.com.co/
+    - /bin/cp -R * $DEPLOYPATH
