@@ -177,7 +177,7 @@ const CLAVE_NUEVOS_VISTOS = 'controlasist_nuevos_vistos';
           <router-outlet></router-outlet>
         </main>
         <!-- Asis, el asistente inteligente — solo docentes y estudiantes -->
-        <app-mascota-asistente *ngIf="(role() === 'docente' || role() === 'estudiante') && !enPaginaAsis()" [chat]="true" [nombre]="profile()?.nombres" [rol]="$any(role())" />
+        <app-mascota-asistente *ngIf="(role() === 'docente' || role() === 'estudiante') && !enPaginaAsis()" [chat]="true" [bloqueado]="role() === 'docente' && !esPremium()" [nombre]="profile()?.nombres" [rol]="$any(role())" />
       </div>
     </div>
   `,

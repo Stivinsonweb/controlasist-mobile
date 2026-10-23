@@ -28,36 +28,90 @@ a{color:#10B981}a:hover{color:#34D399}
   <!-- Titular -->
   <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 32px">
     <div style="display: flex; flex-direction: column; gap: 14px">
-      <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; letter-spacing: 3px; color: #10B981">MUY PRONTO · ASISTENTE INTELIGENTE</span>
-      <h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 88px; line-height: 0.98; font-weight: 800; letter-spacing: -3px">Conoce<br>a <span style="color: #10B981">Asis.</span></h1>
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; letter-spacing: 3px; color: #10B981">NUEVO · ASIS, TU ASISTENTE</span>
+      <h1 style="margin: 0; font-family: 'Sora', sans-serif; font-size: 88px; line-height: 0.98; font-weight: 800; letter-spacing: -3px">Pregúntale<br>a <span style="color: #10B981">Asis.</span></h1>
     </div>
-    <p style="margin: 0 0 8px; font-size: 23px; line-height: 1.42; color: #A7B3C4; width: 320px; flex-shrink: 0">Tu asistente inteligente en ControlAsist. Pronto podrás preguntarle lo que necesites.</p>
+    <p style="margin: 0 0 8px; font-size: 23px; line-height: 1.42; color: #A7B3C4; width: 330px; flex-shrink: 0">Consulta tus clases y reportes, y crea asignaturas con un mensaje. Tú confirmas.</p>
   </div>
 
-  <!-- Escena: Asis + chat bloqueado -->
-  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 22px; height: 472px">
-    <div style="position: relative; border-radius: 26px; background: radial-gradient(circle at 50% 60%, #0F3D36 0%, #0B1220 70%); box-shadow: 0 0 0 1px #1E293B; display: flex; align-items: flex-end; justify-content: center; overflow: hidden">
-      <div style="position: absolute; top: 34px; left: 34px; max-width: 290px; padding: 16px 20px; border-radius: 22px 22px 22px 6px; background: #FFFFFF; color: #0F172A; font-size: 20px; line-height: 1.35; box-shadow: 0 20px 40px rgba(0, 0, 0, .4)">
-        ¡Hola, <b>Ana</b>! Soy Asis 👋<br><span style="font-size: 16px; color: #475569">Muy pronto te ayudaré con tus clases.</span>
-      </div>
-      <div style="position: relative; margin-bottom: 22px; filter: drop-shadow(0 24px 30px rgba(13, 148, 136, .45))">
-        <svg width="300" height="300" viewBox="0 0 120 120" aria-hidden="true">
-        <defs>
-          <linearGradient id="asis-cuerpo" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0D9488"/>
-          </linearGradient>
-          <linearGradient id="asis-panza" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#ECFDF5"/><stop offset="1" stop-color="#A7F3D0"/>
-          </linearGradient>
-        </defs>
+  <!-- Escena: chat de Asis + personalización -->
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; height: 472px">
+
+    <div style="border-radius: 26px; overflow: hidden; display: flex; flex-direction: column; background: #F8FAFC; box-shadow: 0 30px 70px rgba(0, 0, 0, .5)">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: linear-gradient(135deg, #10B981, #0D9488); color: #FFFFFF">
+        <span style="width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center"><svg width="44" height="44" viewBox="0 0 120 120"><defs>
+        <linearGradient id="gato-asis-buho" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0D9488"/></linearGradient>
+        <linearGradient id="gato-asis-panza" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECFDF5"/><stop offset="1" stop-color="#A7F3D0"/></linearGradient>
+        <linearGradient id="gato-asis-gato" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+        <linearGradient id="gato-asis-perro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D6A77A"/><stop offset="1" stop-color="#9A6B43"/></linearGradient>
+        <linearGradient id="gato-asis-pinguino" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#0F172A"/></linearGradient>
+      </defs>
+        <path d="M86 92c14 0 20-10 16-22" stroke="#EA580C" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path class="ala ala-izq" d="M34 74c-8 4-10 14-6 20 6 0 11-5 12-12z" fill="#C2410C"/>
+        <path class="ala ala-der" d="M86 74c8 4 10 14 6 20-6 0-11-5-12-12z" fill="#C2410C"/>
+        <ellipse cx="60" cy="74" rx="30" ry="30" fill="url(#gato-asis-gato)"/>
+        <ellipse cx="60" cy="86" rx="16" ry="14" fill="#FFF7ED"/>
+        <path d="M32 50l2-22 18 12z" fill="#F97316"/><path d="M36 46l1-11 9 6z" fill="#FED7AA"/>
+        <path d="M88 50l-2-22-18 12z" fill="#F97316"/><path d="M84 46l-1-11-9 6z" fill="#FED7AA"/>
+        <path d="M48 46q3-4 6 0M66 46q3-4 6 0" stroke="#C2410C" stroke-width="2" fill="none" stroke-linecap="round"/>
         
+        <g class="birrete">
+          <path d="M40 30l20-9 20 9-20 9z" fill="#1E293B"/>
+          <rect x="52" y="33" width="16" height="6" rx="2" fill="#1E293B"/>
+          <path d="M78 30v9" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="78" cy="40" r="2.4" fill="#FBBF24"/>
+        </g>
+      
+        <ellipse cx="48" cy="60" rx="9" ry="10" fill="#FFFFFF"/><ellipse cx="72" cy="60" rx="9" ry="10" fill="#FFFFFF"/>
+        <g class="pupilas"><ellipse cx="49" cy="61" rx="3.5" ry="6" fill="#065F46"/><ellipse cx="73" cy="61" rx="3.5" ry="6" fill="#065F46"/><circle cx="50.5" cy="58" r="1.6" fill="#FFFFFF"/><circle cx="74.5" cy="58" r="1.6" fill="#FFFFFF"/></g>
+        
+        <path d="M57 70h6l-3 4z" fill="#F472B6"/>
+        <path d="M60 74q-3 4-6 2M60 74q3 4 6 2" stroke="#9A3412" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M40 70h-12M40 74l-11 3M80 70h12M80 74l11 3" stroke="#9A3412" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M50 102v4M56 102v4M64 102v4M70 102v4" stroke="#FFF7ED" stroke-width="4" stroke-linecap="round"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800">Asis · tu asistente</span>
+          <span style="font-size: 13px; opacity: .9">38 preguntas disponibles hoy</span>
+        </span>
+        <span style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 17px">🕘</span>
+        <span style="width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 17px">🎨</span>
+      </div>
+      <div style="flex-grow: 1; padding: 14px 16px; display: flex; flex-direction: column; gap: 9px">
+        <div style="align-self: flex-end; max-width: 78%; padding: 9px 13px; border-radius: 16px 16px 4px 16px; background: #0D9488; color: #FFFFFF; font-size: 14px; line-height: 1.4">¿Quién está en riesgo en Cálculo?</div>
+        <div style="align-self: flex-start; max-width: 86%; padding: 9px 13px; border-radius: 16px 16px 16px 4px; background: #FFFFFF; color: #0F172A; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 2px rgba(15,23,42,.1)"><b>2 estudiantes</b> están bajo el 75 %:<br>· Juan Esteban Ríos — 71 %<br>· Nicolás Valencia — 57 %</div>
+        <div style="align-self: flex-end; max-width: 78%; padding: 9px 13px; border-radius: 16px 16px 4px 16px; background: #0D9488; color: #FFFFFF; font-size: 14px; line-height: 1.4">Crea Física II, grupo A, periodo 2026-2</div>
+        <div style="align-self: flex-start; width: 88%; border-radius: 16px; background: #FFFFFF; box-shadow: inset 0 0 0 2px #10B981, 0 6px 16px rgba(16,185,129,.18); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 15px; font-weight: 800; color: #047857">Crear asignatura</span>
+          <span style="font-size: 13px; color: #334155"><span style="color: #64748B">Nombre</span> <b>Física II</b> · <span style="color: #64748B">Grupo</span> <b>A</b> · <span style="color: #64748B">Periodo</span> <b>2026-2</b></span>
+          <div style="display: flex; gap: 8px; margin-top: 4px">
+            <span style="flex: 1; border-radius: 11px; padding: 9px; background: #F1F5F9; color: #334155; font-size: 14px; font-weight: 700; text-align: center">Cancelar</span>
+            <span style="flex: 1; border-radius: 11px; padding: 9px; background: #047857; color: #FFFFFF; font-size: 14px; font-weight: 700; text-align: center">Confirmar</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid #E2E8F0; background: #FFFFFF">
+        <span style="flex-grow: 1; border-radius: 12px; padding: 11px 14px; background: #F1F5F9; color: #94A3B8; font-size: 14px">Escribe tu pregunta…</span>
+        <span style="width: 42px; height: 42px; border-radius: 12px; background: #047857; display: flex; align-items: center; justify-content: center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4z"></path></svg>
+        </span>
+      </div>
+    </div>
+
+    <div style="border-radius: 26px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+      <span style="font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800">Personaliza a Asis</span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px">
+        <div style="border-radius: 16px; box-shadow: inset 0 0 0 1px #E2E8F0; background: #FFFFFF; color: #334155; padding: 6px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 800"><svg width="74" height="74" viewBox="0 0 120 120"><defs>
+        <linearGradient id="buho-asis-buho" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0D9488"/></linearGradient>
+        <linearGradient id="buho-asis-panza" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECFDF5"/><stop offset="1" stop-color="#A7F3D0"/></linearGradient>
+        <linearGradient id="buho-asis-gato" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+        <linearGradient id="buho-asis-perro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D6A77A"/><stop offset="1" stop-color="#9A6B43"/></linearGradient>
+        <linearGradient id="buho-asis-pinguino" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#0F172A"/></linearGradient>
+      </defs>
         <path class="ala ala-izq" d="M30 62c-12 4-17 18-13 30 8-2 15-9 18-18z" fill="#0F766E"/>
         <path class="ala ala-der" d="M90 62c12 4 17 18 13 30-8-2-15-9-18-18z" fill="#0F766E"/>
-        
-        <ellipse cx="60" cy="68" rx="32" ry="36" fill="url(#asis-cuerpo)"/>
-        <ellipse cx="60" cy="82" rx="20" ry="20" fill="url(#asis-panza)"/>
+        <ellipse cx="60" cy="68" rx="32" ry="36" fill="url(#buho-asis-buho)"/>
+        <ellipse cx="60" cy="82" rx="20" ry="20" fill="url(#buho-asis-panza)"/>
         <path d="M52 78q4 3 8 0q4 3 8 0M52 86q4 3 8 0q4 3 8 0" stroke="#6EE7B7" stroke-width="2" fill="none" stroke-linecap="round"/>
-        
         <path d="M34 40l4-14 10 10z" fill="#10B981"/>
         <path d="M86 40l-4-14-10 10z" fill="#10B981"/>
         
@@ -67,78 +121,124 @@ a{color:#10B981}a:hover{color:#34D399}
           <path d="M78 30v9" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
           <circle cx="78" cy="40" r="2.4" fill="#FBBF24"/>
         </g>
-        
-        <circle cx="47" cy="56" r="13" fill="#FFFFFF"/>
-        <circle cx="73" cy="56" r="13" fill="#FFFFFF"/>
-        <g class="pupilas">
-          <circle cx="48" cy="57" r="6" fill="#0F172A"/><circle cx="74" cy="57" r="6" fill="#0F172A"/>
-          <circle cx="50" cy="55" r="2" fill="#FFFFFF"/><circle cx="76" cy="55" r="2" fill="#FFFFFF"/>
-        </g>
+      
+        <circle cx="47" cy="56" r="13" fill="#FFFFFF"/><circle cx="73" cy="56" r="13" fill="#FFFFFF"/>
+        <g class="pupilas"><circle cx="48" cy="57" r="6" fill="#0F172A"/><circle cx="74" cy="57" r="6" fill="#0F172A"/><circle cx="50" cy="55" r="2" fill="#FFFFFF"/><circle cx="76" cy="55" r="2" fill="#FFFFFF"/></g>
         
         <path d="M56 66l4 6 4-6z" fill="#F59E0B"/>
-        <circle cx="38" cy="68" r="3.5" fill="#F472B6" opacity=".45"/>
-        <circle cx="82" cy="68" r="3.5" fill="#F472B6" opacity=".45"/>
+        <circle cx="38" cy="68" r="3.5" fill="#F472B6" opacity=".45"/><circle cx="82" cy="68" r="3.5" fill="#F472B6" opacity=".45"/>
+        <path d="M50 102v5M54 102v5M66 102v5M70 102v5" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/></svg>Búho</div><div style="border-radius: 16px; box-shadow: inset 0 0 0 3px #10B981; background: #ECFDF5; color: #047857; padding: 6px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 800"><svg width="74" height="74" viewBox="0 0 120 120"><defs>
+        <linearGradient id="gato-asis-buho" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0D9488"/></linearGradient>
+        <linearGradient id="gato-asis-panza" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECFDF5"/><stop offset="1" stop-color="#A7F3D0"/></linearGradient>
+        <linearGradient id="gato-asis-gato" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+        <linearGradient id="gato-asis-perro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D6A77A"/><stop offset="1" stop-color="#9A6B43"/></linearGradient>
+        <linearGradient id="gato-asis-pinguino" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#0F172A"/></linearGradient>
+      </defs>
+        <path d="M86 92c14 0 20-10 16-22" stroke="#EA580C" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path class="ala ala-izq" d="M34 74c-8 4-10 14-6 20 6 0 11-5 12-12z" fill="#C2410C"/>
+        <path class="ala ala-der" d="M86 74c8 4 10 14 6 20-6 0-11-5-12-12z" fill="#C2410C"/>
+        <ellipse cx="60" cy="74" rx="30" ry="30" fill="url(#gato-asis-gato)"/>
+        <ellipse cx="60" cy="86" rx="16" ry="14" fill="#FFF7ED"/>
+        <path d="M32 50l2-22 18 12z" fill="#F97316"/><path d="M36 46l1-11 9 6z" fill="#FED7AA"/>
+        <path d="M88 50l-2-22-18 12z" fill="#F97316"/><path d="M84 46l-1-11-9 6z" fill="#FED7AA"/>
+        <path d="M48 46q3-4 6 0M66 46q3-4 6 0" stroke="#C2410C" stroke-width="2" fill="none" stroke-linecap="round"/>
         
-        <path d="M50 102v5M54 102v5M66 102v5M70 102v5" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-        <span style="position: absolute; top: 18px; right: 6px; width: 58px; height: 58px; border-radius: 999px; background: #1E293B; color: #FBBF24; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 5px #0B1220">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path></svg>
-        </span>
+        <g class="birrete">
+          <path d="M40 30l20-9 20 9-20 9z" fill="#1E293B"/>
+          <rect x="52" y="33" width="16" height="6" rx="2" fill="#1E293B"/>
+          <path d="M78 30v9" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="78" cy="40" r="2.4" fill="#FBBF24"/>
+        </g>
+      
+        <ellipse cx="48" cy="60" rx="9" ry="10" fill="#FFFFFF"/><ellipse cx="72" cy="60" rx="9" ry="10" fill="#FFFFFF"/>
+        <g class="pupilas"><ellipse cx="49" cy="61" rx="3.5" ry="6" fill="#065F46"/><ellipse cx="73" cy="61" rx="3.5" ry="6" fill="#065F46"/><circle cx="50.5" cy="58" r="1.6" fill="#FFFFFF"/><circle cx="74.5" cy="58" r="1.6" fill="#FFFFFF"/></g>
+        
+        <path d="M57 70h6l-3 4z" fill="#F472B6"/>
+        <path d="M60 74q-3 4-6 2M60 74q3 4 6 2" stroke="#9A3412" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M40 70h-12M40 74l-11 3M80 70h12M80 74l11 3" stroke="#9A3412" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M50 102v4M56 102v4M64 102v4M70 102v4" stroke="#FFF7ED" stroke-width="4" stroke-linecap="round"/></svg>Gato</div><div style="border-radius: 16px; box-shadow: inset 0 0 0 1px #E2E8F0; background: #FFFFFF; color: #334155; padding: 6px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 800"><svg width="74" height="74" viewBox="0 0 120 120"><defs>
+        <linearGradient id="perro-asis-buho" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0D9488"/></linearGradient>
+        <linearGradient id="perro-asis-panza" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECFDF5"/><stop offset="1" stop-color="#A7F3D0"/></linearGradient>
+        <linearGradient id="perro-asis-gato" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+        <linearGradient id="perro-asis-perro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D6A77A"/><stop offset="1" stop-color="#9A6B43"/></linearGradient>
+        <linearGradient id="perro-asis-pinguino" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#0F172A"/></linearGradient>
+      </defs>
+        <path d="M88 90q14-4 12-18" stroke="#9A6B43" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <ellipse cx="60" cy="74" rx="30" ry="30" fill="url(#perro-asis-perro)"/>
+        <ellipse cx="60" cy="86" rx="15" ry="14" fill="#FDF6EC"/>
+        <path class="ala ala-izq" d="M33 42c-10 4-12 24-4 34 6-2 9-12 10-24z" fill="#6B4423"/>
+        <path class="ala ala-der" d="M87 42c10 4 12 24 4 34-6-2-9-12-10-24z" fill="#6B4423"/>
+        
+        <g class="birrete">
+          <path d="M40 30l20-9 20 9-20 9z" fill="#1E293B"/>
+          <rect x="52" y="33" width="16" height="6" rx="2" fill="#1E293B"/>
+          <path d="M78 30v9" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="78" cy="40" r="2.4" fill="#FBBF24"/>
+        </g>
+      
+        <ellipse cx="48" cy="58" rx="8.5" ry="9" fill="#FFFFFF"/><ellipse cx="72" cy="58" rx="8.5" ry="9" fill="#FFFFFF"/>
+        <g class="pupilas"><circle cx="49" cy="59" r="4.5" fill="#1F2937"/><circle cx="73" cy="59" r="4.5" fill="#1F2937"/><circle cx="50.5" cy="57" r="1.6" fill="#FFFFFF"/><circle cx="74.5" cy="57" r="1.6" fill="#FFFFFF"/></g>
+        
+        <ellipse cx="60" cy="72" rx="9" ry="7" fill="#F5E6D3"/>
+        <ellipse cx="60" cy="69" rx="4.5" ry="3.2" fill="#1F2937"/>
+        <path d="M60 72v3q-3 4-6 2M60 75q3 4 6 2" stroke="#4B2E16" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M57 79q3 7 6 0z" fill="#F472B6"/>
+        <path d="M50 102v4M56 102v4M64 102v4M70 102v4" stroke="#6B4423" stroke-width="4" stroke-linecap="round"/></svg>Perro</div><div style="border-radius: 16px; box-shadow: inset 0 0 0 1px #E2E8F0; background: #FFFFFF; color: #334155; padding: 6px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 800"><svg width="74" height="74" viewBox="0 0 120 120"><defs>
+        <linearGradient id="pinguino-asis-buho" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#0D9488"/></linearGradient>
+        <linearGradient id="pinguino-asis-panza" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ECFDF5"/><stop offset="1" stop-color="#A7F3D0"/></linearGradient>
+        <linearGradient id="pinguino-asis-gato" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+        <linearGradient id="pinguino-asis-perro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D6A77A"/><stop offset="1" stop-color="#9A6B43"/></linearGradient>
+        <linearGradient id="pinguino-asis-pinguino" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#475569"/><stop offset="1" stop-color="#0F172A"/></linearGradient>
+      </defs>
+        <path class="ala ala-izq" d="M31 64c-10 8-12 22-8 30 6-3 10-11 11-22z" fill="#1E293B"/>
+        <path class="ala ala-der" d="M89 64c10 8 12 22 8 30-6-3-10-11-11-22z" fill="#1E293B"/>
+        <ellipse cx="60" cy="68" rx="30" ry="37" fill="url(#pinguino-asis-pinguino)"/>
+        <ellipse cx="60" cy="78" rx="20" ry="25" fill="#F8FAFC"/>
+        <path d="M60 46c-12 0-20 8-20 17h40c0-9-8-17-20-17z" fill="#F8FAFC"/>
+        
+        <g class="birrete">
+          <path d="M40 30l20-9 20 9-20 9z" fill="#1E293B"/>
+          <rect x="52" y="33" width="16" height="6" rx="2" fill="#1E293B"/>
+          <path d="M78 30v9" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="78" cy="40" r="2.4" fill="#FBBF24"/>
+        </g>
+      
+        <ellipse cx="51" cy="58" rx="7" ry="7.5" fill="#FFFFFF"/><ellipse cx="69" cy="58" rx="7" ry="7.5" fill="#FFFFFF"/>
+        <g class="pupilas"><circle cx="52" cy="59" r="3.8" fill="#0F172A"/><circle cx="70" cy="59" r="3.8" fill="#0F172A"/><circle cx="53.3" cy="57.3" r="1.3" fill="#FFFFFF"/><circle cx="71.3" cy="57.3" r="1.3" fill="#FFFFFF"/></g>
+        
+        <path d="M54 66h12l-6 7z" fill="#F59E0B"/>
+        <circle cx="44" cy="68" r="3.2" fill="#F472B6" opacity=".45"/><circle cx="76" cy="68" r="3.2" fill="#F472B6" opacity=".45"/>
+        <path d="M46 104h10l-5-4zM64 104h10l-5-4z" fill="#F59E0B"/></svg>Pingüino</div>
       </div>
-      <span style="position: absolute; bottom: 20px; left: 50%; width: 170px; height: 18px; margin-left: -85px; border-radius: 50%; background: rgba(0, 0, 0, .45)"></span>
-    </div>
-
-    <div style="border-radius: 26px; background: #FFFFFF; color: #0F172A; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 30px 70px rgba(0, 0, 0, .5)">
-      <div style="display: flex; align-items: center; gap: 12px; padding: 16px 18px; background: linear-gradient(135deg, #10B981, #0D9488); color: #FFFFFF">
-        <span style="width: 46px; height: 46px; border-radius: 14px; background: rgba(255, 255, 255, .2); display: flex; align-items: center; justify-content: center; font-size: 24px">🦉</span>
-        <span style="display: flex; flex-direction: column">
-          <span style="font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800">Asis · tu asistente</span>
-          <span style="font-size: 13px; opacity: .85">Chatbot inteligente de ControlAsist</span>
-        </span>
-      </div>
-      <div style="flex-grow: 1; padding: 26px 22px 14px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px">
-        <span style="width: 78px; height: 78px; border-radius: 24px; background: #1E293B; color: #FBBF24; display: flex; align-items: center; justify-content: center">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path><circle cx="12" cy="15.5" r="1.3" fill="currentColor"></circle></svg>
-        </span>
-        <span style="font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; color: #0D9488">Muy pronto</span>
-        <span style="font-size: 15px; line-height: 1.45; color: #475569">Pregúntale cómo tomar asistencia, cuántas faltas llevas o qué tienes pendiente.</span>
-        <div style="margin-top: 6px; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px">
-          <span style="padding: 7px 12px; border-radius: 999px; background: #F1F5F9; color: #64748B; font-size: 13px; font-weight: 600">¿Cuántas faltas tengo?</span>
-          <span style="padding: 7px 12px; border-radius: 999px; background: #F1F5F9; color: #64748B; font-size: 13px; font-weight: 600">¿Cómo uso el QR?</span>
-          <span style="padding: 7px 12px; border-radius: 999px; background: #F1F5F9; color: #64748B; font-size: 13px; font-weight: 600">¿Qué tengo pendiente?</span>
-        </div>
-      </div>
-      <div style="padding: 0 18px 18px">
-        <div style="display: flex; align-items: center; gap: 8px; padding: 13px 16px; border-radius: 14px; background: #F8FAFC; box-shadow: inset 0 0 0 1.5px #E2E8F0; color: #94A3B8; font-size: 15px">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path></svg>
-          Escribe tu pregunta… (muy pronto)
-        </div>
-      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; gap: 8px; border-radius: 12px; padding: 8px 11px; background: #ECFDF5; box-shadow: inset 0 0 0 2px #10B981; font-size: 13px; font-weight: 700; color: #047857"><span style="width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 4px #10B981"></span>Maullido<span style="margin-left: auto">▶</span></div><div style="display: flex; align-items: center; gap: 8px; border-radius: 12px; padding: 8px 11px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #E2E8F0; font-size: 13px; font-weight: 600; color: #334155"><span style="width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px #CBD5E1"></span>Campanita<span style="margin-left: auto; color: #047857">▶</span></div>
+      <div style="display: flex; align-items: center; gap: 8px; border-radius: 12px; padding: 8px 11px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #E2E8F0; font-size: 13px; font-weight: 600; color: #334155"><span style="width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px #CBD5E1"></span>Sin sonido</div></div>
+      <span style="margin-top: auto; border-radius: 12px; padding: 11px; background: #047857; color: #FFFFFF; font-size: 15px; font-weight: 700; text-align: center">Guardar</span>
     </div>
   </div>
 
   <!-- Beneficios -->
   <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
     <div style="border-radius: 22px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 20px; display: flex; flex-direction: column; gap: 10px">
-      <span style="width: 44px; height: 44px; border-radius: 12px; background: #0C2A4A; display: flex; align-items: center; justify-content: center">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path><path d="M3 11h18"></path></svg>
+      <span style="width: 44px; height: 44px; border-radius: 12px; background: #062E24; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
       </span>
-      <span style="font-size: 19px; font-weight: 700">Mi horario<span style="margin-left: 8px; border-radius: 999px; padding: 3px 9px; background: #10B981; color: #04140E; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1px; vertical-align: middle">NUEVO</span></span>
-      <span style="font-size: 15px; line-height: 1.35; color: #A7B3C4">Tus clases de la semana, por día y hora, con hoy resaltado.</span>
+      <span style="font-size: 19px; font-weight: 700">Hace cosas por ti</span>
+      <span style="font-size: 15px; line-height: 1.35; color: #A7B3C4">Crea asignaturas, horarios y actividades. Nada cambia sin tu confirmación.</span>
     </div>
     <div style="border-radius: 22px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 20px; display: flex; flex-direction: column; gap: 10px">
-      <span style="width: 44px; height: 44px; border-radius: 12px; background: #062E24; display: flex; align-items: center; justify-content: center">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      <span style="width: 44px; height: 44px; border-radius: 12px; background: #0C2A4A; display: flex; align-items: center; justify-content: center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg>
       </span>
-      <span style="font-size: 19px; font-weight: 700">Avisos al celular<span style="margin-left: 8px; border-radius: 999px; padding: 3px 9px; background: #10B981; color: #04140E; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1px; vertical-align: middle">NUEVO</span></span>
-      <span style="font-size: 15px; line-height: 1.35; color: #A7B3C4">Clases, actividades y notas, aunque la app esté cerrada.</span>
+      <span style="font-size: 19px; font-weight: 700">Historial guardado</span>
+      <span style="font-size: 15px; line-height: 1.35; color: #A7B3C4">Revisa tus conversaciones y retoma cualquiera donde quedó.</span>
     </div>
     <div style="border-radius: 22px; background: #111A2E; box-shadow: 0 0 0 1px #1E293B; padding: 20px; display: flex; flex-direction: column; gap: 10px">
       <span style="width: 44px; height: 44px; border-radius: 12px; background: #3A2A0A; display: flex; align-items: center; justify-content: center">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M10.8 12.2L20 3"></path><path d="M17 6l3 3"></path></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4z"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 5a10 10 0 0 1 0 14"></path></svg>
       </span>
-      <span style="font-size: 19px; font-weight: 700">Entra más rápido<span style="margin-left: 8px; border-radius: 999px; padding: 3px 9px; background: #10B981; color: #04140E; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1px; vertical-align: middle">NUEVO</span></span>
-      <span style="font-size: 15px; line-height: 1.35; color: #A7B3C4">Tu navegador recuerda tu correo y contraseña de forma segura.</span>
+      <span style="font-size: 19px; font-weight: 700">A tu gusto</span>
+      <span style="font-size: 15px; line-height: 1.35; color: #A7B3C4">Búho, gato, perro o pingüino, con su propio sonido.</span>
     </div>
   </div>
 

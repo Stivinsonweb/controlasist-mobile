@@ -1,8 +1,11 @@
 // Edge Function: asistente-chat — Asis, el asistente inteligente de ControlAsist.
 //
-// La IA corre en Groq (API compatible con OpenAI, secreto GROQ_API_KEY; modelo en GROQ_MODEL).
+// La IA corre en Groq (API compatible con OpenAI, secreto GROQ_API_KEY). Si un modelo se queda sin
+// cupo, pasa al siguiente de la lista sin perder la conversación (ver MODELOS).
 // Todas las consultas a la base se hacen con el JWT del usuario, así que las reglas de seguridad
 // (RLS) aplican igual que en la app: un docente solo ve sus asignaturas y un estudiante sus datos.
+//
+// Docentes: solo con Premium activo. Estudiantes: gratis.
 //
 // Acciones que cambian datos (crear/editar asignatura, horario, actividad): la IA NO las ejecuta.
 // La propuesta queda guardada en el mensaje (estado "pendiente"); el cliente muestra Confirmar/Cancelar
@@ -22,8 +25,16 @@ const corsHeaders = {
 const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const MODELO = Deno.env.get('GROQ_MODEL') || 'openai/gpt-oss-120b';
+// Modelos en orden de preferencia. En Groq cada modelo tiene su propio cupo: si uno se agota
+// (429) o no está disponible, se pasa al siguiente con el mismo historial, sin perder el chat.
+// Se pueden cambiar sin desplegar con los secretos GROQ_MODELOS y GROQ_MODELOS_RESPALDO (separados por comas).
+const lista = (v: string | undefined, porDefecto: string[]) => (v ? v.split(',').map((m) => m.trim()).filter(Boolean) : porDefecto);
+const MODELOS = lista(Deno.env.get('GROQ_MODELOS') ?? Deno.env.get('GROQ_MODEL'), ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile', 'llama-3.1-8b-instant']);
+// Modelos livianos para quien ya gastó sus preguntas del día (cupo aparte).
+const MODELOS_RESPALDO = lista(Deno.env.get('GROQ_MODELOS_RESPALDO'), ['llama-3.1-8b-instant', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile']);
 const LIMITE_DIARIO = { docente: 40, estudiante: 25 };
+/** Después del límite diario se sigue en modo respaldo hasta este múltiplo del límite. */
+const FACTOR_RESPALDO = 3;
 const MAX_HISTORIAL = 12;
 const MAX_VUELTAS = 5;
 
@@ -371,16 +382,32 @@ Reglas:
 }
 
 // ---------------------------------------------------------------- Groq
-async function llamarGroq(mensajes: unknown[], herramientas: unknown[]) {
-  const res = await fetch(GROQ_URL, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${Deno.env.get('GROQ_API_KEY')}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: MODELO, messages: mensajes, tools: herramientas, tool_choice: 'auto', temperature: 0.3, max_tokens: 1200 }),
-  });
-  if (res.status === 429) throw Object.assign(new Error('ocupado'), { ocupado: true });
-  if (!res.ok) throw new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  const data = await res.json();
-  return data.choices?.[0]?.message ?? { content: '' };
+/**
+ * Llama a Groq probando los modelos en orden. `estado.indice` recuerda el modelo que funcionó para
+ * que las siguientes vueltas de la misma pregunta sigan con él. Si todos fallan por cupo, "ocupado".
+ */
+async function llamarGroq(mensajes: unknown[], herramientas: unknown[], modelos: string[], estado: { indice: number; usado?: string }) {
+  let ultimoError = '';
+  for (let i = estado.indice; i < modelos.length; i++) {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${Deno.env.get('GROQ_API_KEY')}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelos[i], messages: mensajes, tools: herramientas, tool_choice: 'auto', temperature: 0.3, max_tokens: 1200 }),
+    });
+    if (res.ok) {
+      estado.indice = i;
+      estado.usado = modelos[i];
+      const data = await res.json();
+      return data.choices?.[0]?.message ?? { content: '' };
+    }
+    const cuerpo = (await res.text()).slice(0, 300);
+    // 429 = cupo agotado; 400/404 de modelo = no disponible o sin soporte de herramientas; 5xx = caído.
+    const pasarAlSiguiente = res.status === 429 || res.status >= 500 || ((res.status === 400 || res.status === 404) && /model/i.test(cuerpo));
+    console.warn(`Groq ${modelos[i]} respondió ${res.status}: ${cuerpo}`);
+    if (!pasarAlSiguiente) throw new Error(`Groq ${res.status}: ${cuerpo}`);
+    ultimoError = `${res.status}`;
+  }
+  throw Object.assign(new Error(`ocupado (${ultimoError})`), { ocupado: true });
 }
 
 // ---------------------------------------------------------------- servidor
@@ -395,9 +422,12 @@ serve(async (req) => {
     if (!user) return respuesta({ error: 'Inicia sesión para hablar con Asis' }, 401);
 
     // Rol y asignaturas del usuario (con sus propios permisos).
-    const { data: doc } = await sb.from('docentes').select('id, nombres').eq('user_id', user.id).maybeSingle();
+    const { data: doc } = await sb.from('docentes').select('id, nombres, premium_activo, premium_fecha_vencimiento').eq('user_id', user.id).maybeSingle();
     let ctx: Contexto;
     if (doc) {
+      // Para docentes, Asis es parte de Premium (los estudiantes lo usan gratis).
+      const vencido = doc.premium_fecha_vencimiento && new Date(doc.premium_fecha_vencimiento).getTime() < Date.now();
+      if (!doc.premium_activo || vencido) return respuesta({ error: 'Asis es parte de Premium. Actívalo en la sección Premium para seguir usándolo.', premium_requerido: true }, 403);
       const { data: asigs } = await sb.from('asignaturas').select('id, nombre, grupo, periodo, activa, modalidad').eq('docente_id', doc.id).order('activa', { ascending: false }).order('periodo', { ascending: false });
       ctx = { sb, userId: user.id, rol: 'docente', nombre: doc.nombres, docenteId: doc.id, asignaturas: asigs || [] };
     } else {
@@ -454,11 +484,15 @@ serve(async (req) => {
     }
     const mensajeUsuario = await guardar(conversacionId!, 'user', pregunta);
 
-    const { data: uso } = await sb.rpc('asistente_consumir', { p_limite: LIMITE_DIARIO[ctx.rol] });
-    if (!uso?.permitido) {
-      const m = await guardar(conversacionId!, 'assistant', `Hoy ya usaste tus ${uso?.limite ?? LIMITE_DIARIO[ctx.rol]} preguntas 🦉. Mañana seguimos.`);
-      return respuesta({ conversacion_id: conversacionId, mensaje_usuario: mensajeUsuario, mensaje: m, uso });
+    const limite = LIMITE_DIARIO[ctx.rol];
+    const { data: consumo } = await sb.rpc('asistente_consumir', { p_limite: limite * FACTOR_RESPALDO });
+    if (!consumo?.permitido) {
+      const m = await guardar(conversacionId!, 'assistant', `Hoy ya hablamos muchísimo 🦉. Descansemos y mañana seguimos.`);
+      return respuesta({ conversacion_id: conversacionId, mensaje_usuario: mensajeUsuario, mensaje: m, uso: { usadas: limite, limite }, respaldo: true });
     }
+    // Pasado el límite normal, Asis sigue con modelos livianos (modo respaldo) en vez de bloquear.
+    const respaldo = consumo.usadas > limite;
+    const uso = { usadas: Math.min(consumo.usadas, limite), limite };
 
     // Historial reciente de la conversación (guardado en la base).
     const { data: previos } = await sb.from('asistente_mensajes').select('rol, contenido').eq('conversacion_id', conversacionId).order('created_at', { ascending: false }).limit(MAX_HISTORIAL);
@@ -469,9 +503,11 @@ serve(async (req) => {
     const mensajes: any[] = [{ role: 'system', content: instrucciones(ctx, pref?.animal ?? 'buho') }, ...historial];
     let textoFinal = 'Me enredé con esa consulta 😅. ¿Me la preguntas de otra forma?';
     let propuesta: Propuesta | null = null;
+    const estadoModelo = { indice: 0, usado: undefined as string | undefined };
+    const modelos = respaldo ? MODELOS_RESPALDO : MODELOS;
 
     for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta++) {
-      const msg = await llamarGroq(mensajes, herramientas);
+      const msg = await llamarGroq(mensajes, herramientas, modelos, estadoModelo);
       const llamadas = msg.tool_calls || [];
       if (!llamadas.length) {
         textoFinal = (msg.content || '').trim() || 'Mmm, no tengo una respuesta para eso.';
@@ -498,7 +534,8 @@ serve(async (req) => {
       }
     }
     const m = await guardar(conversacionId!, 'assistant', textoFinal, propuesta);
-    return respuesta({ conversacion_id: conversacionId, mensaje_usuario: mensajeUsuario, mensaje: m, uso });
+    // respaldo = se respondió con un modelo distinto al principal (por cupo del usuario o de Groq).
+    return respuesta({ conversacion_id: conversacionId, mensaje_usuario: mensajeUsuario, mensaje: m, uso, respaldo: respaldo || estadoModelo.indice > 0, modelo: estadoModelo.usado });
   } catch (e: any) {
     if (e?.ocupado) return respuesta({ error: 'Estoy atendiendo muchas preguntas en este momento 🦉. Intenta de nuevo en un minuto.' }, 429);
     console.error('Error en asistente-chat:', e);

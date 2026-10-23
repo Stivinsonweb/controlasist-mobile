@@ -421,7 +421,9 @@ export class AsisChatComponent implements OnInit, AfterViewChecked {
       const nuevaConversacion = !this.conversacionId();
       this.conversacionId.set(r.conversacion_id);
       this.mensajes.update((l) => [...l.filter((m) => m !== temporal), r.mensaje_usuario, r.mensaje]);
-      if (r.uso?.limite) this.usoTexto.set(`${Math.max(0, r.uso.limite - r.uso.usadas)} preguntas disponibles hoy`);
+      // Modo respaldo: se agotó el cupo (del usuario o del modelo principal) y responde otro modelo.
+      if (r.respaldo) this.usoTexto.set('Modo respaldo · sigo respondiéndote');
+      else if (r.uso?.limite) this.usoTexto.set(`${Math.max(0, r.uso.limite - r.uso.usadas)} preguntas disponibles hoy`);
       this.prefs.reproducir();
       if (nuevaConversacion) this.cargarConversaciones();
       else this.conversaciones.update((l) => {
